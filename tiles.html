@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tileset test</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<style type="text/css">
+	.clear {
+		clear: both;
+	}
+	.tiles {
+		margin-left: 300px;
+		margin-top: 50px;
+	}
+	.box {
+		width: 58px;
+		height: 58px;
+		border: 1px solid white;
+		float: left;
+	}
+	.box:hover {
+		width: 50px;
+		height: 50px;
+		border: 5px solid white;
+	}
+
+	.tile-food	 { background: #D2691E; }
+	.tile-steel	 { background: #CDCDCD; }
+
+</style>
+</head>
+
+<body style="background:#5E5E5E">
+	<p class="tiles"></p>
+</body>
+
+<script type="text/javascript">
+	const TILES_W = 5
+	const TILES_H = 5
+	let hasTileStart = false
+	let tileStart = null
+
+	$(function() {
+    	init()
+    	initSound()
+	})
+
+	function init(){
+		let tiles = []
+
+		for (let i = 0; i < TILES_W; i++) {
+			tiles[i] = new Array(TILES_H)
+			for (let j = 0; j < tiles[i].length; j++) {
+				tiles[i][j] = 0
+			}
+		}
+
+		for (var i = 0; i < tiles.length; i++) {
+			for (let j = 0; j < tiles[i].length; j++) {
+				if (j % TILES_W == 0) {
+					$('p').append('<div class="box clear" data-box-id="' + (i + 1) + j + '"></div>')
+				} else {
+					$('p').append('<div class="box" data-box-id="' + (i + 1) + j + '"></div>')
+				}
+				
+			}
+		}
+
+
+
+		$('.box').click(function(event) {
+			//event.preventDefault()
+			if (hasTileStart) {
+				hasTileStart = false
+				let thisId = parseInt($(event.target).attr("data-box-id"))
+
+				if (tileStart <= thisId) {
+					for (var i = tileStart + 1; i <= thisId; i++) {
+						$('.box[data-box-id = ' + i + ']').addClass('tile-food')
+					}
+				} else {
+					for (var i = thisId; i <= tileStart; i++) {
+						$('.box[data-box-id = ' + i + ']').addClass('tile-food')
+					}
+				}
+			} else { 
+				hasTileStart = true
+				tileStart = parseInt($(event.target).attr("data-box-id"))
+				$(event.target).addClass('tile-food')
+			}
+		})
+
+		/*$('.box').mouseenter(function(event) {
+			if (hasTileStart) {
+				let thisId = parseInt($(event.target).attr("data-box-id"))
+				if (thisId > tileStart) {
+					for (var i = tileStart + 1; i <= thisId; i++) {
+						$('.box[data-box-id = ' + i + ']').addClass('tile-food')
+					}
+				} else {
+					for (var i = thisId; i <= tileStart; i++) {
+						$('.box[data-box-id = ' + i + ']').addClass('tile-food')
+					}
+				}
+				
+			}
+		}).mouseleave(function(event) {
+			if (hasTileStart) {
+				$(event.target).removeClass('tile-food')
+			}
+		});*/
+
+
+		
+		
+	}
+
+	function initSound(){
+		let sfx = document.createElement('audio')
+	    sfx.setAttribute('src', 'sfx-hover.mp3')
+	    sfx.volume = 0.1
+
+		$(".box").mouseenter(function() {
+			sfx.play()
+		}).mouseleave(function() {
+			sfx.pause()
+			sfx.currentTime = 0
+		})
+	}
+
+</script>
+
+</html>
