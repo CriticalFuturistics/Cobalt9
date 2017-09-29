@@ -49,15 +49,6 @@ function gameLoop() {
 
 
 function renderStars(w) {
-
-	function sprite(options) {
-		let obj = {}
-
-		/*
-		obj.qualcosa = qualocas
-		*/
-	}
-
 	let star = new Image()
 	star.src = "src/sprite/s1.png"
 	ctx.drawImage(star, w, 20)
@@ -75,6 +66,8 @@ function loopCanvas(){
 	// aggiungi nuove stelle
 	// renderizza gli oggetti
 	
+
+
 	function randomizeStar() {
 
 		renderStars(getRandomStarPos(canvas.width))
@@ -86,10 +79,8 @@ function loopCanvas(){
 function getRandomStarPos(mapW) {
 	// Offset per non clippare le stelle ai lati
 	let offset = 32
-
 	let randomNumber = offset + Math.floor((Math.random() * (mapW - offset*2))
-	console.log(randomNumber)
-
+		
 	return randomNumber
 }
 
@@ -98,19 +89,3 @@ function getRandomStarTiming() {
 }
 
 
-class canvasObject {
-	constructor(x, y, src) {
-		this.x = x
-		this.y = y
-		this.src = src
-
-		let img = new Image()
-		img.src = this.src
-
-		this.width = img.width
-		this.height = img.height
-		this.ticksLeft = null
-	}
-
-
-}
