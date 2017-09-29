@@ -4,10 +4,10 @@ a { font-family: Roboto; }
 /*.high { height: calc(100vh - 42px); }*/  
 
 .game {
-	background: black;
+	background: #222;
 	border: 2px solid #FFF;
 	width: 100%;
-    padding-top: 100%;
+    /*padding-top: 100%;*/
 }
 
 .game-header {
@@ -32,3 +32,6 @@ a { font-family: Roboto; }
 	background: #FFF;
 	margin-top: calc(100vh - 105px - 42px);
 }
+
+#gameCanvas, canvas { margin: 0; padding: 0; display: block;}
+canvas { display:block; }

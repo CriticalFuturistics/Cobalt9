@@ -15,6 +15,7 @@
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
+
 	<title>Cobalt 9</title>
 </head>
 
@@ -59,8 +60,10 @@
 					<div class="time"> </div>
 				</div>
 
-				<div class="game">
-					
+				<div class="game" id="game">
+					<canvas id="gameCanvas">
+						
+					</canvas>
 				</div>
 
 				<div class="console">
@@ -87,7 +90,7 @@
 				    <a class="nav-link" data-toggle="tab" href="#Inventory" role="tab" aria-controls="Inventory">Inventory</a>
 				  </li>
 				  <li class="nav-item">
-				    <a class="nav-link active" data-toggle="tab" href="#Starmap" role="tab" aria-controls="Starmap">Starmap</a>
+				    <a class="nav-link" data-toggle="tab" href="#Starmap" role="tab" aria-controls="Starmap">Starmap</a>
 				  </li>
 				  <li class="nav-item">
 				    <a class="nav-link" data-toggle="tab" href="#Encylopedia" role="tab" aria-controls="Encylopedia">Encylopedia</a>
@@ -97,13 +100,15 @@
 				<div class="tab-content high">
 				  <div class="tab-pane active" id="Resources" role="tabpanel"> <div class="ad"></div></div>
 				  <div class="tab-pane" id="Inventory" role="tabpanel"> <div class="ad"></div></div>
-				  <div class="tab-pane active" id="Starmap" role="tabpanel"> <div class="ad"></div></div>
+				  <div class="tab-pane" id="Starmap" role="tabpanel"> <div class="ad"></div></div>
 				  <div class="tab-pane" id="Encylopedia" role="tabpanel"> <div class="ad"></div></div>
 				</div>
 
 			</div>
 		</div>
 	</div>
+
+	<script src="main.js"></script>
 </body>
 
 
