@@ -9,7 +9,7 @@ let gameData = {
 	},
 
 	consts : {
-		starSpawnRate : 20
+		starSpawnRate : 16
 	}
 }
 
@@ -69,7 +69,21 @@ function renderStars() {
 
 function newStar(){
 	let x = getRandomStarPos(canvas.width)
-	gameData.canvas.stars.push(new canvasObject(x, -10, "src/sprite/s1.png"))
+	let lastStarX
+	if (gameData.canvas.stars.length > 0) {
+		lastStarX = gameData.canvas.stars[gameData.canvas.stars.length - 1].getX()
+	} else {
+		lastStarX = x + 16
+	}
+
+	if (Math.abs(lastStarX - x) < 16) {
+		newStar()
+	} else {
+		let s = new canvasObject(x, 0, "src/sprite/s1.png")
+		s.y = -(s.img.height)
+		gameData.canvas.stars.push(s)
+	}
+	
 }
 
 
@@ -107,7 +121,7 @@ function loopCanvas(){
 function getRandomStarPos(mapW) {
 	// Offset per non clippare le stelle ai lati
 	let offset = 18
-	let randomNumber = offset + Math.floor((Math.random() * (mapW - offset*3)))
+	let randomNumber = offset + Math.floor((Math.random() * (mapW - offset * 3)))
 		
 	return randomNumber
 }
