@@ -5,13 +5,12 @@ class canvasObject {
 	constructor(x, y, src) {
 		this.x = x
 		this.y = y
+		this.img = new Image()
 		this.src = src
+		this.img.src = this.src
 
-		let img = new Image()
-		img.src = this.src
-
-		this.width = img.width
-		this.height = img.height
+		this.width = this.img.width
+		this.height = this.img.height
 		this.ticksLeft = null
 	}
 
@@ -33,6 +32,10 @@ class canvasObject {
 
 	getTicksLeft(){
 		return this.ticksLeft
+	}
+
+	moveDown(){
+		this.y += 1
 	}
 
 

@@ -7,11 +7,16 @@ let gameData = {
 		asteroids : [],
 		otherProps : []
 	},
+
+	consts : {
+		starSpawnRate : 20
+	}
 }
+
 
 let canvas = document.getElementById("gameCanvas")
 let ctx = canvas.getContext("2d")
-
+let gLoop = null
 
 
 $(document).ready(function($) {
@@ -26,7 +31,7 @@ function init() {
 	// load interface
 	// load savefile
 	// altro
-	
+
 
 	window.addEventListener('resize', resizeCanvas, false)
 
@@ -37,7 +42,7 @@ function init() {
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
 
-        let gLoop = setInterval(gameLoop(), 25)
+        gLoop = setInterval(gameLoop, 25)
     }
     resizeCanvas()
 }
@@ -48,44 +53,67 @@ function gameLoop() {
 }
 
 
-function renderStars(w) {
-	let star = new Image()
-	star.src = "src/sprite/s1.png"
-	ctx.drawImage(star, w, 20)
+function renderStars() {
+	for (var i = 0; i < gameData.canvas.stars.length; i++) {
+		let s = gameData.canvas.stars[i]
+		s.moveDown()
 
-	gameData.canvas.push(new canvasObject(w, 0, star.src))
+		if (s.y > canvas.height) {
+			gameData.canvas.stars.shift()
+		}
 
+		ctx.drawImage(s.img, s.x, s.y)
+	}	
+
+}
+
+function newStar(){
+	let x = getRandomStarPos(canvas.width)
+	gameData.canvas.stars.push(new canvasObject(x, -10, "src/sprite/s1.png"))
 }
 
 
 
 function loopCanvas(){
 	// clear canvas
-	// se canvasObjects nell'array => renderizzali + movimento (e update gameData)
-	// se movimento fa uscire la stella, toglila e shifta l'array
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 	// aggiungi nuove stelle
+	// renderizza + movimento (e update gameData)
+	// se movimento fa uscire la stella, toglila e shifta l'array
 	// renderizza gli oggetti
 	
 
 
-	function randomizeStar() {
-
-		renderStars(getRandomStarPos(canvas.width))
+	if (getRandomStarTiming() == 1) {
+		newStar()
 	}
-	
+
+	renderStars()
+
+/*
+	if (gameData.canvas.stars.length > 2) {
+		clearInterval(gLoop)
+	}
+	let x
+	if (gameData.canvas.stars.length > 0) {
+	 	x = gameData.canvas.stars[0].y
+		console.log(x)
+	}
+*/
 }	
 
 
 function getRandomStarPos(mapW) {
 	// Offset per non clippare le stelle ai lati
-	let offset = 32
-	let randomNumber = offset + Math.floor((Math.random() * (mapW - offset*2))
+	let offset = 18
+	let randomNumber = offset + Math.floor((Math.random() * (mapW - offset*3)))
 		
 	return randomNumber
 }
 
 function getRandomStarTiming() {
-	return Math.floor((Math.random() * 3) + 1)
+	return Math.floor((Math.random() * gameData.consts.starSpawnRate) + 1)
 }
 
 
