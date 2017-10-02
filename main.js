@@ -10,7 +10,7 @@ let gameData = {
 	},
 
 	consts : {
-		starSpawnRate : 10	// The lower, the more likely
+		starSpawnRate : 14	// The lower, the more likely
 	}
 }
 
