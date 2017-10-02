@@ -12,6 +12,7 @@ class canvasObject {
 		this.width = this.img.width
 		this.height = this.img.height
 		this.ticksLeft = null
+		this.speed = 1
 	}
 
 	getX(){
@@ -35,7 +36,7 @@ class canvasObject {
 	}
 
 	moveDown(){
-		this.y += 1
+		this.y += this.speed
 	}
 
 
