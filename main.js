@@ -76,7 +76,7 @@ function renderStars() {
 // Adds a new star with a random X coord to gameData.canvas.stars.
 function newStar(){
 	let x = getRandomStarPos(canvas.width)
-	let minDistance = 18
+	let minDistance = 30
 
 	// Check if it's not too close to another star.
 	let lastStars = []
