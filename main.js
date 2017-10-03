@@ -1,4 +1,4 @@
-// DataStructure containing the game state. Could be used as a savefile.
+// DataStructure containing the game state. Could be used as a savefile... maybe.
 let gameData = {
 	canvas : {
 		spaceship : null,
@@ -9,8 +9,17 @@ let gameData = {
 		otherProps : []
 	},
 
+	src : {
+		sprites : {
+			stars : { 
+				srcs : ["src/sprite/s2.png", "src/sprite/s1.png", "src/sprite/s3.png", "src/sprite/s4Head.png"],
+				chances : [50, 30, 15, 5]
+			}
+		}
+	},
+
 	consts : {
-		starSpawnRate : 14	// The lower, the more likely
+		starSpawnRate : 13	// The lower, the more likely
 	}
 }
 
@@ -76,7 +85,7 @@ function renderStars() {
 // Adds a new star with a random X coord to gameData.canvas.stars.
 function newStar(){
 	let x = getRandomStarPos(canvas.width)
-	let minDistance = 30
+	let minDistance = 32
 
 	// Check if it's not too close to another star.
 	let lastStars = []
@@ -101,7 +110,8 @@ function newStar(){
 		newStar()
 	} else {
 		// Adds the star to the list of stars.
-		let s = new canvasObject(x, 0, "src/sprite/s1.png")
+		let sprite = getRandomStarSprite()
+		let s = new canvasObject(x, 0, sprite)
 		s.y = -(s.img.height)
 		gameData.canvas.stars.push(s)
 	}
@@ -140,16 +150,42 @@ function loopCanvas(){
 }	
 
 
+
 function getRandomStarPos(mapW) {
 	// Offset per non clippare le stelle ai lati
-	let offset = 12
-	let randomNumber = offset + Math.floor((Math.random() * (mapW - offset * 3)))
+	let offset = 10 	
+	let randomNumber = offset + getRandom(0, (mapW - offset * 3))
 		
 	return randomNumber
 }
 
+
+
 function getRandomStarTiming() {
-	return Math.floor((Math.random() * gameData.consts.starSpawnRate) + 1)
+	//return Math.floor((Math.random() * gameData.consts.starSpawnRate) + 1)
+	return getRandom(0, gameData.consts.starSpawnRate)
 }
+
+
+
+// Randomly selects a star sprite from gameData.src.sprites.stars
+function getRandomStarSprite() {
+	let n = 0
+	let chances = gameData.src.sprites.stars.chances
+
+	// Iteratively analyze the percentage and get the index of the random star src
+	function getStarChance(i) {
+		let r = getRandom(1, 100)
+		if (r <= chances[i]) {
+			return getStarChance(i + 1)
+		} else 
+			return i
+	}
+	n = getStarChance(0)
+
+
+	return gameData.src.sprites.stars.srcs[n]	
+}
+
 
 
