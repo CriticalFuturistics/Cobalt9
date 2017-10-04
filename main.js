@@ -69,10 +69,12 @@ function gameLoop() {
 function renderStars() {
 	for (var i = 0; i < gameData.canvas.stars.length; i++) {
 		let s = gameData.canvas.stars[i]
+		console.log("moved " + s.x + " star down.")
 		s.moveDown()
 
 		// If the star reaches the end of the screen, remove it and shift the array.
 		if (s.y > canvas.height + s.img.height) {
+			console.log("removing star")
 			gameData.canvas.stars.shift()
 		}
 
@@ -136,17 +138,6 @@ function loopCanvas(){
 	}
 
 	renderStars()
-
-/*
-	if (gameData.canvas.stars.length > 2) {
-		clearInterval(gLoop)
-	}
-	let x
-	if (gameData.canvas.stars.length > 0) {
-	 	x = gameData.canvas.stars[0].y
-		console.log(x)
-	}
-*/
 }	
 
 
@@ -162,7 +153,6 @@ function getRandomStarPos(mapW) {
 
 
 function getRandomStarTiming() {
-	//return Math.floor((Math.random() * gameData.consts.starSpawnRate) + 1)
 	return getRandom(0, gameData.consts.starSpawnRate)
 }
 
@@ -189,3 +179,10 @@ function getRandomStarSprite() {
 
 
 
+
+
+function stopGameLoop(){
+	if (gLoop) {
+		clearInterval(gLoop)
+	}
+}
