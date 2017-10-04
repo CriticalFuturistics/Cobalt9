@@ -3,7 +3,8 @@ let gameData = {
 	canvas : {
 		spaceship : null,
 		stars : [],
-		planets : null,
+		planets : [],
+		currentPlanet : null,
 		enemyShips : [],
 		asteroids : [],
 		otherProps : []
@@ -12,14 +13,14 @@ let gameData = {
 	src : {
 		sprites : {
 			stars : { 
-				srcs : ["src/sprite/s2.png", "src/sprite/s1.png", "src/sprite/s3.png", "src/sprite/s4Head.png"],
-				chances : [50, 30, 15, 5]
+				srcs : ["src/sprite/s1.png", "src/sprite/s2.png", "src/sprite/s3.png", "src/sprite/s4.png"],
+				chances : [50, 30, 15, 5]	// Chnces MUST be in decremental order
 			}
 		}
 	},
 
 	consts : {
-		starSpawnRate : 13	// The lower, the more likely
+		starSpawnRate : 14	// The lower, the more likely
 	}
 }
 
@@ -41,6 +42,16 @@ $(document).ready(function($) {
 
 
 function init() {
+
+	// Load Sprites
+	// In order to not load the same sprites evey frame, load them from the src once at the start.
+	let srcs = gameData.src.sprites.stars.srcs
+	for (var i = 0; i < srcs.length; i++) {
+		let img = new Image()
+		img.src = srcs[i]
+		srcs[i] = img
+	}
+
 	// load interface
 	// load savefile
 	// altro
@@ -69,12 +80,12 @@ function gameLoop() {
 function renderStars() {
 	for (var i = 0; i < gameData.canvas.stars.length; i++) {
 		let s = gameData.canvas.stars[i]
-		console.log("moved " + s.x + " star down.")
+		//console.log("moved " + s.x + " star down.")
 		s.moveDown()
 
 		// If the star reaches the end of the screen, remove it and shift the array.
 		if (s.y > canvas.height + s.img.height) {
-			console.log("removing star")
+			//console.log("removing star")
 			gameData.canvas.stars.shift()
 		}
 
@@ -144,7 +155,7 @@ function loopCanvas(){
 
 function getRandomStarPos(mapW) {
 	// Offset per non clippare le stelle ai lati
-	let offset = 10 	
+	let offset = 8	
 	let randomNumber = offset + getRandom(0, (mapW - offset * 3))
 		
 	return randomNumber
@@ -163,16 +174,16 @@ function getRandomStarSprite() {
 	let n = 0
 	let chances = gameData.src.sprites.stars.chances
 
-	// Iteratively analyze the percentage and get the index of the random star src
+	// Recursively analyze the percentage and get the index of the random star src
 	function getStarChance(i) {
 		let r = getRandom(1, 100)
 		if (r <= chances[i]) {
 			return getStarChance(i + 1)
-		} else 
+		} else {
 			return i
+		}
 	}
 	n = getStarChance(0)
-
 
 	return gameData.src.sprites.stars.srcs[n]	
 }

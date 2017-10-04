@@ -2,12 +2,10 @@
 // Contains the information about the position and the state of an element on the canvas
 
 class canvasObject {
-	constructor(x, y, src) {
+	constructor(x, y, img) {
 		this.x = x
 		this.y = y
-		this.img = new Image()
-		this.src = src
-		this.img.src = this.src
+		this.img = img
 
 		this.width = this.img.width
 		this.height = this.img.height
