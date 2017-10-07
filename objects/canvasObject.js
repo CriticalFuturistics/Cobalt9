@@ -6,10 +6,18 @@ class canvasObject {
 		this.x = x
 		this.y = y
 		this.img = img
+		this.scale = 1
 
-		this.width = this.img.width
-		this.height = this.img.height
+		if (!this.img || !img) {
+			this.width = 0
+			this.height = 0
+		} else {
+			this.width = this.img.width
+			this.height = this.img.height
+		}
+		
 		this.ticksLeft = null
+		this.state = null
 		this.speed = 1
 	}
 
@@ -35,6 +43,15 @@ class canvasObject {
 
 	moveDown(){
 		this.y += this.speed
+	}
+
+	moveUp(){
+		this.y -= this.speed
+	}
+
+	moveTo(x, y){
+		this.x = x
+		this.y = y
 	}
 
 

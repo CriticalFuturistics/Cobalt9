@@ -12,7 +12,10 @@ let gameData = {
 
 	src : {
 		sprites : {
-			stars : { 
+			spaceship : {
+				srcs : "src/sprite/testShip.png",
+			},
+			stars : {
 				srcs : ["src/sprite/s1.png", "src/sprite/s2.png", "src/sprite/s3.png", "src/sprite/s4.png"],
 				chances : [50, 30, 15, 5]	// Chnces MUST be in decremental order
 			}
@@ -24,6 +27,8 @@ let gameData = {
 	}
 }
 
+
+
 const fps = 40
 const framerate = 1000 / fps
 
@@ -33,6 +38,10 @@ let ctx = canvas.getContext("2d")
 let gLoop = null
 
 
+let easeingShip = true
+let increment = .01
+
+// Called once the HTML document has finished loading.
 $(document).ready(function($) {
 
 	init()
@@ -51,10 +60,23 @@ function init() {
 		img.src = srcs[i]
 		srcs[i] = img
 	}
+	let ship = new Image()
+	ship.src = gameData.src.sprites.spaceship.srcs
+	gameData.src.sprites.spaceship.srcs = ship
+
+	canvas.width = $("#game").innerWidth()
+	canvas.height = $("#game").innerWidth()
+
+	let sc = new canvasObject(canvas.width/2 - 32, canvas.height * 1.2, ship)
+	sc.height = 64
+	sc.width = 64
+	gameData.canvas.spaceship = sc
+
 
 	// load interface
 	// load savefile
 	// altro
+
 
 
 	window.addEventListener('resize', resizeCanvas, false)
@@ -66,21 +88,74 @@ function init() {
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
 
+
         gLoop = setInterval(gameLoop, framerate)
     }
     resizeCanvas()
 }
+
+
+
+
+// --------------- Game Loop --------------- //
 
 function gameLoop() {
 	loopCanvas()
 	//... TODO
 }
 
+
+
+// --------------- Renderer --------------- //
+
+function loopCanvas(){
+	// clear canvas
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	// aggiungi nuove stelle
+	// renderizza + movimento (e update gameData)
+	// se movimento fa uscire la stella, toglila e shifta l'array
+	// renderizza gli oggetti
+	
+
+	// Get a random number. If it's 1, spawn a new star
+	if (getRandomStarTiming() == 1) {
+		newStar()
+	}
+
+	renderStars()
+	renderSpaceship()
+}	
+
+function renderSpaceship() {
+	let ship = gameData.canvas.spaceship
+	if (easeingShip) {
+		
+		increment += .015
+
+		ship.y -= 1 / increment
+
+		if (ship.y <= canvas.height/2 - ship.height/2) {
+			increment = 0
+			easeingShip = false
+		}
+
+		ctx.drawImage(ship.img, ship.x, ship.y)
+
+	} else {
+		ctx.drawImage(ship.img, canvas.width/2 - ship.width/2, canvas.height/2 - ship.height/2)
+	}
+	
+	ctx.beginPath();
+	ctx.moveTo(canvas.width/2,0);
+	ctx.lineTo(canvas.width/2,canvas.height);
+	ctx.stroke();
+}
+
 // Loops every star, renders it and moves it at the start of every frame.
 function renderStars() {
 	for (var i = 0; i < gameData.canvas.stars.length; i++) {
 		let s = gameData.canvas.stars[i]
-		//console.log("moved " + s.x + " star down.")
 		s.moveDown()
 
 		// If the star reaches the end of the screen, remove it and shift the array.
@@ -92,7 +167,6 @@ function renderStars() {
 		// Draw the star
 		ctx.drawImage(s.img, s.x, s.y)
 	}	
-
 }
 
 // Adds a new star with a random X coord to gameData.canvas.stars.
@@ -127,30 +201,8 @@ function newStar(){
 		let s = new canvasObject(x, 0, sprite)
 		s.y = -(s.img.height)
 		gameData.canvas.stars.push(s)
-	}
-	
+	}	
 }
-
-
-
-function loopCanvas(){
-	// clear canvas
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-	// aggiungi nuove stelle
-	// renderizza + movimento (e update gameData)
-	// se movimento fa uscire la stella, toglila e shifta l'array
-	// renderizza gli oggetti
-	
-
-	// Get a random number. If it's 1, spawn a new star
-	if (getRandomStarTiming() == 1) {
-		newStar()
-	}
-
-	renderStars()
-}	
-
 
 
 function getRandomStarPos(mapW) {
@@ -162,11 +214,9 @@ function getRandomStarPos(mapW) {
 }
 
 
-
 function getRandomStarTiming() {
 	return getRandom(0, gameData.consts.starSpawnRate)
 }
-
 
 
 // Randomly selects a star sprite from gameData.src.sprites.stars
@@ -187,6 +237,9 @@ function getRandomStarSprite() {
 
 	return gameData.src.sprites.stars.srcs[n]	
 }
+
+
+
 
 
 
