@@ -39,7 +39,7 @@ let gLoop = null
 
 
 let easeingShip = true
-let increment = .01
+let increment = .002
 
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
@@ -145,11 +145,6 @@ function renderSpaceship() {
 	} else {
 		ctx.drawImage(ship.img, canvas.width/2 - ship.width/2, canvas.height/2 - ship.height/2)
 	}
-	
-	ctx.beginPath();
-	ctx.moveTo(canvas.width/2,0);
-	ctx.lineTo(canvas.width/2,canvas.height);
-	ctx.stroke();
 }
 
 // Loops every star, renders it and moves it at the start of every frame.
