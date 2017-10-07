@@ -23,7 +23,8 @@ let gameData = {
 	},
 
 	consts : {
-		starSpawnRate : 14	// The lower, the more likely
+		starSpeed : 1,
+		starSpawnRate : 18	// The lower, the more likely
 	}
 }
 
@@ -36,7 +37,7 @@ const framerate = 1000 / fps
 let canvas = document.getElementById("gameCanvas")
 let ctx = canvas.getContext("2d")
 let gLoop = null
-
+let isPaused = false
 
 let easeingShip = true
 let increment = .002
@@ -67,7 +68,7 @@ function init() {
 	canvas.width = $("#game").innerWidth()
 	canvas.height = $("#game").innerWidth()
 
-	let sc = new canvasObject(canvas.width/2 - 32, canvas.height * 1.2, ship)
+	let sc = new canvasObject(canvas.width/2 - 32, canvas.height * 1.2, ship, 1)
 	sc.height = 64
 	sc.width = 64
 	gameData.canvas.spaceship = sc
@@ -101,8 +102,14 @@ function init() {
 
 function gameLoop() {
 	loopCanvas()
-	//... TODO
+	
 }
+
+
+
+
+
+
 
 
 
@@ -191,8 +198,16 @@ function newStar(){
 	} else {
 		// Adds the star to the list of stars.
 		let sprite = getRandomStarSprite()
-		let s = new canvasObject(x, 0, sprite)
-		s.y = -(s.img.height)
+		let s = new canvasObject(x, 0, sprite, gameData.consts.starSpeed)
+		if (!s.img) {
+			s.y = -18
+		} else {
+			s.y = -(s.img.height)
+		}
+		
+
+		// Deprecated. Having stars move at different speeds overloaded the game.
+		//s.speed += getRandom(0, 2)
 		gameData.canvas.stars.push(s)
 	}	
 }
@@ -208,6 +223,7 @@ function getRandomStarPos(mapW) {
 
 
 function getRandomStarTiming() {
+
 	return getRandom(0, gameData.consts.starSpawnRate)
 }
 
@@ -237,9 +253,30 @@ function getRandomStarSprite() {
 
 
 
+function hyperdrive(){
+	for (var i = 0; i < gameData.canvas.stars.length; i++) {
+		gameData.canvas.stars[i].speed = 4
+	}
+	gameData.consts.starSpeed = 4
+	gameData.consts.starSpawnRate = 6
+}
 
-function stopGameLoop(){
+
+
+
+
+
+
+function pauseGameLoop(){
 	if (gLoop) {
 		clearInterval(gLoop)
+		isPaused = true
+	}
+}
+
+function resumeGameLoop(){
+	if (isPaused) {
+		gLoop = setInterval(gameLoop, framerate)
+		isPaused = false
 	}
 }

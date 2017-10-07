@@ -42,15 +42,19 @@
 
 				<div class="tab-content">
 					<div class="tab-pane active" id="Crew" role="tabpanel"> 
-				  		<div>
+				  		<div class="tab-html">
 				  			<br><br>
-				  			<p style=""> <a onclick="stopGameLoop()" style="background:white; color:black; cursor:pointer">Stop Game</a> </p>
+				  			<p>
+				  				<a onclick="pauseGameLoop()" class="btn">Pause Game</a>
+				  				<a onclick="resumeGameLoop()" class="btn">Resume Game</a>
+				  				
+				  			</p>
 				  		</div>
 				  		<div class="ad"></div>
 					</div>
-					<div class="tab-pane" id="Chips" role="tabpanel"> <div class="ad"></div></div>
-					<div class="tab-pane" id="Upgrades" role="tabpanel"> <div class="ad"></div></div>
-					<div class="tab-pane" id="Settings" role="tabpanel"> <div class="ad"></div></div>
+					<div class="tab-pane" id="Chips" role="tabpanel"> <div class="tab-html"></div> <div class="ad"></div></div>
+					<div class="tab-pane" id="Upgrades" role="tabpanel"> <div class="tab-html"></div> <div class="ad"></div></div>
+					<div class="tab-pane" id="Settings" role="tabpanel"> <div class="tab-html"></div> <div class="ad"></div></div>
 				</div>
 
 			</div>
@@ -79,7 +83,7 @@
 				</div>
 
 				<div class="control-panel">
-					
+					<div style="display:table; margin:0 auto"><a onclick="hyperdrive()" class="btn">Hyperdrive</a></div>
 				</div>
 			</div>
 
@@ -106,10 +110,10 @@
 				</ul>
 
 				<div class="tab-content high">
-				  <div class="tab-pane active" id="Resources" role="tabpanel"> <div class="ad"></div></div>
-				  <div class="tab-pane" id="Inventory" role="tabpanel"> <div class="ad"></div></div>
-				  <div class="tab-pane" id="Starmap" role="tabpanel"> <div class="ad"></div></div>
-				  <div class="tab-pane" id="Encylopedia" role="tabpanel"> <div class="ad"></div></div>
+				  <div class="tab-pane active" id="Resources" role="tabpanel"> <div class="tab-html"></div><div class="ad"></div></div>
+				  <div class="tab-pane" id="Inventory" role="tabpanel"><div class="tab-html"></div> <div class="ad"></div></div>
+				  <div class="tab-pane" id="Starmap" role="tabpanel"><div class="tab-html"></div> <div class="ad"></div></div>
+				  <div class="tab-pane" id="Encylopedia" role="tabpanel"> <div class="tab-html"></div><div class="ad"></div></div>
 				</div>
 
 			</div>

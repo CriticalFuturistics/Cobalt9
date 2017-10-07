@@ -2,7 +2,7 @@
 // Contains the information about the position and the state of an element on the canvas
 
 class canvasObject {
-	constructor(x, y, img) {
+	constructor(x, y, img, speed) {
 		this.x = x
 		this.y = y
 		this.img = img
@@ -17,8 +17,7 @@ class canvasObject {
 		}
 		
 		this.ticksLeft = null
-		this.state = null
-		this.speed = 1
+		this.speed = speed
 	}
 
 	getX(){
