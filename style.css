@@ -32,8 +32,8 @@ a { font-family: Roboto; }
 }
 
 #gameCanvas, canvas { margin: 0; padding: 0; display: block;}
-canvas { display:block; }
 
+canvas { display:block; }
 
 .btn {
 	background:white; 
