@@ -129,21 +129,19 @@ function loopCanvas(){
 
 function renderSpaceship() {
 	let ship = gameData.canvas.spaceship
-	if (easeingShip) {
-		
-		increment += .015
 
+	// EaseIn of the ship when the game starts.
+	if (easeingShip) {
+		increment += .016
 		ship.y -= 1 / increment
 
-		if (ship.y <= canvas.height/2 - ship.height/2) {
+		if (ship.y <= canvas.height/2) {
 			increment = 0
 			easeingShip = false
 		}
-
 		ctx.drawImage(ship.img, ship.x, ship.y)
-
 	} else {
-		ctx.drawImage(ship.img, canvas.width/2 - ship.width/2, canvas.height/2 - ship.height/2)
+		ctx.drawImage(ship.img, canvas.width/2 - ship.width/2, canvas.height/2)
 	}
 }
 
