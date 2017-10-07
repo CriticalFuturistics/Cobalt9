@@ -30,7 +30,8 @@ a { font-family: Roboto; }
 	
 	height: 100px;
 	background: #FFF;
-	/*margin-top: calc(100vh - 105px - 42px);*/
+	/*margin-top: calc(100vh - 105px - 42px);
+	*/
 }
 
 #gameCanvas, canvas { margin: 0; padding: 0; display: block;}
