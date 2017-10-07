@@ -41,6 +41,4 @@ canvas { display:block; }
 	cursor:pointer
 }
 
-.tab-html {
-	height: calc(100vh - 110px - 42px);
-}
+.tab-html { height: calc(100vh - 110px - 42px); }
