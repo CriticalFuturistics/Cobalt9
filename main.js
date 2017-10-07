@@ -159,9 +159,14 @@ function renderStars() {
 		s.moveDown()
 
 		// If the star reaches the end of the screen, remove it and shift the array.
-		if (s.y > canvas.height + s.img.height) {
-			//console.log("removing star")
-			gameData.canvas.stars.shift()
+		if (!s.img) {
+			if (s.y > canvas.height + 64) {
+				gameData.canvas.stars.shift()
+			}
+		} else {
+			if (s.y > canvas.height + s.img.height) {
+				gameData.canvas.stars.shift()
+			}
 		}
 
 		// Draw the star
