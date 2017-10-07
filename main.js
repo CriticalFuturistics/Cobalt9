@@ -160,6 +160,7 @@ function renderStars() {
 
 		// If the star reaches the end of the screen, remove it and shift the array.
 		if (!s.img) {
+			// In case the img hasn't fully loaded yet
 			if (s.y > canvas.height + 64) {
 				gameData.canvas.stars.shift()
 			}
