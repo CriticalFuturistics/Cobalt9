@@ -17,6 +17,7 @@ let gameData = {
 			},
 			stars : {
 				srcs : ["src/sprite/s1.png", "src/sprite/s2.png", "src/sprite/s3.png", "src/sprite/s4.png"],
+				images : [],
 				chances : [50, 30, 15, 5]	// Chnces MUST be in decremental order
 			}
 		}
@@ -56,30 +57,53 @@ function init() {
 	// Load Sprites
 	// In order to not load the same sprites evey frame, load them from the src once at the start.
 	let srcs = gameData.src.sprites.stars.srcs
+
 	for (var i = 0; i < srcs.length; i++) {
 		let img = new Image()
 		img.src = srcs[i]
-		srcs[i] = img
+		img.i = i
+
+		// Fantastic function to make sure all stars have been loaded.
+		img.onload = function() {
+			gameData.src.sprites.stars.images[this.i] = img
+
+			let allImagesLoaded = false
+			for (let j = 0; j < gameData.src.sprites.stars.images.length; j++) {
+
+				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined') {
+					allImagesLoaded = true
+				} else {
+					allImagesLoaded = false
+					break
+				}
+			}
+			if (allImagesLoaded) {
+				loadShip()
+			}
+		}
 	}
+}
+
+function loadShip(){
 	let ship = new Image()
 	ship.src = gameData.src.sprites.spaceship.srcs
-	gameData.src.sprites.spaceship.srcs = ship
 
-	canvas.width = $("#game").innerWidth()
-	canvas.height = $("#game").innerWidth()
+	ship.onload = function(){
+		gameData.src.sprites.spaceship.srcs = ship
 
-	let sc = new canvasObject(canvas.width/2 - 32, canvas.height * 1.2, ship, 1)
-	sc.height = 64
-	sc.width = 64
-	gameData.canvas.spaceship = sc
+		canvas.width = $("#game").innerWidth()
+		canvas.height = $("#game").innerWidth()
 
+		let sc = new canvasObject(canvas.width/2 - 32, canvas.height * 1.2, ship, 1)
+		sc.height = 64
+		sc.width = 64
+		gameData.canvas.spaceship = sc
 
-	// load interface
-	// load savefile
-	// altro
+		loadCanvas()
+	}
+}
 
-
-
+function loadCanvas() {
 	window.addEventListener('resize', resizeCanvas, false)
 
 	function resizeCanvas() {
@@ -88,7 +112,6 @@ function init() {
 		}
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
-
 
         gLoop = setInterval(gameLoop, framerate)
     }
@@ -171,7 +194,13 @@ function renderStars() {
 		}
 
 		// Draw the star
-		ctx.drawImage(s.img, s.x, s.y)
+		if (typeof s.img === 'undefined') {
+			console.log("ERROR: star img Undefined. Ignoring star.")
+		} else {
+			ctx.drawImage(s.img, s.x, s.y)
+		}
+		
+
 	}	
 }
 
@@ -250,7 +279,7 @@ function getRandomStarSprite() {
 	}
 	n = getStarChance(0)
 
-	return gameData.src.sprites.stars.srcs[n]	
+	return gameData.src.sprites.stars.images[n]	
 }
 
 
@@ -284,5 +313,40 @@ function resumeGameLoop(){
 	if (isPaused) {
 		gLoop = setInterval(gameLoop, framerate)
 		isPaused = false
+	}
+}
+
+
+
+
+
+
+
+function test(){
+	let srcs = gameData.src.sprites.stars.srcs
+
+	for (var i = 0; i < srcs.length; i++) {
+		let img = new Image()
+		img.src = srcs[i]
+		img.i = i
+
+		// Fantastic function to make sure all stars have been loaded.
+		img.onload = function() {
+			gameData.src.sprites.stars.images[this.i] = img
+
+			let allImagesLoaded = false
+			for (let j = 0; j < gameData.src.sprites.stars.images.length; j++) {
+
+				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined') {
+					allImagesLoaded = true
+				} else {
+					allImagesLoaded = false
+					break
+				}
+			}
+			if (allImagesLoaded) {
+				//-------
+			}
+		}
 	}
 }

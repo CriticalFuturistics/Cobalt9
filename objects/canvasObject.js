@@ -5,8 +5,8 @@ class canvasObject {
 	constructor(x, y, img, speed) {
 		this.x = x
 		this.y = y
-		this.img = img
 		this.scale = 1
+		this.img = img
 
 		if (!this.img || !img) {
 			this.width = 0
