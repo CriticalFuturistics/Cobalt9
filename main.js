@@ -29,11 +29,11 @@ function init() {
 
 	// Load Sprites
 	// In order to not load the same sprites evey frame, load them from the src once at the start.
-	let srcs = gameData.src.sprites.stars.srcs
+	let srcs = gameData.src
 
-	for (var i = 0; i < srcs.length; i++) {
+	for (var i = 0; i < srcs.sprites.stars.srcs.length; i++) {
 		let img = new Image()
-		img.src = srcs[i]
+		img.src = srcs.sprites.stars.srcs[i]
 		img.i = i
 
 		// Fantastic function to make sure all stars have been loaded.
@@ -54,6 +54,14 @@ function init() {
 				loadShip()
 			}
 		}
+	}
+
+	let back = new Image()
+	back.src = srcs.sprites.console.background.src
+
+	back.onload = function() {
+		gameData.src.sprites.console.background.image = back
+		renderConsole()
 	}
 
 
@@ -88,19 +96,7 @@ function loadCanvas() {
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
 
-        
-
-
-        consoleCanvas.width = $("#console").innerWidth()
-        consoleCanvas.height = $("#console").innerHeight()
-consoleCtx.clearRect(0, 0, consoleCanvas.width, consoleCanvas.height)
-
-        let back = new Image()
-        back.src = gameData.src.sprites.console.background
-        back.width = consoleCanvas.width
-        back.height = consoleCanvas.height
-
-        consoleCtx.drawImage(back, 0, 0)
+        renderConsole()
 
         gLoop = setInterval(gameLoop, framerate)
     }
@@ -126,6 +122,24 @@ function gameLoop() {
 
 
 // --------------- Renderer --------------- //
+
+function renderConsole(){
+	if (gameData.src.sprites.console.background.image) {
+		consoleCanvas.width = $("#console").innerWidth()
+	    consoleCanvas.height = $("#console").innerHeight()
+
+		consoleCtx.clearRect(0, 0, consoleCanvas.width, consoleCanvas.height)
+
+		// Background
+	    let back = gameData.src.sprites.console.background.image
+	    back.width = consoleCanvas.width
+	    back.height = consoleCanvas.height
+
+	    consoleCtx.drawImage(back, 0, 0, consoleCanvas.width, consoleCanvas.height)
+	}
+    // Buttons
+    // ... 
+}
 
 function loopCanvas(){
 	// clear canvas

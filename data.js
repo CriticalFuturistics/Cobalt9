@@ -26,7 +26,10 @@ let gameData = {
 			},
 
 			console : {
-				background : "src/sprite/console.png"
+				background : {
+					src : "src/sprite/console.png",
+					image : null
+				}
 			}
 		}
 	},
