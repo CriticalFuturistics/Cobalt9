@@ -1,5 +1,9 @@
+@font-face {font-family:"Digital";src:url("fonts/Let_s_go_Digital_Regular.eot?") format("eot"),url("fonts/Let_s_go_Digital_Regular.woff") format("woff"),url("fonts/Let_s_go_Digital_Regular.ttf") format("truetype"),url("fonts/Let_s_go_Digital_Regular.svg#LetsgoDigital-Regular") format("svg");font-weight:normal;font-style:normal;}
+.digital {	font-family: "Digital"; }
+
 * {	font-family: Roboto; }
 a { font-family: Roboto; }
+
 .col-lg-4 { color: #FFf; }
 /*.high { height: calc(100vh - 42px); }*/  
 
@@ -25,7 +29,6 @@ a { font-family: Roboto; }
 	background: #B94587;
 }
 
-
 .ad {
 	height: 100px;
 	background: #FFF;
@@ -42,3 +45,14 @@ canvas { display:block; }
 }
 
 .tab-html { height: calc(100vh - 110px - 42px); }
+
+
+
+#test {
+	position: absolute;
+	left: 100px;
+	top: 670px;
+	color: #B70404;
+	font-size: 24px;
+	font-family: "Digital";
+}

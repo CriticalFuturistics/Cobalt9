@@ -57,14 +57,15 @@ function init() {
 	}
 
 	let back = new Image()
+	let miningSlider = new Image()
 	back.src = srcs.sprites.console.background.src
+	//miningSlider.src = srcs.sprites.console.miningSlider.src
+
 
 	back.onload = function() {
 		gameData.src.sprites.console.background.image = back
 		renderConsole()
 	}
-
-
 }
 
 function loadShip(){
