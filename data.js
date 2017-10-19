@@ -7,7 +7,11 @@ let gameData = {
 		currentPlanet : null,
 		enemyShips : [],
 		asteroids : [],
-		otherProps : []
+		otherProps : [],
+
+		/*console : {
+			background : "",
+		}*/
 	},
 
 	src : {
@@ -19,6 +23,10 @@ let gameData = {
 				srcs : ["src/sprite/s1.png", "src/sprite/s2.png", "src/sprite/s3.png", "src/sprite/s4.png"],
 				images : [],
 				chances : [50, 30, 15, 5]	// Chnces MUST be in decremental order
+			},
+
+			console : {
+				background : "src/sprite/console.png"
 			}
 		}
 	},

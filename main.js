@@ -6,6 +6,10 @@ const framerate = 1000 / fps
 
 let canvas = document.getElementById("gameCanvas")
 let ctx = canvas.getContext("2d")
+
+let consoleCanvas = document.getElementById("consoleCanvas")
+let consoleCtx = consoleCanvas.getContext("2d")
+
 let gLoop = null
 let isPaused = false
 
@@ -51,6 +55,8 @@ function init() {
 			}
 		}
 	}
+
+
 }
 
 function loadShip(){
@@ -81,6 +87,20 @@ function loadCanvas() {
 		}
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
+
+        
+
+
+        consoleCanvas.width = $("#console").innerWidth()
+        consoleCanvas.height = $("#console").innerHeight()
+consoleCtx.clearRect(0, 0, consoleCanvas.width, consoleCanvas.height)
+
+        let back = new Image()
+        back.src = gameData.src.sprites.console.background
+        back.width = consoleCanvas.width
+        back.height = consoleCanvas.height
+
+        consoleCtx.drawImage(back, 0, 0)
 
         gLoop = setInterval(gameLoop, framerate)
     }
