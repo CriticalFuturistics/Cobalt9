@@ -29,6 +29,11 @@ let gameData = {
 				background : {
 					src : "src/sprite/console.png",
 					image : null
+				},
+
+				display : {
+					src : "src/sprite/spaceTime.png",
+					image : null
 				}
 			}
 		}

@@ -56,16 +56,56 @@ function init() {
 		}
 	}
 
-	let back = new Image()
-	let miningSlider = new Image()
-	back.src = srcs.sprites.console.background.src
-	//miningSlider.src = srcs.sprites.console.miningSlider.src
 
+	for (var i = 0; i < srcs.sprites.console.length; i++) {
+		let img = new Image()
+		img.src = srcs.sprites.console[i].src
+		img.i = i
 
-	back.onload = function() {
-		gameData.src.sprites.console.background.image = back
-		renderConsole()
+		// Fantastic function to make sure all stars have been loaded.
+		img.onload = function() {
+			gameData.src.sprites.stars.images[this.i] = img
+
+			let allImagesLoaded = false
+			for (let j = 0; j < gameData.src.sprites.stars.images.length; j++) {
+				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined') {
+					allImagesLoaded = true
+				} else {
+					allImagesLoaded = false
+					break
+				}
+			}
+			if (allImagesLoaded) {
+				loadShip()
+			}
+		}
 	}
+
+	let c = srcs.sprites.console
+	for (let k in c){
+		let img = new Image()
+		img.src = c[k].src
+		img.k = k
+
+		img.onload = function(){
+			c[this.k].image = img
+			let allImagesLoaded = false
+
+			for (x in c){
+				if (typeof c[x].image !== 'undefined') {
+					allImagesLoaded = true
+				} else {
+					allImagesLoaded = false
+					break
+				}
+			}
+
+			if (allImagesLoaded) {
+				renderConsole()
+			}
+		}
+	}
+
 }
 
 function loadShip(){
@@ -119,25 +159,31 @@ function gameLoop() {
 
 
 
-
-
-
 // --------------- Renderer --------------- //
 
 function renderConsole(){
-	if (gameData.src.sprites.console.background.image) {
-		consoleCanvas.width = $("#console").innerWidth()
-	    consoleCanvas.height = $("#console").innerHeight()
+	
+	consoleCanvas.width = $("#console").innerWidth()
+    consoleCanvas.height = $("#console").innerHeight()
 
-		consoleCtx.clearRect(0, 0, consoleCanvas.width, consoleCanvas.height)
+	consoleCtx.clearRect(0, 0, consoleCanvas.width, consoleCanvas.height)
 
-		// Background
-	    let back = gameData.src.sprites.console.background.image
-	    back.width = consoleCanvas.width
-	    back.height = consoleCanvas.height
 
-	    consoleCtx.drawImage(back, 0, 0, consoleCanvas.width, consoleCanvas.height)
-	}
+	let w = consoleCanvas.width
+	let h = consoleCanvas.height
+
+    let back = gameData.src.sprites.console.background.image
+    let display = gameData.src.sprites.console.display.image
+
+    back.width = w
+    back.height = h
+
+    display.width = w
+    display.height = h
+
+    consoleCtx.drawImage(back, 0, 0, w, h)
+    consoleCtx.drawImage(display, 12, 20)
+	
     // Buttons
     // ... 
 }
