@@ -50,9 +50,9 @@ canvas { display:block; }
 
 #test {
 	position: absolute;
-	left: 100px;
-	top: 670px;
+	left: 30px;
+	top: 666px;
 	color: #B70404;
-	font-size: 24px;
+	font-size: 22px;
 	font-family: "Digital";
 }

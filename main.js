@@ -16,6 +16,7 @@ let isPaused = false
 let easeingShip = true
 let increment = .002
 
+
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
 
@@ -36,76 +37,26 @@ function init() {
 		img.src = srcs.sprites.stars.srcs[i]
 		img.i = i
 
-		// Fantastic function to make sure all stars have been loaded.
 		img.onload = function() {
 			gameData.src.sprites.stars.images[this.i] = img
 
-			let allImagesLoaded = false
-			for (let j = 0; j < gameData.src.sprites.stars.images.length; j++) {
+			let allStarsLoaded = false
 
-				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined') {
-					allImagesLoaded = true
+			for (let j = 0; j < gameData.src.sprites.stars.srcs.length; j++) {
+
+				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined' && gameData.src.sprites.stars.images[j] != null) {
+					allStarsLoaded = true
 				} else {
-					allImagesLoaded = false
+					allStarsLoaded = false
 					break
 				}
 			}
-			if (allImagesLoaded) {
+			if (allStarsLoaded) {
+
 				loadShip()
 			}
 		}
 	}
-
-
-	for (var i = 0; i < srcs.sprites.console.length; i++) {
-		let img = new Image()
-		img.src = srcs.sprites.console[i].src
-		img.i = i
-
-		// Fantastic function to make sure all stars have been loaded.
-		img.onload = function() {
-			gameData.src.sprites.stars.images[this.i] = img
-
-			let allImagesLoaded = false
-			for (let j = 0; j < gameData.src.sprites.stars.images.length; j++) {
-				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined') {
-					allImagesLoaded = true
-				} else {
-					allImagesLoaded = false
-					break
-				}
-			}
-			if (allImagesLoaded) {
-				loadShip()
-			}
-		}
-	}
-
-	let c = srcs.sprites.console
-	for (let k in c){
-		let img = new Image()
-		img.src = c[k].src
-		img.k = k
-
-		img.onload = function(){
-			c[this.k].image = img
-			let allImagesLoaded = false
-
-			for (x in c){
-				if (typeof c[x].image !== 'undefined') {
-					allImagesLoaded = true
-				} else {
-					allImagesLoaded = false
-					break
-				}
-			}
-
-			if (allImagesLoaded) {
-				renderConsole()
-			}
-		}
-	}
-
 }
 
 function loadShip(){
@@ -123,7 +74,34 @@ function loadShip(){
 		sc.width = 64
 		gameData.canvas.spaceship = sc
 
-		loadCanvas()
+		loadConsole()
+	}
+}
+
+function loadConsole(){
+	let c = gameData.src.sprites.console
+	for (let k in c){
+		let img = new Image()
+		img.src = c[k].src
+		img.k = k
+
+		img.onload = function() {
+			c[this.k].image = img
+			let allLoaded = false
+
+			for (x in c){
+				if (typeof c[x].image === 'undefined' || c[x].image == null) {
+					allLoaded = false
+					break
+				} else {
+					allLoaded = true
+				}
+			}
+
+			if (allLoaded) {
+				loadCanvas()
+			}
+		}
 	}
 }
 
@@ -152,6 +130,10 @@ function loadCanvas() {
 function gameLoop() {
 	loopCanvas()
 	
+	// Decrement turbo
+	if (gameData.consts.turbo > 0) {
+		gameData.consts.turbo -= 1
+	}
 }
 
 
@@ -162,18 +144,18 @@ function gameLoop() {
 // --------------- Renderer --------------- //
 
 function renderConsole(){
-	
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight()
 
 	consoleCtx.clearRect(0, 0, consoleCanvas.width, consoleCanvas.height)
-
 
 	let w = consoleCanvas.width
 	let h = consoleCanvas.height
 
     let back = gameData.src.sprites.console.background.image
     let display = gameData.src.sprites.console.display.image
+    let boosterBarBackground = gameData.src.sprites.console.boosterBarBackground.image
+    let boosterBarFull = gameData.src.sprites.console.boosterBarFull.image
 
     back.width = w
     back.height = h
@@ -183,6 +165,26 @@ function renderConsole(){
 
     consoleCtx.drawImage(back, 0, 0, w, h)
     consoleCtx.drawImage(display, 12, 20)
+    consoleCtx.drawImage(boosterBarBackground, 
+    	(w/2) - (boosterBarBackground.width/2),
+    	h - boosterBarBackground.height - 8)
+
+    // Percentage of squares
+	let q = gameData.consts.turbo
+	if (q == 0) {
+		q = 0.1
+	}
+
+    consoleCtx.drawImage(boosterBarFull,
+    	0,
+    	0,
+    	boosterBarFull.width / (100/q),
+    	boosterBarFull.height,
+    	(w/2) - (boosterBarFull.width/2),
+    	h - boosterBarFull.height - 8,
+    	boosterBarFull.width / (100/q),
+    	boosterBarFull.height)
+
 	
     // Buttons
     // ... 
@@ -205,6 +207,7 @@ function loopCanvas(){
 
 	renderStars()
 	renderSpaceship()
+	renderConsole()
 }	
 
 function renderSpaceship() {
@@ -336,13 +339,24 @@ function getRandomStarSprite() {
 
 
 
-
 function hyperdrive(){
-	for (var i = 0; i < gameData.canvas.stars.length; i++) {
-		gameData.canvas.stars[i].speed = 4
+	console.log(gameData.consts.turbo)
+	if (gameData.consts.turbo < 100) {
+		gameData.consts.turbo += 10
+/*
+		gameData.consts.starSpeed += 1
+
+		if (gameData.consts.turbo < 50) {
+			gameData.consts.starSpawnRate -= 1
+		} else {
+			gameData.consts.starSpawnRate -= 0.5
+		}
+		
+
+		for (let i = 0; i < gameData.canvas.stars.length; i++) {
+			gameData.canvas.stars[i].speed = gameData.consts.starSpeed
+		}*/
 	}
-	gameData.consts.starSpeed = 4
-	gameData.consts.starSpawnRate = 6
 }
 
 

@@ -34,14 +34,27 @@ let gameData = {
 				display : {
 					src : "src/sprite/spaceTime.png",
 					image : null
-				}
+				},
+
+				boosterBarBackground : {
+					src : "src/sprite/boosterBarEmpty.png",
+					image : null
+				},
+
+				boosterBarFull : {
+					src : "src/sprite/boosterBarFull.png",
+					image : null
+				},
 			}
 		}
 	},
 
 	consts : {
 		starSpeed : 1,
-		starSpawnRate : 18	// The lower, the more likely
+		starSpawnRate : 18,	// The lower, the more likely
+		
+		turbo : 0,
+
 	},
 
 
