@@ -4,6 +4,16 @@
 * {	font-family: Roboto; }
 a { font-family: Roboto; }
 
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
 .col-lg-4 { color: #FFf; }
 /*.high { height: calc(100vh - 42px); }*/  
 
@@ -53,6 +63,6 @@ canvas { display:block; }
 	left: 30px;
 	top: 666px;
 	color: #B70404;
-	font-size: 22px;
+	font-size: 21px;
 	font-family: "Digital";
 }

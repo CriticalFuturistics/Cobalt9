@@ -27,11 +27,14 @@ $(document).ready(function($) {
 
 
 function init() {
+	// Initial console data
+	consoleCanvas.width = $("#console").innerWidth()
+    consoleCanvas.height = $("#console").innerHeight() 
 
 	// Load Sprites
 	// In order to not load the same sprites evey frame, load them from the src once at the start.
+	// Once the stars are loaded, it starts to load the ship.
 	let srcs = gameData.src
-
 	for (var i = 0; i < srcs.sprites.stars.srcs.length; i++) {
 		let img = new Image()
 		img.src = srcs.sprites.stars.srcs[i]
@@ -57,6 +60,7 @@ function init() {
 			}
 		}
 	}
+
 }
 
 function loadShip(){
@@ -115,6 +119,7 @@ function loadCanvas() {
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
 
+        gameData.consts.isConsoleLoaded = false
         renderConsole()
 
         gLoop = setInterval(gameLoop, framerate)
@@ -132,7 +137,12 @@ function gameLoop() {
 	
 	// Decrement turbo
 	if (gameData.consts.turbo > 0) {
-		gameData.consts.turbo -= 1
+		if (gameData.consts.turbo > 75) {
+			gameData.consts.turbo -= 2
+		} else {
+			gameData.consts.turbo -= 1
+		}
+		
 	}
 }
 
@@ -152,47 +162,87 @@ function renderConsole(){
 	let w = consoleCanvas.width
 	let h = consoleCanvas.height
 
-    let back = gameData.src.sprites.console.background.image
-    let display = gameData.src.sprites.console.display.image
-    let boosterBarBackground = gameData.src.sprites.console.boosterBarBackground.image
-    let boosterBarFull = gameData.src.sprites.console.boosterBarFull.image
-
-    back.width = w
-    back.height = h
-
-    display.width = w
-    display.height = h
-
-    consoleCtx.drawImage(back, 0, 0, w, h)
-    consoleCtx.drawImage(display, 12, 20)
-    consoleCtx.drawImage(boosterBarBackground, 
-    	(w/2) - (boosterBarBackground.width/2),
-    	h - boosterBarBackground.height - 8)
-
-    // Percentage of squares
 	let q = gameData.consts.turbo
-	if (q == 0) {
-		q = 0.1
+	// So that it doesn't divide by zero
+	if (q == 0) { q = 0.1 }
+
+	// ----- This is ran once -----
+
+	if (!gameData.consts.isConsoleLoaded) {
+		gameData.consts.isConsoleLoaded = true
+
+		let c = gameData.canvas.console
+		for(k in c){
+			c[k].image = gameData.src.sprites.console[k].image
+			c[k].h = c[k].image.height
+			c[k].w = c[k].image.width
+		}
+
+		c.display.x = 12
+		c.display.y = 20
+
+		c.boosterBarBackground.x = (w/2) - c.boosterBarBackground.image.width/2
+    	c.boosterBarBackground.y = h - c.boosterBarBackground.image.height - 4	
+
+    	c.btnTurbo.x = (w/2) - (c.btnTurbo.image.width/2)
+   		c.btnTurbo.y = (h/2) - (c.btnTurbo.image.height/2) - 12
+
+    	c.boosterBarFull.clip.sw = c.boosterBarFull.image.width / (100/q)
+    	c.boosterBarFull.clip.sh = c.boosterBarFull.image.height
+    	
+    	c.boosterBarFull.x = (w/2) - (c.boosterBarFull.image.width/2),
+    	c.boosterBarFull.y = h - c.boosterBarFull.image.height - 4,
+    	c.boosterBarFull.w = c.boosterBarFull.image.width / (100/q),
+    	c.boosterBarFull.h = c.boosterBarFull.image.height
+
+    	c.slider.x = w - c.slider.image.width - c.slider.image.width/6
+    	c.slider.y = h/2 - c.slider.image.height/2 - c.slider.image.height/12
+
+    	c.sliderSelector.x = c.slider.x - (c.sliderSelector.image.width/2) + 3
+    	c.sliderSelector.y = (c.slider.y/2) + c.slider.image.height/6
+
+
+		consoleCanvas.objects = c
+	}
+	
+	// ------------------------
+
+	let c = consoleCanvas.objects
+
+	for(k in c){
+		if (c[k].visible) {
+			if (k == "background") {
+				consoleCtx.drawImage(c[k].image, c[k].x, c[k].y, w, h)
+			} else if (k == "boosterBarFull") {
+				consoleCtx.drawImage(c[k].image,
+			    	c[k].clip.sx, c[k].clip.sy,
+			    	c[k].image.width / (100/q), c[k].clip.sh,
+			    	c[k].x, c[k].y,
+			    	c[k].image.width / (100/q), c[k].h)
+			} else if (c[k].hasOwnProperty("clip")) {
+				consoleCtx.drawImage(c[k].image,
+			    	c[k].clip.sx, c[k].clip.sy,
+			    	c[k].clip.sw, c[k].clip.sh,
+			    	c[k].x, c[k].y,
+			    	c[k].w, c[k].h)
+			} else {
+				consoleCtx.drawImage(c[k].image, c[k].x, c[k].y)
+			}
+		}
 	}
 
-    consoleCtx.drawImage(boosterBarFull,
-    	0,
-    	0,
-    	boosterBarFull.width / (100/q),
-    	boosterBarFull.height,
-    	(w/2) - (boosterBarFull.width/2),
-    	h - boosterBarFull.height - 8,
-    	boosterBarFull.width / (100/q),
-    	boosterBarFull.height)
-
-	
-    // Buttons
-    // ... 
+   	if (!gameData.consts.isConsoleEventEnabled) {
+   		gameData.consts.isConsoleEventEnabled = true
+   		addConsoleEvents()
+   	}
+   	
 }
+
+
 
 function loopCanvas(){
 	// clear canvas
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
 
 	// aggiungi nuove stelle
 	// renderizza + movimento (e update gameData)
@@ -340,7 +390,6 @@ function getRandomStarSprite() {
 
 
 function hyperdrive(){
-	console.log(gameData.consts.turbo)
 	if (gameData.consts.turbo < 100) {
 		gameData.consts.turbo += 10
 /*
@@ -357,6 +406,27 @@ function hyperdrive(){
 			gameData.canvas.stars[i].speed = gameData.consts.starSpeed
 		}*/
 	}
+}
+
+
+
+function addConsoleEvents() {
+	consoleCanvas.addEventListener('click', function(e) {
+		let k = this.objects.btnTurbo
+
+		// Top offset from the game canvas + the 42px high header
+		let y = e.pageY - canvas.height - 42 - 4
+		let x = e.layerX
+
+		if (y > k.y &&
+			y < k.y + k.h && 
+			x > k.x &&
+			x < k.x + k.w) {
+				hyperdrive()
+		}
+
+		
+	}, false)
 }
 
 
@@ -384,7 +454,7 @@ function resumeGameLoop(){
 
 
 
-
+/*
 function test(){
 	let srcs = gameData.src.sprites.stars.srcs
 
@@ -412,4 +482,4 @@ function test(){
 			}
 		}
 	}
-}
+}*/
