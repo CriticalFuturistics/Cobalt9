@@ -85,7 +85,8 @@ let gameData = {
 				y : 0,
 				w : 0,
 				h : 0,
-				visible : true
+				visible : true,
+				spacing : 0
 			}
 		}
 	},
@@ -153,6 +154,9 @@ let gameData = {
 		starSpawnRate : 18,	// The lower, the more likely
 		
 		turbo : 0,
+
+		miningPriority : 0,
+		maxMiningPriority : 5,
 
 	},
 

@@ -138,7 +138,7 @@ function gameLoop() {
 	// Decrement turbo
 	if (gameData.consts.turbo > 0) {
 		if (gameData.consts.turbo > 750) {
-			gameData.consts.turbo -= 10
+			gameData.consts.turbo -= 12
 		} else if (gameData.consts.turbo > 500) {
 			gameData.consts.turbo -= 8
 		} else {
@@ -186,8 +186,8 @@ function renderConsole(){
 		c.boosterBarBackground.x = (w/2) - c.boosterBarBackground.image.width/2
     	c.boosterBarBackground.y = h - c.boosterBarBackground.image.height - 4	
 
-    	c.btnTurbo.x = (w/2) - (c.btnTurbo.image.width/2)
-   		c.btnTurbo.y = (h/2) - (c.btnTurbo.image.height/2) - 12
+    	c.btnTurbo.x = Math.floor((w/2) - (c.btnTurbo.image.width/2))
+   		c.btnTurbo.y = Math.floor((h/2) - (c.btnTurbo.image.height/2) - 12)
 
     	c.boosterBarFull.clip.sw = c.boosterBarFull.image.width / (1000/q)
     	c.boosterBarFull.clip.sh = c.boosterBarFull.image.height
@@ -199,10 +199,16 @@ function renderConsole(){
 
     	c.slider.x = w - c.slider.image.width - c.slider.image.width/6
     	c.slider.y = h/2 - c.slider.image.height/2 - c.slider.image.height/12
+		
+		// Mining Priority
+    	c.sliderSelector.spacing = gameData.consts.miningPriority * c.slider.image.width/5
 
-    	c.sliderSelector.x = c.slider.x - (c.sliderSelector.image.width/2) + 3
+    	c.sliderSelector.x = (c.slider.x - (c.sliderSelector.image.width/2) + 3) + c.sliderSelector.spacing
     	c.sliderSelector.y = (c.slider.y/2) + c.slider.image.height/6
 
+    	gameData.canvas.console.sliderSelector.x = c.sliderSelector.x
+
+    	
 
 		consoleCanvas.objects = c
 	}
@@ -221,6 +227,9 @@ function renderConsole(){
 			    	c[k].image.width / (1000/q), c[k].clip.sh,
 			    	c[k].x, c[k].y,
 			    	c[k].image.width / (1000/q), c[k].h)
+			} else if (k == "sliderSelector") {
+				c[k].spacing = gameData.consts.miningPriority * c.slider.image.width/5
+				consoleCtx.drawImage(c[k].image, c[k].x + c[k].spacing, c[k].y)			  
 			} else if (c[k].hasOwnProperty("clip")) {
 				consoleCtx.drawImage(c[k].image,
 			    	c[k].clip.sx, c[k].clip.sy,
@@ -239,6 +248,7 @@ function renderConsole(){
 
 
 	// ----------------------------
+
 
    	if (!gameData.consts.isConsoleEventEnabled) {
    		gameData.consts.isConsoleEventEnabled = true
@@ -420,22 +430,111 @@ function hyperdrive(){
 
 
 function addConsoleEvents() {
+	//let isMouseDown = false
+	let isSliderSelected = false
+	let startX
+	let sliderDistance = 0
+
+	$("#consoleCanvas").mousedown(function (e) {
+		let k = this.objects.sliderSelector
+
+		let rect = consoleCanvas.getBoundingClientRect()
+      	let scaleX = consoleCanvas.width / rect.width
+      	let scaleY = consoleCanvas.height / rect.height
+
+    	let x = Math.floor((e.clientX - rect.left) * scaleX)
+    	let y = Math.floor((e.clientY - rect.top) * scaleY)
+    	let w = k.w * scaleX
+    	let h = k.h * scaleY
+
+    	let kx = k.x + gameData.consts.miningPriority * this.objects.slider.image.width/5
+
+		if (y > k.y && y < k.y + h && 
+			x > kx && x < kx + w) {
+			startX = x
+			isSliderSelected = true
+			
+		}
+		
+	})
+
+	$("#consoleCanvas").mousemove(function (e) {
+		if (isSliderSelected) {
+			let rect = consoleCanvas.getBoundingClientRect()
+			let scaleX = consoleCanvas.width / rect.width
+			let x = Math.floor((e.clientX - rect.left) * scaleX)
+			let dx = x - startX
+			startX = x
+
+			sliderDistance += dx
+			let p = gameData.consts.miningPriority
+
+			if (sliderDistance > this.objects.slider.w/5) {
+				sliderDistance = 0
+				if (p < gameData.consts.maxMiningPriority) { 
+					p += 1
+
+				}
+			
+			} else if (sliderDistance < -(this.objects.slider.w/5)) {
+				sliderDistance = 0
+				if (p > 0) { p -= 1 }
+
+			}
+			gameData.consts.miningPriority = p
+
+		}
+	})
+	$("#consoleCanvas").mouseup(function (e) {
+		isSliderSelected = false
+	})
+
 	consoleCanvas.addEventListener('click', function(e) {
 		let k = this.objects.btnTurbo
 
-		// Top offset from the game canvas + the 42px high header
-		let y = e.pageY - canvas.height - 42 - 4
-		let x = e.layerX
+		let rect = consoleCanvas.getBoundingClientRect()
+      	let scaleX = consoleCanvas.width / rect.width
+      	let scaleY = consoleCanvas.height / rect.height
 
-		if (y > k.y &&
-			y < k.y + k.h && 
-			x > k.x &&
-			x < k.x + k.w) {
-				hyperdrive()
+    	let x = Math.floor((e.clientX - rect.left) * scaleX)
+    	let y = Math.floor((e.clientY - rect.top) * scaleY)
+    	let w = k.w * scaleX
+    	let h = k.h * scaleY
+
+		let kxc = k.x + (k.w/2)
+		let kyc = k.y + (k.h/2)
+
+		let r = w/2
+
+		if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {
+			hyperdrive()			
+		}		
+	}, false)
+
+	/*consoleCanvas.addEventListener('click', function(e) {
+		let k = this.objects.sliderSelector
+
+		let rect = consoleCanvas.getBoundingClientRect()
+      	let scaleX = consoleCanvas.width / rect.width
+      	let scaleY = consoleCanvas.height / rect.height
+
+    	let x = Math.floor((e.clientX - rect.left) * scaleX)
+    	let y = Math.floor((e.clientY - rect.top) * scaleY)
+    	let w = k.w * scaleX
+    	let h = k.h * scaleY
+
+		if (y > k.y && y < k.y + h && 
+			x > k.x && x < k.x + w) {
+			if (sliderSelected) {
+				console.log("moving")
+			}
+			
+	
 		}
 
-		
-	}, false)
+
+	}, false)*/
+
 }
 
 
