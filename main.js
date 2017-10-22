@@ -137,10 +137,12 @@ function gameLoop() {
 	
 	// Decrement turbo
 	if (gameData.consts.turbo > 0) {
-		if (gameData.consts.turbo > 75) {
-			gameData.consts.turbo -= 2
+		if (gameData.consts.turbo > 750) {
+			gameData.consts.turbo -= 10
+		} else if (gameData.consts.turbo > 500) {
+			gameData.consts.turbo -= 8
 		} else {
-			gameData.consts.turbo -= 1
+			gameData.consts.turbo -= 6
 		}
 		
 	}
@@ -187,12 +189,12 @@ function renderConsole(){
     	c.btnTurbo.x = (w/2) - (c.btnTurbo.image.width/2)
    		c.btnTurbo.y = (h/2) - (c.btnTurbo.image.height/2) - 12
 
-    	c.boosterBarFull.clip.sw = c.boosterBarFull.image.width / (100/q)
+    	c.boosterBarFull.clip.sw = c.boosterBarFull.image.width / (1000/q)
     	c.boosterBarFull.clip.sh = c.boosterBarFull.image.height
     	
     	c.boosterBarFull.x = (w/2) - (c.boosterBarFull.image.width/2),
     	c.boosterBarFull.y = h - c.boosterBarFull.image.height - 4,
-    	c.boosterBarFull.w = c.boosterBarFull.image.width / (100/q),
+    	c.boosterBarFull.w = c.boosterBarFull.image.width / (1000/q),
     	c.boosterBarFull.h = c.boosterBarFull.image.height
 
     	c.slider.x = w - c.slider.image.width - c.slider.image.width/6
@@ -205,7 +207,7 @@ function renderConsole(){
 		consoleCanvas.objects = c
 	}
 	
-	// ------------------------
+	// ----------------------------
 
 	let c = consoleCanvas.objects
 
@@ -216,9 +218,9 @@ function renderConsole(){
 			} else if (k == "boosterBarFull") {
 				consoleCtx.drawImage(c[k].image,
 			    	c[k].clip.sx, c[k].clip.sy,
-			    	c[k].image.width / (100/q), c[k].clip.sh,
+			    	c[k].image.width / (1000/q), c[k].clip.sh,
 			    	c[k].x, c[k].y,
-			    	c[k].image.width / (100/q), c[k].h)
+			    	c[k].image.width / (1000/q), c[k].h)
 			} else if (c[k].hasOwnProperty("clip")) {
 				consoleCtx.drawImage(c[k].image,
 			    	c[k].clip.sx, c[k].clip.sy,
@@ -230,6 +232,13 @@ function renderConsole(){
 			}
 		}
 	}
+
+
+	// ------- HTML render --------
+	// digits
+
+
+	// ----------------------------
 
    	if (!gameData.consts.isConsoleEventEnabled) {
    		gameData.consts.isConsoleEventEnabled = true
@@ -390,8 +399,8 @@ function getRandomStarSprite() {
 
 
 function hyperdrive(){
-	if (gameData.consts.turbo < 100) {
-		gameData.consts.turbo += 10
+	if (gameData.consts.turbo < 1000) {
+		gameData.consts.turbo += 60
 /*
 		gameData.consts.starSpeed += 1
 
