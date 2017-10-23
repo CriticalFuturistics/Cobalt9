@@ -58,7 +58,7 @@ canvas { display:block; }
 
 
 
-#test {
+#speed, #time {
 	position: absolute;
 	left: 30px;
 	top: 666px;

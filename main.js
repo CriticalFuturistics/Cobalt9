@@ -144,8 +144,9 @@ function gameLoop() {
 		} else {
 			gameData.consts.turbo -= 6
 		}
-		
 	}
+
+
 }
 
 
@@ -201,7 +202,7 @@ function renderConsole(){
     	c.slider.y = h/2 - c.slider.image.height/2 - c.slider.image.height/12
 		
 		// Mining Priority
-    	c.sliderSelector.spacing = gameData.consts.miningPriority * c.slider.image.width/5
+    	c.sliderSelector.spacing = gameData.consts.miningPriority * (c.slider.image.width/5 - 1)
 
     	c.sliderSelector.x = (c.slider.x - (c.sliderSelector.image.width/2) + 3) + c.sliderSelector.spacing
     	c.sliderSelector.y = (c.slider.y/2) + c.slider.image.height/6
@@ -228,7 +229,7 @@ function renderConsole(){
 			    	c[k].x, c[k].y,
 			    	c[k].image.width / (1000/q), c[k].h)
 			} else if (k == "sliderSelector") {
-				c[k].spacing = gameData.consts.miningPriority * c.slider.image.width/5
+				c[k].spacing = gameData.consts.miningPriority * (c.slider.image.width/5 - 1)
 				consoleCtx.drawImage(c[k].image, c[k].x + c[k].spacing, c[k].y)			  
 			} else if (c[k].hasOwnProperty("clip")) {
 				consoleCtx.drawImage(c[k].image,
@@ -244,8 +245,29 @@ function renderConsole(){
 
 
 	// ------- HTML render --------
-	// digits
+	// Console Digits
+	let numberOfDigits = 8
+	$("#speed").html(formatSpeed(gameData.consts.speed, numberOfDigits))
+	$("#speed").css({
+		position : 'absolute',
+		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
+		//left: parseInt(consoleCanvas.objects.display.x) + "px",
+		left: 32 + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 3/4
+	})
 
+	$("#time").html(formatSpeed(gameData.consts.time, numberOfDigits))
+	$("#time").css({
+		position : 'absolute',
+		//top: parseInt($("#console").position().top + consoleCanvas.objects.display.image.height/2 + 3) + "px",
+		top: parseInt($("#speed").position().top + $("#speed").height() + 3) + "px",
+		left: 32 + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 3/4
+	})
+
+		//pauseGameLoop()
 
 	// ----------------------------
 
@@ -447,7 +469,7 @@ function addConsoleEvents() {
     	let w = k.w * scaleX
     	let h = k.h * scaleY
 
-    	let kx = k.x + gameData.consts.miningPriority * this.objects.slider.image.width/5
+    	let kx = k.x + gameData.consts.miningPriority * (this.objects.slider.image.width/5 - 1)
 
 		if (y > k.y && y < k.y + h && 
 			x > kx && x < kx + w) {

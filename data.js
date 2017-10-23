@@ -158,6 +158,10 @@ let gameData = {
 		miningPriority : 0,
 		maxMiningPriority : 5,
 
+		// temp
+		speed : 1000,
+		time : 60000000000000000000, // in seconds
+
 	},
 
 
