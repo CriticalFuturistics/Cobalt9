@@ -109,7 +109,8 @@ let gameData = {
 				},
 
 				display : {
-					src : "src/sprite/spaceTime.png",
+					//src : "src/sprite/spaceTime.png",
+					src : "src/sprite/display.png",
 					image : null
 				},
 

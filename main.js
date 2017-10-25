@@ -239,13 +239,13 @@ function renderConsole(){
     	c.boosterBarFull.h = c.boosterBarFull.image.height
 
     	c.slider.x = w - c.slider.image.width - c.slider.image.width/6
-    	c.slider.y = h/2 - c.slider.image.height/2 - c.slider.image.height/12
+    	c.slider.y = h/2 - c.slider.image.height/2 - c.slider.image.height/4
 		
 		// Mining Priority
     	c.sliderSelector.spacing = gameData.consts.miningPriority * (c.slider.image.width/5 - 1)
 
     	c.sliderSelector.x = (c.slider.x - (c.sliderSelector.image.width/2) + 3) + c.sliderSelector.spacing
-    	c.sliderSelector.y = (c.slider.y/2) + c.slider.image.height/6
+    	c.sliderSelector.y = (c.slider.y/2) + parseInt(c.slider.image.height/16)
 
     	gameData.canvas.console.sliderSelector.x = c.sliderSelector.x
 
@@ -324,9 +324,6 @@ function renderConsole(){
 		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
 		"text-align" : "right"
 	})
-
-
-
 
 
 
