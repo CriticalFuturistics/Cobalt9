@@ -158,11 +158,20 @@ let gameData = {
 		miningPriority : 0,
 		maxMiningPriority : 5,
 
-		// temp
-		speed : 1000,
-		time : 60000000000000000000, // in seconds
+		distanceUnits : ['KM', 'AU', 'PC'],
+		distanceMax : 999999999,
+		distance : {
+			n : 0,
+			u : 0
+		},
+		timeUnits : ['--', '--', '--'],
+		time : {
+			n : 0,
+			u : 0
+		},
 
 	},
 
+	updateTime : 0,
 
 }

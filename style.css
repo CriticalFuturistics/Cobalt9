@@ -62,11 +62,15 @@ canvas { display:block; }
 
 
 
-#speed, #time {
+#distance, #time, #distanceUnit, #timeUnit, #emptyTime, #emptyDistance, #emptyTimeUnit, #emptyDistanceUnit {
 	position: absolute;
 	left: 30px;
 	top: 666px;
 	color: #B70404;
 	font-size: 21px;
 	font-family: "Digital";
+}
+
+#emptyTime, #emptyDistance, #emptyTimeUnit, #emptyDistanceUnit {
+	color : #370000;
 }

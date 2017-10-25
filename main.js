@@ -143,7 +143,35 @@ function loadCanvas() {
 
 function gameLoop() {
 	loopCanvas()
-	
+
+
+
+	if (gameData.updateTime >= 3) {
+		gameData.updateTime = 0
+		timeToUpdate = true
+	} else {
+		gameData.updateTime += 1
+		timeToUpdate = false
+	}
+
+
+	let m = gameData.consts.turbo/10 + 1
+	// Update Distance and Time
+	if (timeToUpdate) {
+		if (gameData.consts.distance.u == 0) {
+			gameData.consts.distance.n += 10000 * m
+		} else if (gameData.consts.distance.u == 1) {
+			gameData.consts.distance.n += 20 * m
+		} else if (gameData.consts.distance.u == 2) {
+			gameData.consts.distance.n += 1 * m
+		}
+
+		if (gameData.consts.distance.n >= 999999999) {
+			updateDistance()
+		}
+	}
+
+
 	// Decrement turbo
 	if (gameData.consts.turbo > 0) {
 		if (gameData.consts.turbo > 750) {
@@ -198,6 +226,9 @@ function renderConsole(){
 
     	c.btnTurbo.x = Math.floor((w/2) - (c.btnTurbo.image.width/2))
    		c.btnTurbo.y = Math.floor((h/2) - (c.btnTurbo.image.height/2) - 12)
+
+   		c.prsTurbo.x = c.btnTurbo.x 
+   		c.prsTurbo.y = c.btnTurbo.y 
 
     	c.boosterBarFull.clip.sw = c.boosterBarFull.image.width / (1000/q)
     	c.boosterBarFull.clip.sh = c.boosterBarFull.image.height
@@ -255,28 +286,92 @@ function renderConsole(){
 
 	// ------- HTML render --------
 	// Console Digits
-	let numberOfDigits = 8
-	$("#speed").html(formatSpeed(gameData.consts.speed, numberOfDigits))
-	$("#speed").css({
+
+	$("#emptyDistance").html('888888888')
+	$("#emptyTime").html('888888888')
+	$("#emptyDistanceUnit").html('88')
+	$("#emptyTimeUnit").html('88')
+
+	$("#emptyDistance").css({
 		position : 'absolute',
 		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
-		//left: parseInt(consoleCanvas.objects.display.x) + "px",
-		left: 32 + "px",
+		left: 27 + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
-		width : (consoleCanvas.objects.display.image.width - 4) * 3/4
+		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
+		"text-align" : "right"
+	})
+	$("#emptyDistanceUnit").css({
+		position : 'absolute',
+		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
+		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
+		"text-align" : "right"
+	})
+	$("#emptyTime").css({
+		position : 'absolute',
+		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
+		left: 27 + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
+		"text-align" : "right"
+	})
+	$("#emptyTimeUnit").css({
+		position : 'absolute',
+		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
+		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
+		"text-align" : "right"
 	})
 
-	$("#time").html(formatSpeed(gameData.consts.time, numberOfDigits))
+
+
+
+
+
+	$("#distance").html(gameData.consts.distance.n)
+	$("#distance").css({
+		position : 'absolute',
+		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
+		left: 27 + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
+		"text-align" : "right"
+	})
+
+	$("#distanceUnit").html(gameData.consts.distanceUnits[gameData.consts.distance.u])
+	$("#distanceUnit").css({
+		position : 'absolute',
+		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
+		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
+		"text-align" : "right"
+	})
+
+	$("#time").html(gameData.consts.time.n)
 	$("#time").css({
 		position : 'absolute',
-		//top: parseInt($("#console").position().top + consoleCanvas.objects.display.image.height/2 + 3) + "px",
-		top: parseInt($("#speed").position().top + $("#speed").height() + 3) + "px",
-		left: 32 + "px",
+		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
+		left: 27 + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
-		width : (consoleCanvas.objects.display.image.width - 4) * 3/4
+		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
+		"text-align" : "right"
 	})
 
-		//pauseGameLoop()
+	$("#timeUnit").html(gameData.consts.timeUnits[gameData.consts.time.u])
+	$("#timeUnit").css({
+		position : 'absolute',
+		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
+		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
+		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
+		"text-align" : "right"
+	})
+
+
+	//pauseGameLoop()
 
 	// ----------------------------
 
@@ -442,7 +537,7 @@ function getRandomStarSprite() {
 function hyperdrive(){
 	if (gameData.consts.turbo < 1000) {
 		gameData.consts.turbo += 60
-/*
+	/*
 		gameData.consts.starSpeed += 1
 
 		if (gameData.consts.turbo < 50) {
@@ -524,15 +619,26 @@ function addConsoleEvents() {
 	})
 	$("#consoleCanvas").mouseup(function (e) {
 		isSliderSelected = false
+		
+		consoleCanvas.objects.btnTurbo.visible = true
+		consoleCanvas.objects.prsTurbo.visible = false
 	})
 
 	$("#consoleCanvas").mouseout(function (e) {
 		if (isSliderSelected){
 			isSliderSelected = false
 		}
+		consoleCanvas.objects.btnTurbo.visible = true
+		consoleCanvas.objects.prsTurbo.visible = false
 	})
 
-	consoleCanvas.addEventListener('click', function(e) {
+
+	consoleCanvas.addEventListener('mouseup', function(e) {
+		consoleCanvas.objects.btnTurbo.visible = true
+		consoleCanvas.objects.prsTurbo.visible = false
+	})
+
+	consoleCanvas.addEventListener('mousedown', function(e) {
 		let k = this.objects.btnTurbo
 
 		let rect = consoleCanvas.getBoundingClientRect()
@@ -549,36 +655,92 @@ function addConsoleEvents() {
 
 		let r = w/2
 
-		if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {		
-			hyperdrive()			
+		if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {
+			this.objects.btnTurbo.visible = false
+			this.objects.prsTurbo.visible = true
+
+			hyperdrive()
 		}		
 	}, false)
 
-	/*consoleCanvas.addEventListener('click', function(e) {
-		let k = this.objects.sliderSelector
-
-		let rect = consoleCanvas.getBoundingClientRect()
-      	let scaleX = consoleCanvas.width / rect.width
-      	let scaleY = consoleCanvas.height / rect.height
-
-    	let x = Math.floor((e.clientX - rect.left) * scaleX)
-    	let y = Math.floor((e.clientY - rect.top) * scaleY)
-    	let w = k.w * scaleX
-    	let h = k.h * scaleY
-
-		if (y > k.y && y < k.y + h && 
-			x > k.x && x < k.x + w) {
-			if (sliderSelected) {
-				console.log("moving")
-			}
-			
-	
-		}
 
 
-	}, false)*/
+
 
 }
+
+
+
+// --------------------------------- Unit Conversion --------------------------------- //
+
+
+function updateDistance(){
+	if (gameData.consts.distance.n >= 999999999) {
+		let newVal = unitConversion(gameData.consts.distance.n, gameData.consts.distance.u)
+		gameData.consts.distance.n = newVal.n
+		gameData.consts.distance.u = newVal.u
+	}
+}
+
+
+function unitConversion(n, u){
+	if (n >= 999999999) {
+		if (u == 0)	return convertToAU(n, u)
+		if (u == 1)	return convertToPC(n, u)
+	} else if (n < 1) {
+		if (u == 2)	return convertToAU(n, u)
+		if (u == 1)	return convertToKM(n, u)
+	}
+}
+
+function convertToAU(n, u) {
+	// KM --> AU
+	if (u == 0) {
+		return { u : 1,	n : Math.round((n / 149598000).toFixed(1)) }
+	} 
+	// PC --> AU
+	if (u == 2) {
+		return { u : 1, n : parseInt(n * 206265) }
+	}
+}
+
+function convertToPC(n, u) {
+	// AU --> PC
+	if (u == 1) {
+		return { u : 2,	n : Math.round((n / 206265).toFixed(1)) }
+	} 
+	// ?? --> PC
+	// If we need a higher unit of measurement
+}
+
+
+function convertToKM(n, u) {
+	// AU --> KM
+	if (u == 2) {
+		return { u : 0, n : parseInt(n * 149598000) }
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -599,38 +761,3 @@ function resumeGameLoop(){
 		isPaused = false
 	}
 }
-
-
-
-
-
-
-/*
-function test(){
-	let srcs = gameData.src.sprites.stars.srcs
-
-	for (var i = 0; i < srcs.length; i++) {
-		let img = new Image()
-		img.src = srcs[i]
-		img.i = i
-
-		// Fantastic function to make sure all stars have been loaded.
-		img.onload = function() {
-			gameData.src.sprites.stars.images[this.i] = img
-
-			let allImagesLoaded = false
-			for (let j = 0; j < gameData.src.sprites.stars.images.length; j++) {
-
-				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined') {
-					allImagesLoaded = true
-				} else {
-					allImagesLoaded = false
-					break
-				}
-			}
-			if (allImagesLoaded) {
-				//-------
-			}
-		}
-	}
-}*/
