@@ -1,4 +1,8 @@
-@font-face {font-family:"Digital";src:url("fonts/Let_s_go_Digital_Regular.eot?") format("eot"),url("fonts/Let_s_go_Digital_Regular.woff") format("woff"),url("fonts/Let_s_go_Digital_Regular.ttf") format("truetype"),url("fonts/Let_s_go_Digital_Regular.svg#LetsgoDigital-Regular") format("svg");font-weight:normal;font-style:normal;}
+@font-face {font-family:"Digital";
+src:url("fonts/digital-7.ttf");
+	font-weight:normal;
+	font-style:normal;
+}
 .digital {	font-family: "Digital"; }
 
 * {	font-family: Roboto; }

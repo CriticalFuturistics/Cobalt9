@@ -10,6 +10,8 @@ let ctx = canvas.getContext("2d")
 let consoleCanvas = document.getElementById("consoleCanvas")
 let consoleCtx = consoleCanvas.getContext("2d")
 
+let sfx = null
+
 let gLoop = null
 let isPaused = false
 
@@ -19,11 +21,18 @@ let increment = .002
 
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
-
+	initSound()
 	init()
 
 })
 
+function initSound(){
+	sfx = document.createElement('audio')
+    sfx.setAttribute('src', 'src/sfx-hover.mp3')
+    sfx.volume = 0.1
+
+	
+}
 
 
 function init() {
@@ -495,13 +504,19 @@ function addConsoleEvents() {
 				sliderDistance = 0
 				if (p < gameData.consts.maxMiningPriority) { 
 					p += 1
-
+					sfx.pause()
+					sfx.currentTime = 0
+					sfx.play()
 				}
-			
+
 			} else if (sliderDistance < -(this.objects.slider.w/5)) {
 				sliderDistance = 0
-				if (p > 0) { p -= 1 }
-
+				if (p > 0) { 
+					p -= 1
+					sfx.pause()
+					sfx.currentTime = 0
+					sfx.play()
+				}
 			}
 			gameData.consts.miningPriority = p
 
@@ -509,6 +524,12 @@ function addConsoleEvents() {
 	})
 	$("#consoleCanvas").mouseup(function (e) {
 		isSliderSelected = false
+	})
+
+	$("#consoleCanvas").mouseout(function (e) {
+		if (isSliderSelected){
+			isSliderSelected = false
+		}
 	})
 
 	consoleCanvas.addEventListener('click', function(e) {
@@ -528,7 +549,7 @@ function addConsoleEvents() {
 
 		let r = w/2
 
-		if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {
+		if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {		
 			hyperdrive()			
 		}		
 	}, false)
