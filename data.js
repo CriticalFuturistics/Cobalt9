@@ -104,7 +104,7 @@ let gameData = {
 
 			console : {
 				background : {
-					src : "src/sprite/console.png",
+					src : "src/sprite/console_2.png",
 					image : null
 				},
 
