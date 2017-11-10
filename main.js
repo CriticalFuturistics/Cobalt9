@@ -158,17 +158,33 @@ function gameLoop() {
 	let m = gameData.consts.turbo/10 + 1
 	// Update Distance and Time
 	if (timeToUpdate) {
-		if (gameData.consts.distance.u == 0) {
-			gameData.consts.distance.n += 10000 * m
-		} else if (gameData.consts.distance.u == 1) {
-			gameData.consts.distance.n += 20 * m
-		} else if (gameData.consts.distance.u == 2) {
-			gameData.consts.distance.n += 1 * m
+		let d = gameData.consts.distance.n
+		if (d >= gameData.consts.distanceMax 
+		||  d <= gameData.consts.speed.n * 2
+		||  d <= 2
+		&& !gameData.consts.isStopped) {
+			if (d == 0 && d <= 0) {
+				gameData.consts.distance.n = 0
+				gameData.consts.speed.n = 0
+			} else {			
+				updateDistance()
+			}
+			
 		}
+		if (gameData.consts.distance.n >= gameData.consts.speed.n * m) {
+			gameData.consts.distance.n -= gameData.consts.speed.n * m	
+		} else {
+			// Arrived at destination
+			gameData.consts.distance.n = 0
+			gameData.consts.distance.u = 0
 
-		if (gameData.consts.distance.n >= 999999999) {
-			updateDistance()
+			gameData.consts.speed.u = 0
+			gameData.consts.speed.n = 0
+
+			gameData.consts.isStopped = true
 		}
+		
+
 	}
 
 
@@ -325,9 +341,11 @@ function renderConsole(){
 		"text-align" : "right"
 	})
 
-
-
-	$("#distance").html(gameData.consts.distance.n)
+	let temp = gameData.consts.distance.n
+	if (gameData.consts.distance.n > gameData.consts.distanceMax || gameData.consts.distance.n < 0) {
+		temp = 0
+	}
+	$("#distance").html(Math.round(temp))
 	$("#distance").css({
 		position : 'absolute',
 		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
@@ -347,7 +365,7 @@ function renderConsole(){
 		"text-align" : "right"
 	})
 
-	$("#time").html(gameData.consts.time.n)
+	$("#time").html(Math.round(gameData.consts.time.n))
 	$("#time").css({
 		position : 'absolute',
 		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
@@ -592,7 +610,7 @@ function addConsoleEvents() {
 			sliderDistance += dx
 			let p = gameData.consts.miningPriority
 
-			if (sliderDistance > this.objects.slider.w/5) {
+			if (sliderDistance > this.objects.slider.w/5 - this.objects.sliderSelector.w/4) {
 				sliderDistance = 0
 				if (p < gameData.consts.maxMiningPriority) { 
 					p += 1
@@ -601,7 +619,7 @@ function addConsoleEvents() {
 					sfx.play()
 				}
 
-			} else if (sliderDistance < -(this.objects.slider.w/5)) {
+			} else if (sliderDistance < -(this.objects.slider.w/5) + this.objects.sliderSelector.w/4) {
 				sliderDistance = 0
 				if (p > 0) { 
 					p -= 1
@@ -659,12 +677,8 @@ function addConsoleEvents() {
 			hyperdrive()
 		}		
 	}, false)
-
-
-
-
-
 }
+
 
 
 
@@ -672,22 +686,40 @@ function addConsoleEvents() {
 
 
 function updateDistance(){
-	if (gameData.consts.distance.n >= 999999999) {
-		let newVal = unitConversion(gameData.consts.distance.n, gameData.consts.distance.u)
+	if (gameData.consts.distance.n >= gameData.consts.distanceMax || gameData.consts.distance.n <= gameData.consts.speed.n * 2 || gameData.consts.distance.n <= 2) {
+		let newVal = unitConversion(gameData.consts.distance.n, gameData.consts.distance.u, 'd')
 		gameData.consts.distance.n = newVal.n
 		gameData.consts.distance.u = newVal.u
+		updateSpeed()
 	}
 }
 
+function updateSpeed(){
+	let newVal = unitConversion(gameData.consts.speed.n, gameData.consts.speed.u, 's')
+	gameData.consts.speed.n = newVal.n
+	gameData.consts.speed.u = newVal.u
+}
 
-function unitConversion(n, u){
-	if (n >= 999999999) {
-		if (u == 0)	return convertToAU(n, u)
-		if (u == 1)	return convertToPC(n, u)
-	} else if (n < 1) {
-		if (u == 2)	return convertToAU(n, u)
-		if (u == 1)	return convertToKM(n, u)
+
+function unitConversion(n, u, type){
+	if (type == 'd') {
+		if (n >= gameData.consts.distanceMax) {
+			if (u == 0)	return convertToAU(n, u)
+			if (u == 1)	return convertToPC(n, u)
+		} else {
+			if (u == 2)	return convertToAU(n, u)
+			if (u == 1)	return convertToKM(n, u)
+		}
+	} else if (type == 's') {
+		if (n >= gameData.consts.distanceMax) {
+			if (u == 0)	return convertToAU(n, u)
+			if (u == 1)	return convertToPC(n, u)
+		} else {
+			if (u == 2)	return convertToAU(n, u)
+			if (u == 1)	return convertToKM(n, u)
+		}
 	}
+	
 }
 
 function convertToAU(n, u) {
@@ -713,7 +745,7 @@ function convertToPC(n, u) {
 
 function convertToKM(n, u) {
 	// AU --> KM
-	if (u == 2) {
+	if (u == 1) {
 		return { u : 0, n : parseInt(n * 149598000) }
 	}
 }

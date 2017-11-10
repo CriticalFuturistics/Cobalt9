@@ -154,6 +154,7 @@ let gameData = {
 		starSpeed : 1,
 		starSpawnRate : 18,	// The lower, the more likely
 		
+
 		turbo : 0,
 
 		miningPriority : 0,
@@ -162,17 +163,24 @@ let gameData = {
 		distanceUnits : ['KM', 'AU', 'PC'],
 		distanceMax : 999999999,
 		distance : {
-			n : 0,
-			u : 0
+			n : 2.2,
+			u : 2
 		},
+
 		timeUnits : ['--', '--', '--'],
 		time : {
 			n : 0,
 			u : 0
 		},
 
+		speed : {
+			n : 0.01,
+			u : 2,
+		}
+
 	},
 
 	updateTime : 0,
+	isStopped : false,
 
 }
