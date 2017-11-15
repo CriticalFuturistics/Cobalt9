@@ -163,7 +163,7 @@ let gameData = {
 		distanceUnits : ['KM', 'AU', 'PC'],
 		distanceMax : 999999999,
 		distance : {
-			n : 2.2,
+			n : 100,
 			u : 2
 		},
 
@@ -182,5 +182,31 @@ let gameData = {
 
 	updateTime : 0,
 	isStopped : false,
+
+}
+
+
+let game = {
+
+	qbits : 0,
+	energy : 0,
+
+	resources : {
+		titanium : 10,
+		copper : 30,
+		silicon: 19,
+		gold : 8,
+		uranium : 37,
+		food : 44,
+	}, 
+
+	resourcesMax : {
+		titanium : 50,
+		copper : 50,
+		silicon: 50,
+		gold : 50,
+		uranium : 50,
+		food : 50,
+	}, 
 
 }

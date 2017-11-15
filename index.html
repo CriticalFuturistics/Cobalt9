@@ -24,13 +24,13 @@
 	<title>Cobalt 9</title>
 </head>
 
-<body style="background:#484A54">
+<body style="background:#404249">
 	<div class="container" style="width:100%; margin-left:0; margin-right:0">
 		<div class="row">
 			<div class="col-lg-4 high">
 				<ul class="nav nav-tabs nav-justified unselectable" id="myTab" role="tablist">
 				  <li class="nav-item">
-				    <a class="nav-link active unselectable" data-toggle="tab" href="#Crew" role="tab" aria-controls="Crew">Crew</a>
+				    <a class="nav-link unselectable" data-toggle="tab" href="#Crew" role="tab" aria-controls="Crew">Crew</a>
 				  </li>
 				  <li class="nav-item">
 				    <a class="nav-link unselectable" data-toggle="tab" href="#Chips" role="tab" aria-controls="Chips">Chips</a>
@@ -47,11 +47,7 @@
 					<div class="tab-pane active" id="Crew" role="tabpanel"> 
 				  		<div class="tab-html">
 				  			<br><br>
-				  			<p>
-				  				<a onclick="pauseGameLoop()" class="btn">Pause Game</a>
-				  				<a onclick="resumeGameLoop()" class="btn">Resume Game</a>
-				  				
-				  			</p>
+				  			
 				  		</div>
 				  		<div class="ad"></div>
 					</div>
@@ -106,7 +102,7 @@
 			<div class="col-lg-4 high">
 				<ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
 				  <li class="nav-item">
-				    <a class="nav-link active unselectable" data-toggle="tab" href="#Resources" role="tab" aria-controls="Crew">Resources</a>
+				    <a class="nav-link active unselectable" data-toggle="tab" href="#Resources" role="tab" aria-controls="Resources">Resources</a>
 				  </li>
 				  <li class="nav-item">
 				    <a class="nav-link unselectable" data-toggle="tab" href="#Inventory" role="tab" aria-controls="Inventory">Inventory</a>
@@ -120,10 +116,19 @@
 				</ul>
 
 				<div class="tab-content high">
-				  <div class="tab-pane active" id="Resources" role="tabpanel"> <div class="tab-html"></div><div class="ad"></div></div>
-				  <div class="tab-pane" id="Inventory" role="tabpanel"><div class="tab-html"></div> <div class="ad"></div></div>
-				  <div class="tab-pane" id="Starmap" role="tabpanel"><div class="tab-html"></div> <div class="ad"></div></div>
-				  <div class="tab-pane" id="Encylopedia" role="tabpanel"> <div class="tab-html"></div><div class="ad"></div></div>
+					<div class="tab-pane active" id="Resources" role="tabpanel">
+				  		<div class="tab-html">
+				  			<p>
+				  				<div id="resourcesList">
+				  					
+				  				</div>
+				  			</p>
+				  		</div>
+				  		<div class="ad"></div>
+				  	</div>
+					<div class="tab-pane" id="Inventory" role="tabpanel"><div class="tab-html"></div> <div class="ad"></div></div>
+					<div class="tab-pane" id="Starmap" role="tabpanel"><div class="tab-html"></div> <div class="ad"></div></div>
+					<div class="tab-pane" id="Encylopedia" role="tabpanel"> <div class="tab-html"></div><div class="ad"></div></div>
 				</div>
 
 			</div>

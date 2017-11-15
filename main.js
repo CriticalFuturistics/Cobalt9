@@ -22,20 +22,84 @@ let increment = .002
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
 	initSound()
+	initCSS()
+	initHTML()
 	init()
-
 })
 
-function initSound(){
+// Load the sound files into an HTML element.
+function initSound() {
 	sfx = document.createElement('audio')
     sfx.setAttribute('src', 'src/sfx-hover.mp3')
     sfx.volume = 0.1
-
-	
 }
 
+// Change the initail CSS of some elements.
+function initCSS() {
+	$("[aria-controls='Crew']").parent().addClass('active')
+	$("[aria-controls='Resources']").parent().addClass('active')	
+}
 
-function init() {
+function initHTML() {
+	// Populate Crew
+	let $crew = $('#Crew .tab-html')
+
+	let $crewP = $("<p>").appendTo($crew)
+	let $btnPause = $("<a>", {"class" : "btn", "text" : "Pause Game", "onclick" : "pauseGameLoop()"})
+	$btnPause.appendTo($crewP)
+
+	let $btnResume = $("<a>", {"class" : "btn", "text" : "Resume Game", "onclick" : "resumeGameLoop()"})
+	$btnResume.click(resumeGameLoop())
+	$btnResume.appendTo($crewP)
+
+	// Populate Chips
+
+	// Populate Upgrades
+
+	// Populate Settings
+
+
+	// Populate Resources
+	let $resources = $('#Resources .tab-html')
+	let $resourcesList = $('#Resources #resourcesList')
+
+	let r = game.resources
+
+	for (k in r){
+		let $resourceImg = $("<div>", { "class" : "resourceImg", "id" : ("resourceImg" + k)})
+		let $resource = $("<div>", { "class" : "resource"})
+
+		let $resourceB = $("<div>", { "class" : "resourceB", "id" : ("resourceB" + k)})
+		let $resourceN = $("<div>", { "class" : "resourceN", "id" : ("resourceN" + k), "text" : (r[k] + "/" + game.resourcesMax[k]) })
+	
+		$resourceB.css({
+			width: getPercent(game.resourcesMax[k], r[k]) + "%",
+			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k]))
+		})
+		$resource.append($resourceB)
+		$resource.append($resourceN)
+
+		$item = $("<div>", { "id" : ("list" + k)})
+		$item.append($resourceImg)
+		$item.append($resource)
+
+		$resourcesList.append($item)
+	}
+	
+
+
+	// Populate Inventory
+
+	// Populate Starmap
+
+	// Populate Encylopedia
+
+
+
+}
+
+// General init
+function init(){
 	// Initial console data
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight() 
@@ -69,10 +133,10 @@ function init() {
 			}
 		}
 	}
-
 }
 
-function loadShip(){
+// Loads the ship, then chain-calls loadConsole().
+function loadShip() {
 	let ship = new Image()
 	ship.src = gameData.src.sprites.spaceship.srcs
 
@@ -90,8 +154,8 @@ function loadShip(){
 		loadConsole()
 	}
 }
-
-function loadConsole(){
+// Loads the console, then chain-calls loadCanvas().
+function loadConsole() {
 	let c = gameData.src.sprites.console
 	for (let k in c){
 		let img = new Image()
@@ -117,7 +181,7 @@ function loadConsole(){
 		}
 	}
 }
-
+// Loads the canvas, then stars the Gameloop.
 function loadCanvas() {
 	window.addEventListener('resize', resizeCanvas, false)
 
@@ -144,8 +208,6 @@ function loadCanvas() {
 function gameLoop() {
 	loopCanvas()
 
-
-
 	if (gameData.updateTime >= 3) {
 		gameData.updateTime = 0
 		timeToUpdate = true
@@ -153,7 +215,6 @@ function gameLoop() {
 		gameData.updateTime += 1
 		timeToUpdate = false
 	}
-
 
 	let m = gameData.consts.turbo/10 + 1
 	// Update Distance and Time
@@ -198,8 +259,6 @@ function gameLoop() {
 			gameData.consts.turbo -= 6
 		}
 	}
-
-
 }
 
 
@@ -209,7 +268,7 @@ function gameLoop() {
 
 // --------------- Renderer --------------- //
 
-function renderConsole(){
+function renderConsole() {
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight()
 
@@ -395,20 +454,14 @@ function renderConsole(){
    		gameData.consts.isConsoleEventEnabled = true
    		addConsoleEvents()
    	}
-   	
 }
 
 
 
-function loopCanvas(){
+function loopCanvas() {
 	// clear canvas
 	ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-	// aggiungi nuove stelle
-	// renderizza + movimento (e update gameData)
-	// se movimento fa uscire la stella, toglila e shifta l'array
-	// renderizza gli oggetti
-	
 
 	// Get a random number. If it's 1, spawn a new star
 	if (getRandomStarTiming() == 1) {
@@ -468,7 +521,7 @@ function renderStars() {
 }
 
 // Adds a new star with a random X coord to gameData.canvas.stars.
-function newStar(){
+function newStar() {
 	let x = getRandomStarPos(canvas.width)
 	let minDistance = 32
 
@@ -549,7 +602,7 @@ function getRandomStarSprite() {
 
 
 
-function hyperdrive(){
+function hyperdrive() {
 	if (gameData.consts.turbo < 1000) {
 		gameData.consts.turbo += 60
 	/*
@@ -685,7 +738,7 @@ function addConsoleEvents() {
 // --------------------------------- Unit Conversion --------------------------------- //
 
 
-function updateDistance(){
+function updateDistance() {
 	if (gameData.consts.distance.n >= gameData.consts.distanceMax || gameData.consts.distance.n <= gameData.consts.speed.n * 2 || gameData.consts.distance.n <= 2) {
 		let newVal = unitConversion(gameData.consts.distance.n, gameData.consts.distance.u, 'd')
 		gameData.consts.distance.n = newVal.n
@@ -694,14 +747,14 @@ function updateDistance(){
 	}
 }
 
-function updateSpeed(){
+function updateSpeed() {
 	let newVal = unitConversion(gameData.consts.speed.n, gameData.consts.speed.u, 's')
 	gameData.consts.speed.n = newVal.n
 	gameData.consts.speed.u = newVal.u
 }
 
 
-function unitConversion(n, u, type){
+function unitConversion(n, u, type) {
 	if (type == 'd') {
 		if (n >= gameData.consts.distanceMax) {
 			if (u == 0)	return convertToAU(n, u)
@@ -777,14 +830,14 @@ function convertToKM(n, u) {
 
 
 
-function pauseGameLoop(){
+function pauseGameLoop() {
 	if (gLoop) {
 		clearInterval(gLoop)
 		isPaused = true
 	}
 }
 
-function resumeGameLoop(){
+function resumeGameLoop() {
 	if (isPaused) {
 		gLoop = setInterval(gameLoop, framerate)
 		isPaused = false
