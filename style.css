@@ -150,7 +150,7 @@ canvas { display:block; }
 	z-index: 0;
 	position: relative;
 	width: 100%;
-	height: 40px;
+	height: 38px;
 	background: rgba(10, 200, 10, 0.3)
 }
 
@@ -165,24 +165,30 @@ canvas { display:block; }
 #resourceImgtitanium {
 	background: url('src/sprite/resourceTitanium.png') no-repeat 0 0;
     background-position: center;
+    background-size: 40px 40px;
 }
 #resourceImgcopper {
 	background: url('src/sprite/resourceCopper.png') no-repeat 0 0;
     background-position: center;
+    background-size: 40px 40px;
 }
 #resourceImgsilicon {
 	background: url('src/sprite/resourceSilicon.png') no-repeat 0 0;
     background-position: center;
+    background-size: 40px 40px;
 }
 #resourceImggold {
 	background: url('src/sprite/resourceGold.png') no-repeat 0 0;
     background-position: center;
+    background-size: 40px 40px;
 }
 #resourceImguranium {
 	background: url('src/sprite/resourceUranium.png') no-repeat 0 0;
     background-position: center;
+    background-size: 40px 40px;
 }
 #resourceImgfood {
 	background: url('src/sprite/resourceFood.png') no-repeat 0 0;
     background-position: center;
+    background-size: 40px 40px;
 }

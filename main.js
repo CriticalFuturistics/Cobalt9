@@ -72,6 +72,7 @@ function initHTML() {
 		let $resourceB = $("<div>", { "class" : "resourceB", "id" : ("resourceB" + k)})
 		let $resourceN = $("<div>", { "class" : "resourceN", "id" : ("resourceN" + k), "text" : (r[k] + "/" + game.resourcesMax[k]) })
 	
+		console.log(getColorFromPercent(getPercent(game.resourcesMax[k], r[k])))
 		$resourceB.css({
 			width: getPercent(game.resourcesMax[k], r[k]) + "%",
 			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k]))

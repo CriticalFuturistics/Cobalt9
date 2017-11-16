@@ -9,15 +9,14 @@ function getPercent(n, m) {
 
 
 function getColorFromPercent(p){
-	if (p == 100) {
-		return "rgba(10, 200, 10, 0.3)"
-	} else if (p >= 75) {
-		return "rgba(10, 100, 10, 0.3)"
-	} else if (p >= 50) {
-		return "rgba(255, 0, 0, 0.3)"
-	} else if (p >= 25) {
-		return "rgba(255, 0, 0, 0.3)"
-	} else if (p < 25) {
-		return "rgba(10, 200, 10, 0.3)"
-	}
+
+	let end = 120
+	let start = 0
+
+	let a = p/100
+	let	b = end * a
+	let	c = b + start
+
+	//return "rgba("+ c +", 255, 128, 0.3)"
+	return "hsla("+ c +", 100%, 50%, 0.4)"
 }
