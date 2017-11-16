@@ -192,7 +192,7 @@ let game = {
 	energy : 0,
 
 	resources : {
-		titanium : 10,
+		titanium : 2,
 		copper : 30,
 		silicon: 19,
 		gold : 8,

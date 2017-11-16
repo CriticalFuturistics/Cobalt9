@@ -72,7 +72,6 @@ function initHTML() {
 		let $resourceB = $("<div>", { "class" : "resourceB", "id" : ("resourceB" + k)})
 		let $resourceN = $("<div>", { "class" : "resourceN", "id" : ("resourceN" + k), "text" : (r[k] + "/" + game.resourcesMax[k]) })
 	
-		console.log(getColorFromPercent(getPercent(game.resourcesMax[k], r[k])))
 		$resourceB.css({
 			width: getPercent(game.resourcesMax[k], r[k]) + "%",
 			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k]))
@@ -644,17 +643,17 @@ function addConsoleEvents() {
 
     	let kx = k.x + gameData.consts.miningPriority * (this.objects.slider.image.width/5 - 1)
 
-		if (y > k.y && y < k.y + h && 
+		if (!isPaused &&
+			y > k.y && y < k.y + h && 
 			x > kx && x < kx + w) {
 			startX = x
 			isSliderSelected = true
-			
 		}
 		
 	})
 
 	$("#consoleCanvas").mousemove(function (e) {
-		if (isSliderSelected) {
+		if (!isPaused && isSliderSelected) {
 			let rect = consoleCanvas.getBoundingClientRect()
 			let scaleX = consoleCanvas.width / rect.width
 			let x = Math.floor((e.clientX - rect.left) * scaleX)
@@ -664,7 +663,7 @@ function addConsoleEvents() {
 			sliderDistance += dx
 			let p = gameData.consts.miningPriority
 
-			if (sliderDistance > this.objects.slider.w/5 - this.objects.sliderSelector.w/4) {
+			if (sliderDistance > this.objects.slider.w/5 - this.objects.sliderSelector.w/5) {
 				sliderDistance = 0
 				if (p < gameData.consts.maxMiningPriority) { 
 					p += 1
@@ -673,7 +672,7 @@ function addConsoleEvents() {
 					sfx.play()
 				}
 
-			} else if (sliderDistance < -(this.objects.slider.w/5) + this.objects.sliderSelector.w/4) {
+			} else if (sliderDistance < -(this.objects.slider.w/5) + this.objects.sliderSelector.w/5) {
 				sliderDistance = 0
 				if (p > 0) { 
 					p -= 1
@@ -687,49 +686,57 @@ function addConsoleEvents() {
 		}
 	})
 	$("#consoleCanvas").mouseup(function (e) {
-		isSliderSelected = false
+		if(!isPaused) {
+			isSliderSelected = false
 		
-		consoleCanvas.objects.btnTurbo.visible = true
-		consoleCanvas.objects.prsTurbo.visible = false
+			consoleCanvas.objects.btnTurbo.visible = true
+			consoleCanvas.objects.prsTurbo.visible = false
+		}
 	})
 
 	$("#consoleCanvas").mouseout(function (e) {
-		if (isSliderSelected){
-			isSliderSelected = false
+		if(!isPaused) {
+			if (isSliderSelected){
+				isSliderSelected = false
+			}
+			consoleCanvas.objects.btnTurbo.visible = true
+			consoleCanvas.objects.prsTurbo.visible = false
 		}
-		consoleCanvas.objects.btnTurbo.visible = true
-		consoleCanvas.objects.prsTurbo.visible = false
 	})
 
 
 	consoleCanvas.addEventListener('mouseup', function(e) {
-		consoleCanvas.objects.btnTurbo.visible = true
-		consoleCanvas.objects.prsTurbo.visible = false
+		if(!isPaused) {
+			consoleCanvas.objects.btnTurbo.visible = true
+			consoleCanvas.objects.prsTurbo.visible = false
+		}
 	})
 
 	consoleCanvas.addEventListener('mousedown', function(e) {
-		let k = this.objects.btnTurbo
+		if(!isPaused) {
+			let k = this.objects.btnTurbo
 
-		let rect = consoleCanvas.getBoundingClientRect()
-      	let scaleX = consoleCanvas.width / rect.width
-      	let scaleY = consoleCanvas.height / rect.height
+			let rect = consoleCanvas.getBoundingClientRect()
+	      	let scaleX = consoleCanvas.width / rect.width
+	      	let scaleY = consoleCanvas.height / rect.height
 
-    	let x = Math.floor((e.clientX - rect.left) * scaleX)
-    	let y = Math.floor((e.clientY - rect.top) * scaleY)
-    	let w = k.w * scaleX
-    	let h = k.h * scaleY
+	    	let x = Math.floor((e.clientX - rect.left) * scaleX)
+	    	let y = Math.floor((e.clientY - rect.top) * scaleY)
+	    	let w = k.w * scaleX
+	    	let h = k.h * scaleY
 
-		let kxc = k.x + (k.w/2)
-		let kyc = k.y + (k.h/2)
+			let kxc = k.x + (k.w/2)
+			let kyc = k.y + (k.h/2)
 
-		let r = w/2
+			let r = w/2
 
-		if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {
-			this.objects.btnTurbo.visible = false
-			this.objects.prsTurbo.visible = true
+			if (Math.ceil(Math.sqrt(Math.pow(x - kxc, 2) + Math.pow(y - kyc, 2))) < r) {
+				this.objects.btnTurbo.visible = false
+				this.objects.prsTurbo.visible = true
 
-			hyperdrive()
-		}		
+				hyperdrive()
+			}		
+		}
 	}, false)
 }
 

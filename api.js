@@ -9,7 +9,6 @@ function getPercent(n, m) {
 
 
 function getColorFromPercent(p){
-
 	let end = 120
 	let start = 0
 
@@ -17,6 +16,5 @@ function getColorFromPercent(p){
 	let	b = end * a
 	let	c = b + start
 
-	//return "rgba("+ c +", 255, 128, 0.3)"
 	return "hsla("+ c +", 100%, 50%, 0.4)"
 }
