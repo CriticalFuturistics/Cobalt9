@@ -146,9 +146,9 @@ function loadShip() {
 		canvas.width = $("#game").innerWidth()
 		canvas.height = $("#game").innerWidth()
 
-		let sc = new canvasObject(canvas.width/2 - 32, canvas.height * 1.2, ship, 1)
-		sc.height = 64
-		sc.width = 64
+		let sc = new canvasObject(canvas.width/2 - 128, canvas.height * 1.2, ship, 1)
+		sc.height = 128
+		sc.width = 128
 		gameData.canvas.spaceship = sc
 
 		loadConsole()
