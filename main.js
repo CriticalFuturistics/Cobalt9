@@ -252,11 +252,25 @@ function gameLoop() {
 	// Decrement turbo
 	if (gameData.consts.turbo > 0) {
 		if (gameData.consts.turbo > 750) {
+			gameData.consts.starSpeed = 14
+			gameData.consts.starSpawnRate = 2
 			gameData.consts.turbo -= 12
 		} else if (gameData.consts.turbo > 500) {
-			gameData.consts.turbo -= 8
+			gameData.consts.starSpeed = 9
+			gameData.consts.starSpawnRate = 4
+			gameData.consts.turbo -= 9
+		} else if (gameData.consts.turbo > 250) {
+			gameData.consts.starSpeed = 4
+			gameData.consts.starSpawnRate = 10
+			gameData.consts.turbo -= 7
 		} else {
+			gameData.consts.starSpeed = 2
+			gameData.consts.starSpawnRate = 18	
 			gameData.consts.turbo -= 6
+		}
+
+		for (let i = 0; i < gameData.canvas.stars.length; i++) {
+			gameData.canvas.stars[i].speed = gameData.consts.starSpeed
 		}
 	}
 }
@@ -605,19 +619,6 @@ function getRandomStarSprite() {
 function hyperdrive() {
 	if (gameData.consts.turbo < 1000) {
 		gameData.consts.turbo += 60
-	/*
-		gameData.consts.starSpeed += 1
-
-		if (gameData.consts.turbo < 50) {
-			gameData.consts.starSpawnRate -= 1
-		} else {
-			gameData.consts.starSpawnRate -= 0.5
-		}
-		
-
-		for (let i = 0; i < gameData.canvas.stars.length; i++) {
-			gameData.canvas.stars[i].speed = gameData.consts.starSpeed
-		}*/
 	}
 }
 

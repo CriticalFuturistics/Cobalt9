@@ -18,3 +18,4 @@ function getColorFromPercent(p){
 
 	return "hsla("+ c +", 100%, 50%, 0.4)"
 }
+

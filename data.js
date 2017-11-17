@@ -163,7 +163,7 @@ let gameData = {
 		distanceUnits : ['KM', 'AU', 'PC'],
 		distanceMax : 999999999,
 		distance : {
-			n : 100,
+			n : 1000,
 			u : 2
 		},
 
