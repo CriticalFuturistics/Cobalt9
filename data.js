@@ -154,20 +154,21 @@ let gameData = {
 		starSpeed : 1,
 		starSpawnRate : 18,	// The lower, the more likely
 		
-
 		turbo : 0,
 
 		miningPriority : 0,
 		maxMiningPriority : 5,
 
 		distanceUnits : ['KM', 'AU', 'PC'],
+		timeUnits : ['--', '--', '--'],
 		distanceMax : 999999999,
+		
 		distance : {
 			n : 1000,
 			u : 2
 		},
 
-		timeUnits : ['--', '--', '--'],
+		
 		time : {
 			n : 0,
 			u : 0
@@ -183,6 +184,21 @@ let gameData = {
 	updateTime : 0,
 	isStopped : false,
 
+	
+	_s : { // Strings
+
+		qbits : "qbits",
+		energy : "energy",
+
+		r : { // Resources
+			titanium : "titanium",
+			copper : "copper",
+			silicon: "silicon",
+			gold : "gold",
+			uranium : "uranium",
+			food : "food"
+		}
+	}
 }
 
 

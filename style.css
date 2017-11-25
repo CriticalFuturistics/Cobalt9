@@ -18,6 +18,12 @@ body { background: #40424A; }
     user-select: none;
 }
 
+.ctooltip {
+	position: absolute;
+	z-index: 9999;
+	background: #FFF;
+}
+
 
 .col-lg-4 { color: #FFF; }
 /*.high { height: calc(100vh - 42px); }*/  

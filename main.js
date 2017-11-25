@@ -36,6 +36,10 @@ function initSound() {
 
 // Change the initail CSS of some elements.
 function initCSS() {
+	// Activate Tooltips
+	$('[data-toggle="tooltip"]').tooltip()
+
+	// Activate selected windows
 	$("[aria-controls='Crew']").parent().addClass('active')
 	$("[aria-controls='Resources']").parent().addClass('active')	
 }
@@ -73,8 +77,11 @@ function initHTML() {
 		let $resourceN = $("<div>", { "class" : "resourceN", "id" : ("resourceN" + k), "text" : (r[k] + "/" + game.resourcesMax[k]) })
 	
 		$resourceB.css({
-			width: getPercent(game.resourcesMax[k], r[k]) + "%",
-			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k]))
+			"width": getPercent(game.resourcesMax[k], r[k]) + "%",
+			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k])),
+			"transition": "all 0.2s ease",
+			"-webkit-transition": "all 0.3s ease-out",
+			"-moz-transition": "all 0.3s ease-out",
 		})
 		$resource.append($resourceB)
 		$resource.append($resourceN)
@@ -82,6 +89,18 @@ function initHTML() {
 		$item = $("<div>", { "id" : ("list" + k)})
 		$item.append($resourceImg)
 		$item.append($resource)
+		$item.attr('data-k', k)
+
+		$item.mouseover(function(event) {
+			createTootlip(	$(this), 
+							80, 
+							40, 
+							caseString($(this).attr("data-k")))
+		})
+		$item.mouseout(function(event) {
+			removeTooltip()
+		})
+
 
 		$resourcesList.append($item)
 	}
@@ -216,40 +235,51 @@ function gameLoop() {
 		timeToUpdate = false
 	}
 
-	let m = gameData.consts.turbo/10 + 1
-	// Update Distance and Time
+	
+	// Update every 4th tick ---
 	if (timeToUpdate) {
-		let d = gameData.consts.distance.n
-		if (d >= gameData.consts.distanceMax 
-		||  d <= gameData.consts.speed.n * 2
-		||  d <= 2
-		&& !gameData.consts.isStopped) {
-			if (d == 0 && d <= 0) {
-				gameData.consts.distance.n = 0
-				gameData.consts.speed.n = 0
-			} else {			
-				updateDistance()
-			}
-			
-		}
-		if (gameData.consts.distance.n >= gameData.consts.speed.n * m) {
-			gameData.consts.distance.n -= gameData.consts.speed.n * m	
-		} else {
-			// Arrived at destination
-			gameData.consts.distance.n = 0
-			gameData.consts.distance.u = 0
-
-			gameData.consts.speed.u = 0
-			gameData.consts.speed.n = 0
-
-			gameData.consts.isStopped = true
-		}
-		
-
+		updateTravelInfo()
+		updateUI()
 	}
 
+	// Update every tick ---
+	decrementTurbo()
+	
+}
 
-	// Decrement turbo
+// 					(time TODO)
+// Updates distance, time and speed.
+function updateTravelInfo() {
+	let m = gameData.consts.turbo/10 + 1
+
+	let d = gameData.consts.distance.n
+	if (d >= gameData.consts.distanceMax 
+	||  d <= gameData.consts.speed.n * 2
+	||  d <= 2
+	&& !gameData.consts.isStopped) {
+		if (d == 0 && d <= 0) {
+			gameData.consts.distance.n = 0
+			gameData.consts.speed.n = 0
+		} else {			
+			updateDistance()
+		}
+		
+	}
+	if (gameData.consts.distance.n >= gameData.consts.speed.n * m) {
+		gameData.consts.distance.n -= gameData.consts.speed.n * m	
+	} else {
+		// Arrived at destination
+		gameData.consts.distance.n = 0
+		gameData.consts.distance.u = 0
+
+		gameData.consts.speed.u = 0
+		gameData.consts.speed.n = 0
+
+		gameData.consts.isStopped = true
+	}
+}
+
+function decrementTurbo() {
 	if (gameData.consts.turbo > 0) {
 		if (gameData.consts.turbo > 750) {
 			gameData.consts.starSpeed = 14
@@ -279,8 +309,24 @@ function gameLoop() {
 
 
 
-
 // --------------- Renderer --------------- //
+
+// Updates every UI element that is not inside a canvas.
+// Should be called last, so that all data is up to date.
+function updateUI() {
+	// Update the Resources screen
+	let r = game.resources
+
+	for (k in r){
+		$("#resourceN" + k).text(r[k] + "/" + game.resourcesMax[k])
+		$("#resourceB" + k).css({
+			width: getPercent(game.resourcesMax[k], r[k]) + "%",
+			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k]))
+		})
+	}
+}
+
+
 
 function renderConsole() {
 	consoleCanvas.width = $("#console").innerWidth()
