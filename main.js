@@ -275,10 +275,6 @@ function gameLoop() {
 	if (timeToUpdate) {
 		updateTravelInfo()
 		updateUI()
-		let x = gameData.asteroidsData[0].currentResources.titanium
-		console.log(x)
-		gameData.asteroidsData[0].mine(1, gameData._s.r[gameData._s.rPrio[0]])
-		console.log(gameData.asteroidsData[0].currentResources)
 	}
 
 	// Update every tick ---
