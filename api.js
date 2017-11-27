@@ -28,16 +28,33 @@ function getColorFromPercent(p) {
 function removeTooltip() {
 	$(".ctooltip").remove()
 }
-function createTootlip(parent, w, h, html) {
+function createTootlip(parent, w, h, pos, html) {
+	// Default values
 	let x = parent.offset().left
-	let y = parent.offset().top + parent.height() + 4
+	let y = parent.offset().top
 
+	// Change the tooltip position to top|right|bot|left.
+	if (pos == 't') {
+		x = parent.offset().left
+		y = parent.offset().top - h - 4
+	} else if (pos == 'r') {
+		x = parent.offset().left + parent.width()+ 4
+		y = parent.offset().top 
+	} else if (pos == 'b') {
+		x = parent.offset().left
+		y = parent.offset().top + parent.height() + 4
+	} else if (pos == 'l') {
+		x = parent.offset().left - w - 4
+		y = parent.offset().top
+	}
+	
 	let $tooltip = $("<div>", { "class" : "ctooltip", "text" : html })
 	$tooltip.css({
 		"top" : y + "px",
 		"left" : x + "px",
 		"width" : w + "px",
-		"height" : h + "px"
+		"height" : h + "px",
+		
 	})
 	$("body").prepend($tooltip)
 }

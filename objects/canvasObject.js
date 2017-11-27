@@ -1,7 +1,7 @@
 // Canvas Object to be stored in the gameData object.
 // Contains the information about the position and the state of an element on the canvas
 
-class canvasObject {
+class CanvasObj {
 	constructor(x, y, img, speed) {
 		this.x = x
 		this.y = y
@@ -19,6 +19,21 @@ class canvasObject {
 		this.ticksLeft = null
 		this.speed = speed
 	}
+
+	moveDown(){
+		this.y += this.speed
+	}
+
+	moveUp(){
+		this.y -= this.speed
+	}
+
+	moveTo(x, y){
+		this.x = x
+		this.y = y
+	}
+
+	// Getters and Setters
 
 	getX(){
 		return this.x
@@ -39,19 +54,4 @@ class canvasObject {
 	getTicksLeft(){
 		return this.ticksLeft
 	}
-
-	moveDown(){
-		this.y += this.speed
-	}
-
-	moveUp(){
-		this.y -= this.speed
-	}
-
-	moveTo(x, y){
-		this.x = x
-		this.y = y
-	}
-
-
 }

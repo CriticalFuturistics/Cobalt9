@@ -35,7 +35,7 @@ body { background: #40424A; }
 	border-radius: 0px;
 	border: 1px solid #FFF;
 	border-top: 0px;
-	transition: background-color 0.2s ease;
+	transition: background-color 0.1s ease;
 }
 .nav-tabs > li > a {
 	border: 1px solid #FFF !important;

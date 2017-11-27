@@ -3,6 +3,7 @@ let gameData = {
 	canvas : {
 		spaceship : null,
 		stars : [],
+		asteroids : [],
 		planets : [],
 		currentPlanet : null,
 		enemyShips : [],
@@ -91,6 +92,8 @@ let gameData = {
 		}
 	},
 
+	asteroidsData : [],
+
 	src : {
 		sprites : {
 			spaceship : {
@@ -99,7 +102,12 @@ let gameData = {
 			stars : {
 				srcs : ["src/sprite/s1.png", "src/sprite/s2.png", "src/sprite/s3.png", "src/sprite/s4.png"],
 				images : [],
-				chances : [50, 30, 15, 5]	// Chnces MUST be in decremental order
+				chances : [60, 25, 10, 5]	// Chnces MUST be in decremental order and sum to 100
+			},
+			asteroids : {
+				srcs : ["src/sprite/a1.png", "src/sprite/a1.png", "src/sprite/a1.png", "src/sprite/a1.png", "src/sprite/a1.png"],
+				images : [],
+				chances : [50, 30, 12, 6, 2]	// Chnces MUST be in decremental order
 			},
 
 			console : {
@@ -152,7 +160,9 @@ let gameData = {
 		isConsoleEventEnabled : false,
 
 		starSpeed : 1,
+		asteroidSpeed : 1,
 		starSpawnRate : 18,	// The lower, the more likely
+		asteroidSpawnRate : 100, // The lower, the more likely
 		
 		turbo : 0,
 
@@ -177,7 +187,55 @@ let gameData = {
 		speed : {
 			n : 0.01,
 			u : 2,
-		}
+		},
+
+
+		asteroidTypes : [
+			{ 
+				id : 0,
+				src : "src/sprite/a1.png",
+
+				// Base resources amound held
+				r : {
+					titanium : 10,
+					copper : 7,
+					silicon: 1,
+					gold : 0,
+					uranium : 0,
+				},
+				
+				/* Resources multiplier
+				The value is decided by randoming a number between [Min, Max],
+				then it is multiplied by the base number and floored (meaning that
+				the final value	needs to be >0.9 to be 1)
+				*/
+				multiplier : {
+					titanium : [1, 1], // Always the base amount
+					copper : [1, 1.7],
+					silicon: [1, 1.2],
+					gold : [0, 0],	// Always 0
+					uranium : [0, 0],
+				}
+			},
+			{ 
+				id : 1,
+				src : "src/sprite/a1.png",
+				r : {
+					titanium : 7,
+					copper : 12,
+					silicon: 2,
+					gold : 1,
+					uranium : 0,
+				},
+				multiplier : {
+					titanium : [0.8, 1.2],
+					copper : [1, 1.3],
+					silicon: [1, 3],
+					gold : [0, 0.2],
+					uranium : [0, 0],
+				}
+			}
+		]
 
 	},
 
@@ -193,11 +251,13 @@ let gameData = {
 		r : { // Resources
 			titanium : "titanium",
 			copper : "copper",
-			silicon: "silicon",
+			silicon : "silicon",
 			gold : "gold",
 			uranium : "uranium",
 			food : "food"
-		}
+		},
+
+		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"]
 	}
 }
 

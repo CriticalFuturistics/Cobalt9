@@ -93,8 +93,9 @@ function initHTML() {
 
 		$item.mouseover(function(event) {
 			createTootlip(	$(this), 
-							80, 
-							40, 
+							100, 
+							40,
+							'l',
 							caseString($(this).attr("data-k")))
 		})
 		$item.mouseout(function(event) {
@@ -125,7 +126,7 @@ function init(){
 
 	// Load Sprites
 	// In order to not load the same sprites evey frame, load them from the src once at the start.
-	// Once the stars are loaded, it starts to load the ship.
+	// Once the stars are loaded, it starts to load the asteroids and then the ship.
 	let srcs = gameData.src
 	for (var i = 0; i < srcs.sprites.stars.srcs.length; i++) {
 		let img = new Image()
@@ -147,7 +148,41 @@ function init(){
 				}
 			}
 			if (allStarsLoaded) {
+				loadAsteroids()
+			}
+		}
+	}
+}
 
+// Loads the ship, then chain-calls loadShip().
+function loadAsteroids(){
+	// Initial console data
+	consoleCanvas.width = $("#console").innerWidth()
+    consoleCanvas.height = $("#console").innerHeight() 
+
+	// Load Sprites
+	// Like in loadStars()
+	let srcs = gameData.src
+	for (var i = 0; i < srcs.sprites.asteroids.srcs.length; i++) {
+		let img = new Image()
+		img.src = srcs.sprites.asteroids.srcs[i]
+		img.i = i
+
+		img.onload = function() {
+			gameData.src.sprites.asteroids.images[this.i] = img
+
+			let allAsteroidsLoaded = false
+
+			for (let j = 0; j < gameData.src.sprites.asteroids.srcs.length; j++) {
+
+				if (typeof gameData.src.sprites.asteroids.images[j] !== 'undefined' && gameData.src.sprites.asteroids.images[j] != null) {
+					allAsteroidsLoaded = true
+				} else {
+					allAsteroidsLoaded = false
+					break
+				}
+			}
+			if (allAsteroidsLoaded) {
 				loadShip()
 			}
 		}
@@ -165,7 +200,7 @@ function loadShip() {
 		canvas.width = $("#game").innerWidth()
 		canvas.height = $("#game").innerWidth()
 
-		let sc = new canvasObject(canvas.width/2 - 64, canvas.height * 1.2, ship, 1)
+		let sc = new CanvasObj(canvas.width/2 - 64, canvas.height * 1.2, ship, 1)
 		sc.height = 128
 		sc.width = 128
 		gameData.canvas.spaceship = sc
@@ -240,6 +275,10 @@ function gameLoop() {
 	if (timeToUpdate) {
 		updateTravelInfo()
 		updateUI()
+		let x = gameData.asteroidsData[0].currentResources.titanium
+		console.log(x)
+		gameData.asteroidsData[0].mine(1, gameData._s.r[gameData._s.rPrio[0]])
+		console.log(gameData.asteroidsData[0].currentResources)
 	}
 
 	// Update every tick ---
@@ -524,11 +563,16 @@ function loopCanvas() {
 
 
 	// Get a random number. If it's 1, spawn a new star
-	if (getRandomStarTiming() == 1) {
+	if (isRandomStarSpawning()) {
 		newStar()
+	}
+	// Same for asteroids (much less likely)
+	if (isAsteroidSpawning()) {
+		newAsteroid()
 	}
 
 	renderStars()
+	renderAsteroids()
 	renderSpaceship()
 	renderConsole()
 }	
@@ -549,6 +593,33 @@ function renderSpaceship() {
 	} else {
 		ctx.drawImage(ship.img, canvas.width/2 - ship.width/2, canvas.height/2)
 	}
+}
+
+// Loops every asteroid and renders it like renderStars()
+function renderAsteroids() {
+	for (var i = 0; i < gameData.canvas.asteroids.length; i++) {
+		let a = gameData.canvas.asteroids[i]
+		a.moveDown()
+
+		// If the star reaches the end of the screen, remove it and shift the array.
+		if (!a.img) {
+			// In case the img hasn't fully loaded yet
+			if (a.y > canvas.height + 64) {
+				gameData.canvas.asteroids.shift()
+			}
+		} else {
+			if (a.y > canvas.height + a.img.height) {
+				gameData.canvas.asteroids.shift()
+			}
+		}
+
+		// Draw the star
+		if (typeof a.img === 'undefined') {
+			console.log("ERROR: asteroid img Undefined. Ignoring asteroid.")
+		} else {
+			ctx.drawImage(a.img, a.x, a.y)
+		}
+	}		
 }
 
 // Loops every star, renders it and moves it at the start of every frame.
@@ -575,41 +646,51 @@ function renderStars() {
 		} else {
 			ctx.drawImage(s.img, s.x, s.y)
 		}
-		
-
 	}	
 }
 
 // Adds a new star with a random X coord to gameData.canvas.stars.
 function newStar() {
-	let x = getRandomStarPos(canvas.width)
+	let starW = 32
+	if (gameData.canvas.stars.length > 1) {
+		starW = gameData.canvas.stars[gameData.canvas.stars.length - 1].getWidth()
+	}
+	let x = getRandomStartPos(canvas.width, starW)
 	let minDistance = 32
 
 	// Check if it's not too close to another star.
 	let lastStars = []
 	if (gameData.canvas.stars.length > 2) {
-
-		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 1].getX())
-		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 2].getX())
-		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 3].getX())
-
+		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 1])
+		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 2])
+		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 3])
 	} else {
 		for (var i = 0; i < lastStars.length; i++) {
-			lastStars[i] = x + minDistance
+			lastStars[i].getX() = x + minDistance
 		}
 	}
 
 	// Checks the distance between the new star and the last 3 stars.
 	// If it's not enought, random a new star.
-	if (Math.abs(lastStars[0] - x) < minDistance ||
-		Math.abs(lastStars[1] - x) < minDistance ||
-		Math.abs(lastStars[2] - x) < minDistance) 
+	if (lastStars.length == 0) {
+		let sprite = getRandomStarSprite()
+		let s = new CanvasObj(x, 0, sprite, gameData.consts.starSpeed)
+		if (!s.img) {
+			s.y = -18
+		} else {
+			s.y = -(s.img.height)
+		}
+		gameData.canvas.stars.push(s)
+
+	} else if (Math.abs(lastStars[0].getX() - x) < minDistance ||
+		Math.abs(lastStars[1].getX() - x) < minDistance ||
+		Math.abs(lastStars[2].getX() - x) < minDistance) 
 	{
 		newStar()
 	} else {
 		// Adds the star to the list of stars.
 		let sprite = getRandomStarSprite()
-		let s = new canvasObject(x, 0, sprite, gameData.consts.starSpeed)
+		let s = new CanvasObj(x, 0, sprite, gameData.consts.starSpeed)
 		if (!s.img) {
 			s.y = -18
 		} else {
@@ -622,20 +703,78 @@ function newStar() {
 	}	
 }
 
+// Adds a new random asteroid
+function newAsteroid() {
+	let asteroidW = 64
+	if (gameData.canvas.asteroids.length > 1) {
+		asteroidW = gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1].getWidth()
+	}
 
-function getRandomStarPos(mapW) {
-	// Offset per non clippare le stelle ai lati
-	let offset = 8	
-	let randomNumber = offset + getRandom(0, (mapW - offset * 3))
+	let x = getRandomStartPos(canvas.width, asteroidW)
+	let minDistance = asteroidW
+
+	// Check if it's not too close to another asteroid.
+	let lastAsteroid = []
+	if (gameData.canvas.asteroids.length > 2) {
+		lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1])
+		lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 2])
+	} else {
+		for (var i = 0; i < lastAsteroid.length; i++) {
+			lastAsteroid[i].getX() = x + minDistance
+		}
+	}
+
+	if (lastAsteroid.length == 0) {
+		let ast = getRandomAsteroidType()
+		// Contrary to the stars, the sprice is based on the asteroid, so it's not a random sprite
+		let sprite = gameData.src.sprites.asteroids.images[ast.id]
+		let a = new CanvasObj(x, 0, sprite, gameData.consts.asteroidSpeed)
+		if (!a.img) {
+			a.y = -64
+		} else {
+			a.y = -(a.img.height)
+		}
+
+		gameData.canvas.asteroids.push(a)
+		gameData.asteroidsData.push(new AsteroidObj(ast))
+	} else if (Math.abs(lastAsteroid[0].getX() - x) < minDistance) {
+		newAsteroid()
+	} else {
+		let ast = getRandomAsteroidType()
+		// Contrary to the stars, the sprice is based on the asteroid, so it's not a random sprite
+		let sprite = gameData.src.sprites.asteroids.images[ast.id]
+		let a = new CanvasObj(x, 0, sprite, gameData.consts.asteroidSpeed)
+		if (!a.img) {
+			a.y = -64
+		} else {
+			a.y = -(a.img.height)
+		}
+
+		gameData.canvas.asteroids.push(a)
+		gameData.asteroidsData.push(new AsteroidObj(ast))
+	}	
+}
+
+
+function getRandomStartPos(mapW, itemW) {
+	// Offset per non clippare ai lati
+	let offset = itemW + 2
+	let randomNumber = offset + getRandom(0, (mapW - offset * 2))
 		
 	return randomNumber
 }
 
 
-function getRandomStarTiming() {
+function isRandomStarSpawning() {
 
-	return getRandom(0, gameData.consts.starSpawnRate)
+	return getRandom(0, gameData.consts.starSpawnRate) == 1
 }
+
+function isAsteroidSpawning() {
+
+	return getRandom(0, gameData.consts.asteroidSpawnRate) == 1
+}
+
 
 
 // Randomly selects a star sprite from gameData.src.sprites.stars
@@ -658,6 +797,12 @@ function getRandomStarSprite() {
 }
 
 
+
+function getRandomAsteroidType() {
+	let index = getRandom(0, gameData.consts.asteroidTypes.length)
+	let a = gameData.consts.asteroidTypes[index]
+	return a
+}
 
 
 
