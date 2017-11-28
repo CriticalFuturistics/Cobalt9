@@ -343,7 +343,6 @@ function decrementTurbo() {
 
 
 
-
 // --------------- Renderer --------------- //
 
 // Updates every UI element that is not inside a canvas.
@@ -601,11 +600,11 @@ function renderAsteroids() {
 		if (!a.img) {
 			// In case the img hasn't fully loaded yet
 			if (a.y > canvas.height + 64) {
-				gameData.canvas.asteroids.shift()
+				gameData.asteroidsData[0].destroy(0)
 			}
 		} else {
 			if (a.y > canvas.height + a.img.height) {
-				gameData.canvas.asteroids.shift()
+				gameData.asteroidsData[0].destroy(0)
 			}
 		}
 

@@ -79,14 +79,27 @@ class AsteroidObj {
 					this.mine(strength, _s.r['titanium'])
 				}
 			}
-			
 		}
 	}
 
 
-	// Destroys the asteroid once the resources have been depleated
+	// Destroys the asteroid once the resources have been depleated.
+	// astID is NOT this.id, it is the index of the asteroid in asteroidsData.
 	destroy(astID) {
-		// TODO
+		// Remove the asteroid from gameData.asteroidsData and the canvas
+		if (astID > -1 && gameData.asteroidsData.length > 0 && gameData.canvas.asteroids.length > 0) {
+			gameData.asteroidsData.splice(astID, 1)
+			gameData.canvas.asteroids.splice(astID, 1)
+		} else {
+			//TODO Throw error
+		}
+
+
+		// Animate explosion TODO
+		// ...
+
+		// remove self
+		
 	}
 
 

@@ -162,7 +162,7 @@ let gameData = {
 		starSpeed : 1,
 		asteroidSpeed : 1,
 		starSpawnRate : 18,	// The lower, the more likely
-		asteroidSpawnRate : 100, // The lower, the more likely
+		asteroidSpawnRate : 800, // The lower, the more likely
 		
 		turbo : 0,
 
