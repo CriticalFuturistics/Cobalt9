@@ -1,4 +1,4 @@
-// Asteroid Objeect to be stored in gameData.asteroidsData.
+// Asteroid Object to be stored in gameData.asteroidsData.
 // Contains the information about the resources inside the asteroid
 // and other info
 
@@ -11,7 +11,8 @@ class AsteroidObj {
 		this.currentResources = this.resources
 	}
 	
-	// Calculates the max amount of resources in the asteroid depending on its type and RNG
+	// When created, it calculates the max amount of resources 
+	// in the asteroid depending on its type and RNG.
 	calculateResources(base, mult) {
 		for (k in base) {
 			let m = (getRandom(mult[k][0], mult[k][1])).toFixed(1)
@@ -23,8 +24,8 @@ class AsteroidObj {
 
 	// Adds the mined resources to the player's inventory
 	// -strength (int) is the amount of resource mined per call
-	// -priority (obj key) is the resource being prioritized. If the resource is not 
-	// present, it mines the rest, rarest first
+	// -priority (obj key) is the resource being prioritized. If the resource is  
+	// not present, it mines the rest, rarest first
 	mine(strength, priority) {
 		let _s = gameData._s
 
@@ -98,8 +99,7 @@ class AsteroidObj {
 		// Animate explosion TODO
 		// ...
 
-		// remove self
-		
+		// Remove all relative pointers so CG can clean the memory
 	}
 
 
@@ -107,9 +107,4 @@ class AsteroidObj {
 	getResources() {
 		return this.resources
 	}
-
-	getCurrentResources() {
-		return this.currentResources
-	}
-
 }

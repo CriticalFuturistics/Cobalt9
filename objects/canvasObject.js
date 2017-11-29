@@ -17,6 +17,7 @@ class CanvasObj {
 		}
 		
 		this.ticksLeft = null
+		if (speed == null) speed = 0
 		this.speed = speed
 	}
 

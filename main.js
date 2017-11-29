@@ -361,7 +361,6 @@ function updateUI() {
 }
 
 
-
 function renderConsole() {
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight()
@@ -539,14 +538,16 @@ function renderConsole() {
 	})
 
 
-	//pauseGameLoop()
-
 	// ----------------------------
 
 
+   	if (!gameData.consts.isGameEventEnabled) {
+   		gameData.consts.isGameEventEnabled = true
+   		addConsoleEvents()
+   	}
    	if (!gameData.consts.isConsoleEventEnabled) {
    		gameData.consts.isConsoleEventEnabled = true
-   		addConsoleEvents()
+   		addGameEvents()
    	}
 }
 
@@ -604,6 +605,7 @@ function renderAsteroids() {
 			}
 		} else {
 			if (a.y > canvas.height + a.img.height) {
+				// destroy() also removes the canvas object from gameData.canvas
 				gameData.asteroidsData[0].destroy(0)
 			}
 		}
@@ -720,21 +722,15 @@ function newAsteroid() {
 	}
 
 	if (lastAsteroid.length == 0) {
-		let ast = getRandomAsteroidType()
-		// Contrary to the stars, the sprice is based on the asteroid, so it's not a random sprite
-		let sprite = gameData.src.sprites.asteroids.images[ast.id]
-		let a = new CanvasObj(x, 0, sprite, gameData.consts.asteroidSpeed)
-		if (!a.img) {
-			a.y = -64
-		} else {
-			a.y = -(a.img.height)
-		}
-
-		gameData.canvas.asteroids.push(a)
-		gameData.asteroidsData.push(new AsteroidObj(ast))
+		createAsteroid()
 	} else if (Math.abs(lastAsteroid[0].getX() - x) < minDistance) {
 		newAsteroid()
 	} else {
+		createAsteroid()
+	}
+
+	// Private internal function
+	function createAsteroid(){
 		let ast = getRandomAsteroidType()
 		// Contrary to the stars, the sprice is based on the asteroid, so it's not a random sprite
 		let sprite = gameData.src.sprites.asteroids.images[ast.id]
@@ -747,7 +743,7 @@ function newAsteroid() {
 
 		gameData.canvas.asteroids.push(a)
 		gameData.asteroidsData.push(new AsteroidObj(ast))
-	}	
+	}
 }
 
 
@@ -811,7 +807,6 @@ function hyperdrive() {
 
 
 function addConsoleEvents() {
-	//let isMouseDown = false
 	let isSliderSelected = false
 	let startX
 	let sliderDistance = 0
@@ -923,6 +918,63 @@ function addConsoleEvents() {
 
 				hyperdrive()
 			}		
+		}
+	}, false)
+}
+
+function addGameEvents() {
+	$("#gameCanvas").mousedown(function (e) {
+		let rect = gameCanvas.getBoundingClientRect()
+      	let scaleX = gameCanvas.width / rect.width
+      	let scaleY = gameCanvas.height / rect.height
+
+      	// Mouse click coords
+    	let x = Math.floor((e.clientX - rect.left) * scaleX)
+    	let y = Math.floor((e.clientY - rect.top) * scaleY)
+
+    	let asts = gameData.canvas.asteroids
+
+    	if (!isPaused) {
+			for (var i = 0; i < asts.length; i++) {
+				let a = asts[i]
+				let aXend = a.x + a.width
+				let aYend = a.y + a.height
+
+
+	    		if (y > a.y && y < aYend && 
+					x > a.x && x < aXend) {
+					// TODO if 2 asteroids overlap, only select the index of the topmost	
+				}
+    		}
+    	}    	
+    	
+	})
+	$("#gameCanvas").mousemove(function (e) {
+		if (!isPaused) {
+			
+		}
+	})
+	$("#gameCanvas").mouseup(function (e) {
+		if(!isPaused) {
+
+		}
+	})
+
+	$("#gameCanvas").mouseout(function (e) {
+		if(!isPaused) {
+
+		}
+	})
+
+	gameCanvas.addEventListener('mouseup', function(e) {
+		if(!isPaused) {
+
+		}
+	})
+
+	gameCanvas.addEventListener('mousedown', function(e) {
+		if(!isPaused) {
+					
 		}
 	}, false)
 }

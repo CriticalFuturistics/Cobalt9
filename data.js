@@ -158,11 +158,12 @@ let gameData = {
 	consts : {
 		isConsoleLoaded : false,
 		isConsoleEventEnabled : false,
+		isGameEventEnabled : false,
 
 		starSpeed : 1,
 		asteroidSpeed : 1,
 		starSpawnRate : 18,	// The lower, the more likely
-		asteroidSpawnRate : 800, // The lower, the more likely
+		asteroidSpawnRate : 700, // The lower, the more likely
 		
 		turbo : 0,
 
