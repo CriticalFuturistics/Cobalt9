@@ -17,15 +17,15 @@ class CanvasObj {
 		}
 		
 		this.ticksLeft = null
-		if (speed == null) speed = 0
+		if (speed == null) speed = 1
 		this.speed = speed
 	}
 
-	moveDown(){
+	moveDown(){ 
 		this.y += this.speed
 	}
 
-	moveUp(){
+	moveUp(){ 
 		this.y -= this.speed
 	}
 
@@ -34,25 +34,16 @@ class CanvasObj {
 		this.y = y
 	}
 
+
 	// Getters and Setters
 
-	getX(){
-		return this.x
-	}
+	getX(){ return this.x }
 
-	getY(){
-		return this.y
-	}
+	getY(){ return this.y }
 
-	getWidth(){
-		return this.width
-	}
+	getWidth(){ return this.width }
 
-	getHeight(){
-		return this.height
-	}
+	getHeight(){ return this.height }
 
-	getTicksLeft(){
-		return this.ticksLeft
-	}
+	getTicksLeft(){ return this.ticksLeft }
 }

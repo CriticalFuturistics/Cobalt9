@@ -14,6 +14,7 @@ let sfx = null
 
 let gLoop = null
 let isPaused = false
+let timeToUpdate = true
 
 let easeingShip = true
 let increment = .002
@@ -256,23 +257,23 @@ function loadCanvas() {
 
 
 
-
-// --------------- Game Loop --------------- //
+// ----------------------------------- Game Loop ------------------------------------- //
 
 function gameLoop() {
 	loopCanvas()
 
-	if (gameData.updateTime >= 3) {
-		gameData.updateTime = 0
+	if (gameData.consts.updateTime >= 3) {
+		gameData.consts.updateTime = 0
 		timeToUpdate = true
 	} else {
-		gameData.updateTime += 1
+		gameData.consts.updateTime += 1
 		timeToUpdate = false
 	}
 
-	
 	// Update every 4th tick ---
 	if (timeToUpdate) {
+		updateMining()
+
 		updateTravelInfo()
 		updateUI()
 	}
@@ -342,8 +343,10 @@ function decrementTurbo() {
 
 
 
+// ---------------------------------- Game Loop END ---------------------------------- //
 
-// --------------- Renderer --------------- //
+// ------------------------------------ Renderer ------------------------------------- //
+
 
 // Updates every UI element that is not inside a canvas.
 // Should be called last, so that all data is up to date.
@@ -569,6 +572,7 @@ function loopCanvas() {
 
 	renderStars()
 	renderAsteroids()
+	renderLasers()
 	renderSpaceship()
 	renderConsole()
 }	
@@ -591,6 +595,37 @@ function renderSpaceship() {
 	}
 }
 
+// Renders the mining laser
+function renderLasers() {
+	if (gameData.canvas.lasers.length > 0) {
+		for (var i = 0; i < gameData.canvas.lasers.length; i++) {
+			let l = gameData.canvas.lasers[i]
+			
+			let astC = gameData.canvas.asteroids[0] // Default value that's, unfortunately, necessary
+			for (var i = 0; i < gameData.canvas.asteroids.length; i++) {
+				if (gameData.canvas.asteroids[i].uniqueID == l.uniqueID) {
+					astC = gameData.canvas.asteroids[i]
+					break
+				}
+			}
+
+			let shipX = gameData.canvas.spaceship.x + gameData.canvas.spaceship.width/2
+			let shipY = gameData.canvas.spaceship.y + gameData.canvas.spaceship.height/2
+			let astCenterX = astC.getX() + astC.getWidth()/2
+			let astCenterY = astC.getY() + astC.getHeight()/2
+			l.reposition(shipX, shipY, astCenterX, astCenterY)
+
+			// Draw the laser
+			ctx.beginPath()
+			ctx.moveTo(l.getStartX(), l.getStartY())
+			ctx.lineTo(l.getEndX(), l.getEndY())
+			ctx.strokeStyle = l.getColor()
+			ctx.lineWidth = l.getStroke()
+			ctx.stroke()
+		}
+	}
+}
+
 // Loops every asteroid and renders it like renderStars()
 function renderAsteroids() {
 	for (var i = 0; i < gameData.canvas.asteroids.length; i++) {
@@ -598,16 +633,29 @@ function renderAsteroids() {
 		a.moveDown()
 
 		// If the star reaches the end of the screen, remove it and shift the array.
-		if (!a.img) {
-			// In case the img hasn't fully loaded yet
-			if (a.y > canvas.height + 64) {
-				gameData.asteroidsData[0].destroy(0)
+		// In case the img hasn't fully loaded yet.
+		let distance = 64
+		if (a.img) {			
+			distance = a.img.height
+		} 
+		if (a.y > canvas.height + distance/2) {
+			// Remove the relative laser if it was being mined
+			if (gameData.canvas.lasers.length > 0) {
+				let ls = gameData.canvas.lasers 
+				let as = gameData.canvas.asteroids
+
+				for (let k = 0; k < ls.length; k++) {
+					if (as[0].uniqueID == ls[k].uniqueID) {
+						// Splice() will be needed when we have multiple lasers
+						//ls.splice(i, 1)
+						gameData.canvas.lasers = []
+						break
+					}
+				}
 			}
-		} else {
-			if (a.y > canvas.height + a.img.height) {
-				// destroy() also removes the canvas object from gameData.canvas
-				gameData.asteroidsData[0].destroy(0)
-			}
+
+			// destroy() also removes the canvas object from gameData.canvas
+			gameData.asteroidsData[0].destroy(0)			
 		}
 
 		// Draw the star
@@ -732,7 +780,7 @@ function newAsteroid() {
 	// Private internal function
 	function createAsteroid(){
 		let ast = getRandomAsteroidType()
-		// Contrary to the stars, the sprice is based on the asteroid, so it's not a random sprite
+		// Contrary to the stars, the sprite is based on the asteroid, not a random one
 		let sprite = gameData.src.sprites.asteroids.images[ast.id]
 		let a = new CanvasObj(x, 0, sprite, gameData.consts.asteroidSpeed)
 		if (!a.img) {
@@ -741,19 +789,24 @@ function newAsteroid() {
 			a.y = -(a.img.height)
 		}
 
+		// Makes sure to create a unique ID that the asteroid and the laser share
+		ast.uniqueID = 0
+		if (gameData.canvas.asteroids.length > 0) {
+			ast.uniqueID = gameData.consts.lastAsteroidUniqueID + 1
+			gameData.consts.lastAsteroidUniqueID = ast.uniqueID
+			if (ast.uniqueID > 100) {
+				ast.uniqueID = 0
+				gameData.consts.lastAsteroidUniqueID = 0
+			}
+		}
+		a.uniqueID = ast.uniqueID
+
 		gameData.canvas.asteroids.push(a)
 		gameData.asteroidsData.push(new AsteroidObj(ast))
 	}
 }
 
 
-function getRandomStartPos(mapW, itemW) {
-	// Offset per non clippare ai lati
-	let offset = itemW + 2
-	let randomNumber = offset + getRandom(0, (mapW - offset * 2))
-		
-	return randomNumber
-}
 
 
 function isRandomStarSpawning() {
@@ -766,7 +819,13 @@ function isAsteroidSpawning() {
 	return getRandom(0, gameData.consts.asteroidSpawnRate) == 1
 }
 
-
+function getRandomStartPos(mapW, itemW) {
+	// Offset per non clippare ai lati
+	let offset = itemW + 2
+	let randomNumber = offset + getRandom(0, (mapW - offset * 2))
+		
+	return randomNumber
+}
 
 // Randomly selects a star sprite from gameData.src.sprites.stars
 function getRandomStarSprite() {
@@ -786,8 +845,6 @@ function getRandomStarSprite() {
 
 	return gameData.src.sprites.stars.images[n]	
 }
-
-
 
 function getRandomAsteroidType() {
 	let index = getRandom(0, gameData.consts.asteroidTypes.length)
@@ -935,15 +992,19 @@ function addGameEvents() {
     	let asts = gameData.canvas.asteroids
 
     	if (!isPaused) {
-			for (var i = 0; i < asts.length; i++) {
+    		// Reverse for-loop so it can always select the topmost asteroid
+    		for (let i = asts.length - 1; i >= 0; i--) {
 				let a = asts[i]
-				let aXend = a.x + a.width
-				let aYend = a.y + a.height
-
+				let aXend = a.getX() + a.getWidth()
+				let aYend = a.getY() + a.getHeight()
 
 	    		if (y > a.y && y < aYend && 
 					x > a.x && x < aXend) {
-					// TODO if 2 asteroids overlap, only select the index of the topmost	
+	    			if (gameData.asteroidsData[i]) {
+	    				startMining(i)
+						break
+	    			}
+					
 				}
     		}
     	}    	
@@ -979,8 +1040,79 @@ function addGameEvents() {
 	}, false)
 }
 
+// ---------------------------------- Renderer END ------------------------------------ //
+
+// --------------------------------- Mining Handler ---------------------------------- //
+
+// Calculates the stars and end point of the laser and adds it to gameData.canvas.lasers
+// Then it keeps mining every 4 ticks
+function startMining(targetID) {
+	if (gameData.canvas.lasers.length >= gameData.consts.maxConcurrentLasers) {
+		// Remove existing lasers
+		// This minght need to be changed when we implement auto-lasers.
+		gameData.canvas.lasers = []
+	}
+
+	if (gameData.canvas.lasers.length > 0) {
+		if (gameData.canvas.lasers[0].uniqueID != uniqueID) {
+			makeLaser()
+		}
+	} else {
+		makeLaser()
+	}
+
+	// Private function
+	function makeLaser() {
+		// Rendering
+		let astC = gameData.canvas.asteroids[targetID]
+		let shipX = gameData.canvas.spaceship.x + gameData.canvas.spaceship.width/2
+		let shipY = gameData.canvas.spaceship.y + gameData.canvas.spaceship.height/2
+		
+		let astCenterX = astC.getX() + astC.getWidth()/2
+		let astCenterY = astC.getY() + astC.getHeight()/2
+		
+		let lineObj = new LineObject(shipX, shipY, astCenterX, astCenterY, 2, '#AA0000')
+		lineObj.uniqueID = astC.uniqueID
+		gameData.canvas.lasers.push(lineObj)
+	}
+}
+
+// Loops the active lasers and calls asteroidObj.mine()
+function updateMining() {
+	let inv = game.resources
+	let ls = gameData.canvas.lasers
+	let as = gameData.asteroidsData
+
+	for (let i = 0; i < ls.length; i++) {
+		for (var j = 0; j < as.length; j++) {
+			if (as[j].uniqueID == ls[i].uniqueID) {
+				gameData._s.rPrio.reverse()
+				let prio = gameData._s.rPrio[gameData.consts.miningPriority]
+				gameData._s.rPrio.reverse()
+				let mined = as[j].mine(gameData.consts.miningStrength, prio)	
+				if (mined != null) {
+					addResource(mined.resource, mined.n)
+				}		
+				
+			} 
+		}
+	}
+}
+
+function addResource(r, n) {
+	game.resources[r] += n
+	if (game.resources[r] > game.resourcesMax[r]) {
+		game.resources[r] = game.resourcesMax[r]
+	}
+}
 
 
+
+
+
+
+
+// --------------------------------- Mining Handler END ------------------------------ //
 
 // --------------------------------- Unit Conversion --------------------------------- //
 
@@ -1050,7 +1182,7 @@ function convertToKM(n, u) {
 	}
 }
 
-
+// --------------------------------- Unit Conversion END ------------------------------ //
 
 
 

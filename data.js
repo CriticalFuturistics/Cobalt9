@@ -4,6 +4,7 @@ let gameData = {
 		spaceship : null,
 		stars : [],
 		asteroids : [],
+		lasers : [],
 		planets : [],
 		currentPlanet : null,
 		enemyShips : [],
@@ -93,6 +94,7 @@ let gameData = {
 	},
 
 	asteroidsData : [],
+	lasersData : [],
 
 	src : {
 		sprites : {
@@ -156,17 +158,23 @@ let gameData = {
 	},
 
 	consts : {
+		updateTime : 0,
+		isStopped : false,
 		isConsoleLoaded : false,
 		isConsoleEventEnabled : false,
 		isGameEventEnabled : false,
 
-		starSpeed : 1,
-		asteroidSpeed : 1,
+		starSpeed : 0.9,
+		asteroidSpeed : 0.7,
 		starSpawnRate : 18,	// The lower, the more likely
-		asteroidSpawnRate : 700, // The lower, the more likely
-		
+		asteroidSpawnRate : 120, // The lower, the more likely
+		lastAsteroidUniqueID : 0,
+
+		maxConcurrentLasers :  1,
+
 		turbo : 0,
 
+		miningStrength : 2,
 		miningPriority : 0,
 		maxMiningPriority : 5,
 
@@ -240,8 +248,7 @@ let gameData = {
 
 	},
 
-	updateTime : 0,
-	isStopped : false,
+
 
 	
 	_s : { // Strings
@@ -269,21 +276,21 @@ let game = {
 	energy : 0,
 
 	resources : {
-		titanium : 2,
-		copper : 30,
-		silicon: 19,
-		gold : 8,
-		uranium : 37,
-		food : 44,
+		titanium : 0,
+		copper : 0,
+		silicon: 0,
+		gold : 0,
+		uranium : 0,
+		food : 0,
 	}, 
 
 	resourcesMax : {
-		titanium : 50,
-		copper : 50,
-		silicon: 50,
-		gold : 50,
-		uranium : 50,
-		food : 50,
+		titanium : 100,
+		copper : 100,
+		silicon: 100,
+		gold : 100,
+		uranium : 100,
+		food : 100,
 	}, 
 
 }
