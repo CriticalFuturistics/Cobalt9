@@ -164,8 +164,8 @@ let gameData = {
 		isConsoleEventEnabled : false,
 		isGameEventEnabled : false,
 
-		starSpeed : 0.9,
-		asteroidSpeed : 0.7,
+		starSpeed : 0.7,
+		asteroidSpeed : 0.9,
 		starSpawnRate : 18,	// The lower, the more likely
 		asteroidSpawnRate : 120, // The lower, the more likely
 		lastAsteroidUniqueID : 0,
@@ -293,4 +293,81 @@ let game = {
 		food : 100,
 	}, 
 
+}
+
+
+
+let settings = {
+	visual : {
+		isConsoleBoot : true,
+	}
+}
+
+
+let animations = {
+	boot : {
+		initDelay : 1000,
+		finalDelay : 2000,
+		cursorBlink : 400,
+		textDelay : 50,
+		texts : [
+			{ t : "> Booting AmigOS...\n", ms : 500},
+			{ t : "> Loading Assets\n", ms : 800},
+			{ t : "> Waking up AI\n", ms : 1900},
+			{ t : "> I said WAKING UP AI\n", ms : 3200},
+			
+		],
+		logoText : [
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmdhdmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddhyyyyyyhmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmdhyyyyyyyyyyyyyydmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddhyyyyyyyyyyyyyyyyyyyyhdmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmdhyyyyyyyyyyyyyyyyyyyyyyyyyyyyhmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyydmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmdhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhdmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmddhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhdmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmdhyyyyyyyyyyyyyyyyyyyyysssooo+++++ooossyyyyyyyyyyyyyyyyyyyydmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmddhyyyyyyyyyyyyyyyyyyyyso+/:..````     ```..-/+osyyyyyyyyyyyyyyyyyhdmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmdhyyyyyyyyyyyyyyyyyyyyso/-.`                      `./osyyyyyyyyyyyyyyyyyhdmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmyyyyyyyyyyyyyyyyyyys+:.`            ```              `-+syyyyyyyyyyyyyyyyyyhdmmmmmmmmm\n",
+			"mmmmmmmmmmmmmdyyyyyyyyyyyyyyyyso:.        `.-:/++ooooo++/-.`          -osyyyyyyyyyyyso+:.``/dmmmmmmm\n",
+			"mmmmmmmmmmmmmyyyyyyyyyyyyyyys+-`      `.:+ossyyyyyyyyyyyyyso+:`        `/syyyyysso/-.`  ``.:/smmmmmm\n",
+			"mmmmmmmmmmmmhyyyyyyyyyyyyys+.      `./osyyyyyyyyyyyyyyyyyyyyyys/.        :sso+/-.`  `.-/+syho/+dmmmm\n",
+			"mmmmmmmmmmmmyyyyyyyyyyyyso-      `:osyyyyyyyyyyyyyyyyyyyyyyyyyyys:        -.`   `.:/osyyyyhhhy//dmmm\n",
+			"mmmmmmmmmmmhyyyyyyyyyyys/`     `:syyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys/        ``-:+osyyyyyyyyhhhhhsmmmm\n",
+			"mmmmmmmmmmdyyyyyyyyyyys-      -oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy:   `.-/osyyyyyyyyyyyyhhhhhhmmmmm\n",
+			"mmmmmmmmmmyyyyyyyyyyyo.     `/syyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys-:+osyyyyyyyyyyyyyyyyhhhhhdmmmmm\n",
+			"mmmmmmmmmdyyyyyyyyyyo`     `oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhmmmmmm\n",
+			"mmmmmmmmmyyyyyyyyyys.     `oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhdmmmmmm\n",
+			"mmmmmmmmhyyyyyyyyyy:      /yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhmmmmmmm\n",
+			"mmmmmmmmyyyyyyyyyys`     .syyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhmmmmmmmm\n",
+			"mmmmmmmhyyyyyyyyyy/      /yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhdmmmmmmmm\n",
+			"mmmmmmdyyyyyyyyyyy-      +yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhmmmmmmmmm\n",
+			"mmmmmmyyyyyyyyyyyy.      /yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhdmmmmmmmmm\n",
+			"mmmmmdyyyyyyyyyyyy-      -yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhmmmmmmmmmm\n",
+			"mmmmmyyyyyyyyyyyys:       +yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyssyyyyyyyyyyyyyyyyyyyyhhhhhhdmmmmmmmmmm\n",
+			"mmmmhyyyyyyyso+:.``       `oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyys+.-syyyyyyyyyyyyyyyyyyyhhhhhhmmmmmmmmmmm\n",
+			"mmmmyyyys+/-``   `.-       `/syyyyyyyyyyyyyyyyyyyyyyyyyyys/.`  `+yyyyyyyyyyyyyyyyyhhhhhhmmmmmmmmmmmm\n",
+			"mmmyo+:.``   .-/osss/        .+syyyyyyyyyyyyyyyyyyyyyso/-`      `oyyyyyyyyyyyyyyyyhhhhhdmmmmmmmmmmmm\n",
+			"mms.`   `.:+ossyyyyys+`        `:+osyyyyyyyyyyyysso+:.`       `:osyyyyyyyyyyyyyyyhhhhhhmmmmmmmmmmmmm\n",
+			"mmo..-/ossyyyyyyyyyyyyo-`         `.-://++++//:-.``        `-/ssyyyyyyyyyyyyyyyyhhhhhhdmmmmmmmmmmmmm\n",
+			"mmmhyyyyyyyyyyyyyyyyyyyso:`                             `-/osyyyyyyyyyyyyyyyyyyyhhhhhhmmmmmmmmmmmmmm\n",
+			"mmmmmdhyyyyyyyyyyyyyyyyyyss+-.`                    `.-:+osyyyyyyyyyyyyyyyyyyyyyhhhhhhdmmmmmmmmmmmmmm\n",
+			"mmmmmmddhhyyyyyyyyyyyyyyyyyysso+:-..............-/+ossyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmddhhyyyyyyyyyyyyyyyyyyyysssooooooooosssyyyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhhhhmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmddhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhhhhhhhhdmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmdhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmddhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhhhhhhhhdmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmddhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmdhhyyyyyyyyyyyyyyyyyyyyyyyhhhhhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmddhhyyyyyyyyyyyyyyyhhhhhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmddhhyyyyyyyyhhhhhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmdhhhhhhhhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddhhhhhhhhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmdhhhhhddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n",
+			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"
+		]
+
+	}
 }

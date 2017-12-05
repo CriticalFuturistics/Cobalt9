@@ -89,3 +89,28 @@ function setResource(r, n) {
 
 
 
+
+function showOverlay(jQString) {
+	$(jQString).css({
+		"display": 'initial',
+		"height": '100%'
+	})
+}
+
+function hideOverlay(jQString) {
+	$(jQString).css({
+		display: 'none',
+		height: '0%'
+	})
+}
+
+function typeHTML(jQString, text) {
+	$(jQString).html($(jQString).text() + text)
+}
+function typeText(jQString, text) {
+	$(jQString).text($(jQString).text() + text)
+}
+
+function clearTypeText(jQString) {
+	$(jQString).text("")
+}

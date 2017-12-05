@@ -121,15 +121,22 @@ function initHTML() {
 
 // General init
 function init(){
-	// Initial console data
+	// Init console data
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight() 
 
+    // Initial Boot
+	bootConsole()
+
+}
+
+// Loads the sprites, but only after the initial terminal boot
+function loadSprites() {
 	// Load Sprites
 	// In order to not load the same sprites evey frame, load them from the src once at the start.
 	// Once the stars are loaded, it starts to load the asteroids and then the ship.
 	let srcs = gameData.src
-	for (var i = 0; i < srcs.sprites.stars.srcs.length; i++) {
+	for (let i = 0; i < srcs.sprites.stars.srcs.length; i++) {
 		let img = new Image()
 		img.src = srcs.sprites.stars.srcs[i]
 		img.i = i
@@ -156,7 +163,7 @@ function init(){
 }
 
 // Loads the ship, then chain-calls loadShip().
-function loadAsteroids(){
+function loadAsteroids() {
 	// Initial console data
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight() 
@@ -164,7 +171,7 @@ function loadAsteroids(){
 	// Load Sprites
 	// Like in loadStars()
 	let srcs = gameData.src
-	for (var i = 0; i < srcs.sprites.asteroids.srcs.length; i++) {
+	for (let i = 0; i < srcs.sprites.asteroids.srcs.length; i++) {
 		let img = new Image()
 		img.src = srcs.sprites.asteroids.srcs[i]
 		img.i = i
@@ -279,8 +286,7 @@ function gameLoop() {
 	}
 
 	// Update every tick ---
-	decrementTurbo()
-	
+	decrementTurbo()	
 }
 
 // 					(time TODO)
@@ -330,7 +336,7 @@ function decrementTurbo() {
 			gameData.consts.starSpawnRate = 10
 			gameData.consts.turbo -= 7
 		} else {
-			gameData.consts.starSpeed = 2
+			gameData.consts.starSpeed = 0.7
 			gameData.consts.starSpawnRate = 18	
 			gameData.consts.turbo -= 6
 		}
@@ -346,6 +352,79 @@ function decrementTurbo() {
 // ---------------------------------- Game Loop END ---------------------------------- //
 
 // ------------------------------------ Renderer ------------------------------------- //
+
+// bootConsole is only ran at the start and does not use gameLoop for its animations
+function bootConsole() {
+	let jQString = "#initConsoleOverlay"
+	let basejQString = jQString
+
+	if (!settings.visual.isConsoleBoot) {
+		hideOverlay(jQString)
+		loadSprites()
+	} else {
+		// Show the black terminal as an overlay
+		showOverlay(jQString)
+		jQString += " p"
+
+		// Start the music/sfx TODO
+		// ...
+
+		// Animate
+		setTimeout(animBootBlink, animations.boot.initDelay, 5, jQString)
+
+		function animBootBlink(blinks, jQString) {
+			if (blinks <= 0) {
+				setTimeout(animBootText, animations.boot.textDelay, 0, -1)
+				return
+			} else {
+				if (blinks % 2 == 0) {
+					clearTypeText(jQString)
+					setTimeout(animBootBlink, animations.boot.cursorBlink, (blinks - 1), jQString)
+				}
+				if (blinks % 2 != 0) {
+					typeText(jQString, "█")	// Terminal cursor char	
+					setTimeout(animBootBlink, animations.boot.cursorBlink, (blinks - 1), jQString)
+				}
+			}				
+		}
+
+		function animBootText(textIndex, charIndex) {
+			if (textIndex >= animations.boot.texts.length) {
+				animBootLogo(0)
+				return
+			}
+
+			if (charIndex < 0) {
+				clearTypeText(jQString)
+				animBootText(0, 0)
+			} else if (charIndex >= animations.boot.texts[textIndex].t.length) {
+				setTimeout(animBootText, animations.boot.texts[textIndex].ms, textIndex + 1, 0)
+			} else {
+				typeText(jQString, animations.boot.texts[textIndex].t.charAt(charIndex))
+				setTimeout(animBootText, animations.boot.textDelay, textIndex, charIndex + 1)
+			}
+		}
+
+		function animBootLogo(i) {
+			if (i >= animations.boot.logoText.length) {
+				setTimeout(launchGame, animations.boot.finalDelay)
+				return
+			}
+			if (i == 0) {
+				clearTypeText(jQString)
+				$(jQString).append('<pre></pre>')
+				jQString += " pre"
+			}
+			typeText(jQString, animations.boot.logoText[i])
+			setTimeout(animBootLogo, animations.boot.textDelay, i + 1)
+		}
+
+		function launchGame() {
+			hideOverlay(basejQString)
+			loadSprites()
+		}
+    }
+}
 
 
 // Updates every UI element that is not inside a canvas.
@@ -598,11 +677,11 @@ function renderSpaceship() {
 // Renders the mining laser
 function renderLasers() {
 	if (gameData.canvas.lasers.length > 0) {
-		for (var i = 0; i < gameData.canvas.lasers.length; i++) {
+		for (let i = 0; i < gameData.canvas.lasers.length; i++) {
 			let l = gameData.canvas.lasers[i]
 			
 			let astC = gameData.canvas.asteroids[0] // Default value that's, unfortunately, necessary
-			for (var i = 0; i < gameData.canvas.asteroids.length; i++) {
+			for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
 				if (gameData.canvas.asteroids[i].uniqueID == l.uniqueID) {
 					astC = gameData.canvas.asteroids[i]
 					break
@@ -628,7 +707,7 @@ function renderLasers() {
 
 // Loops every asteroid and renders it like renderStars()
 function renderAsteroids() {
-	for (var i = 0; i < gameData.canvas.asteroids.length; i++) {
+	for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
 		let a = gameData.canvas.asteroids[i]
 		a.moveDown()
 
@@ -669,7 +748,7 @@ function renderAsteroids() {
 
 // Loops every star, renders it and moves it at the start of every frame.
 function renderStars() {
-	for (var i = 0; i < gameData.canvas.stars.length; i++) {
+	for (let i = 0; i < gameData.canvas.stars.length; i++) {
 		let s = gameData.canvas.stars[i]
 		s.moveDown()
 
@@ -710,7 +789,7 @@ function newStar() {
 		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 2])
 		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 3])
 	} else {
-		for (var i = 0; i < lastStars.length; i++) {
+		for (let i = 0; i < lastStars.length; i++) {
 			lastStars[i].getX() = x + minDistance
 		}
 	}
@@ -764,7 +843,7 @@ function newAsteroid() {
 		lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1])
 		lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 2])
 	} else {
-		for (var i = 0; i < lastAsteroid.length; i++) {
+		for (let i = 0; i < lastAsteroid.length; i++) {
 			lastAsteroid[i].getX() = x + minDistance
 		}
 	}
@@ -1084,7 +1163,7 @@ function updateMining() {
 	let as = gameData.asteroidsData
 
 	for (let i = 0; i < ls.length; i++) {
-		for (var j = 0; j < as.length; j++) {
+		for (let j = 0; j < as.length; j++) {
 			if (as[j].uniqueID == ls[i].uniqueID) {
 				gameData._s.rPrio.reverse()
 				let prio = gameData._s.rPrio[gameData.consts.miningPriority]

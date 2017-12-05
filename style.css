@@ -5,7 +5,10 @@ src:url("fonts/digital-7.ttf");
 }
 .digital {	font-family: "Digital"; }
 
-* {	font-family: Roboto; border-radius: 0px !important; }
+* {	
+	font-family: Roboto; 
+	border-radius: 0px !important;
+}
 a { font-family: Roboto; }
 body { background: #40424A; }
 
@@ -17,6 +20,38 @@ body { background: #40424A; }
     -ms-user-select: none;
     user-select: none;
 }
+
+/* Overlay (background) */
+.overlay {
+	display: initial;
+    height: 100%;
+    width: 100%;
+    position: fixed; 
+    z-index: 9999; 
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 1);
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-left: 8px;
+    padding-top: 0px;
+    color: #FFF;
+    white-space: pre-line;
+    font-size: 16px;
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+}
+.overlay p { 
+	margin-top: 0px; 
+	padding-top: 0px; 
+}
+.overlay pre {
+	background: #000;
+	color: #FFF;
+	text-align: center;
+	font-size: 12px;
+	margin-top: 0px; 
+	padding-top: 0px;
+}
+
 
 .ctooltip {
 	position: absolute;
