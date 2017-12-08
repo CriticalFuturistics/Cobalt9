@@ -240,7 +240,7 @@ let gameData = {
 					titanium : [0.8, 1.2],
 					copper : [1, 1.3],
 					silicon: [1, 3],
-					gold : [0, 0.2],
+					gold : [0, 0.6],
 					uranium : [0, 0],
 				}
 			}
@@ -299,7 +299,7 @@ let game = {
 
 let settings = {
 	visual : {
-		isConsoleBoot : true,
+		isConsoleBoot : false,
 	}
 }
 

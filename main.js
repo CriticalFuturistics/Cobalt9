@@ -57,6 +57,10 @@ function initHTML() {
 	$btnResume.click(resumeGameLoop())
 	$btnResume.appendTo($crewP)
 
+	let $btnToggleboot = $("<a>", {"class" : "btn", "text" : "Toggle Boot", "onclick" : "toggleBoot()"})
+	$btnToggleboot.click(toggleBoot())
+	$btnToggleboot.appendTo($crewP)
+
 	// Populate Chips
 
 	// Populate Upgrades
@@ -1282,10 +1286,9 @@ function convertToKM(n, u) {
 
 
 
-
-
-
-
+function toggleBoot() {
+	settings.visual.isConsoleBoot = !settings.visual.isConsoleBoot
+}
 
 
 function pauseGameLoop() {

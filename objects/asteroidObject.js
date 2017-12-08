@@ -57,7 +57,7 @@ class AsteroidObj {
 				cr[k] -= strength
 				amountMined = strength
 			} else if (cr[k] < strength) {	
-				amountMined = cr[k] - strength
+				amountMined = Math.abs(cr[k] - strength)
 				cr[k] = 0
 			}
 
