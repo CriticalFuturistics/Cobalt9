@@ -1287,7 +1287,8 @@ function convertToKM(n, u) {
 
 
 function toggleBoot() {
-	settings.visual.isConsoleBoot = !settings.visual.isConsoleBoot
+	// TODO
+	//settings.visual.isConsoleBoot = !settings.visual.isConsoleBoot
 }
 
 

@@ -111,7 +111,12 @@ body { background: #40424A; }
 	background: #FFF;
 }
 
-#gameCanvas, canvas { margin: 0; padding: 0; display: block;}
+#gameCanvas, canvas { 
+	margin: 0; 
+	padding: 0; 
+	display: block;
+	cursor : url('src/sprite/crosshair.png'), auto;
+}
 
 canvas { display:block; }
 
