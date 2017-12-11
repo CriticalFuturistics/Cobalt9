@@ -4,17 +4,21 @@
 
 class AsteroidObj {
 	constructor(ast) {
-		this.typeID = ast.id
-		this.uniqueID = ast.uniqueID
+		this.typeID = parseInt(ast.id)
+		this.uniqueID = parseInt(ast.uniqueID)
 		this.baseResources = ast.r
+		this.src = ast.src
+		this.chance = ast.chance
 		this.multiplier = ast.multiplier
-		this.resources = this.calculateResources(this.baseResources, this.multiplier)
-		this.currentResources = this.resources		
+		this.resources = this.calcResources(this.baseResources, this.multiplier)
+		this.currentResources = this.resources	
+		this.rotationAmount = this.calcRotation(ast.rotation)
+		this.axis = this.calcAxis(ast.axis)
 	}
 	
 	// When created, it calculates the max amount of resources 
 	// in the asteroid depending on its type and RNG.
-	calculateResources(base, mult) {
+	calcResources(base, mult) {
 		let b = {
 			titanium : 0,
 			copper : 0,
@@ -28,6 +32,28 @@ class AsteroidObj {
 		}
 		return b
 	}
+
+	// Calculates the rotation at which the asteroid revolves (dgr/frame)
+	calcRotation(rot) {
+		return getRandomFloat(rot[0], rot[1], 2)
+	}
+
+	// Calculates a random offset for the axis on which it rotates
+	calcAxis(axis) {
+		let r = {
+			x : getRandomFloat(axis.x[0], axis.x[1], 1),
+			y : getRandomFloat(axis.y[0], axis.y[1], 1)
+		}
+
+		let sign = getRandom(0, 1)
+		if (sign == 0) { r.x = -r.x }
+
+		sign = getRandom(0, 1)
+		if (sign == 0) { r.y = -r.y }
+
+		return r
+	}
+
 
 
 	// Adds the mined resources to the player's inventory
@@ -124,7 +150,11 @@ class AsteroidObj {
 
 	// Getters and Setters
 	getTypeID() { return this.typeID }
+	getSrc() { return this.src }
+	getChance() { return this.chance }
 	getResources() { return this.currentResources }
+	getRotationAmount() { return this.rotationAmount }
+	getAxis() { return this.axis }
 
 	getAstID() { 
 		for (let i = 0; i < gameData.canvas.asteroids.length; i++) {

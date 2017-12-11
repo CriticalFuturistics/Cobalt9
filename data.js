@@ -107,9 +107,8 @@ let gameData = {
 				chances : [60, 25, 10, 5]	// Chnces MUST be in decremental order and sum to 100
 			},
 			asteroids : {
-				srcs : ["src/sprite/a1.png", "src/sprite/a1.png", "src/sprite/a1.png", "src/sprite/a1.png", "src/sprite/a1.png"],
+				srcs : [],
 				images : [],
-				chances : [50, 30, 12, 6, 2]	// Chnces MUST be in decremental order
 			},
 
 			console : {
@@ -164,8 +163,8 @@ let gameData = {
 		isConsoleEventEnabled : false,
 		isGameEventEnabled : false,
 
-		starSpeed : 0.7,
-		asteroidSpeed : 0.9,
+		starSpeed : 0.6,
+		asteroidSpeed : 0.8,
 		starSpawnRate : 18,	// The lower, the more likely
 		asteroidSpawnRate : 120, // The lower, the more likely
 		lastAsteroidUniqueID : 0,
@@ -203,6 +202,12 @@ let gameData = {
 			{ 
 				id : 0,
 				src : "src/sprite/a1.png",
+				chance : 50,
+				rotation : [0.1, 0.6],
+				axis : {
+					x : [1, 2.5],
+					y : [1, 3]
+				},
 
 				// Base resources amound held
 				r : {
@@ -229,19 +234,51 @@ let gameData = {
 			{ 
 				id : 1,
 				src : "src/sprite/a1.png",
+				chance : 30,
+				rotation : [0.2, 0.6],
+				axis : {
+					x : [1, 2],
+					y : [1, 2]
+				},
+
 				r : {
-					titanium : 7,
+					titanium : 4,
 					copper : 12,
 					silicon: 2,
 					gold : 1,
 					uranium : 0,
 				},
 				multiplier : {
-					titanium : [0.8, 1.2],
+					titanium : [0.7, 1.1],
 					copper : [1, 1.3],
 					silicon: [1, 3],
 					gold : [0, 0.6],
 					uranium : [0, 0],
+				}
+			},
+			{ 
+				id : 2,
+				src : "src/sprite/a2.png",
+				chance : 12,
+				rotation : [0.3, 0.8],
+				axis : {
+					x : [1, 2],
+					y : [1, 2]
+				},
+
+				r : {
+					titanium : 0,
+					copper : 0,
+					silicon: 0,
+					gold : 0,
+					uranium : 7,
+				},
+				multiplier : {
+					titanium : [0.5, 1],
+					copper : [1.4, 2.6],
+					silicon: [0, 0],
+					gold : [0, 1],
+					uranium : [1.2, 2.7],
 				}
 			}
 		]

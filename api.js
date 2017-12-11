@@ -2,6 +2,11 @@
 function getRandom(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min
 }
+// Same as getRandom, but returns a float.toFixed(fix)
+function getRandomFloat(min, max, fix) {
+	return ((Math.random() * (max - min)) + min).toFixed(fix)
+}
+
 // Properly case a string
 function caseString(s) {
 	return s.charAt(0).toUpperCase() + s.slice(1)
@@ -114,3 +119,9 @@ function typeText(jQString, text) {
 function clearTypeText(jQString) {
 	$(jQString).text("")
 }
+
+
+function toRad(deg) {
+	return (deg * Math.PI / 180).toFixed(3)
+}
+

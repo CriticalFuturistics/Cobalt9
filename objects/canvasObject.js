@@ -7,6 +7,9 @@ class CanvasObj {
 		this.y = y
 		this.scale = 1
 		this.img = img
+		this.rotationAmount = 0
+		this.rotation = 0
+		this.axis = 0
 
 		if (!this.img || !img) {
 			this.width = 0
@@ -34,8 +37,22 @@ class CanvasObj {
 		this.y = y
 	}
 
+	rotate() {
+		this.rotation += parseFloat(this.getRotationAmount())
+	}
 
 	// Getters and Setters
+
+	// Where dpf is "degrees per frame"
+	setRotationAmount(dpf) { this.rotationAmount = dpf }
+
+	getRotationAmount() { return parseFloat(this.rotationAmount).toFixed(1) }
+
+	getRotation() { return parseFloat(this.rotation).toFixed(1) }
+	
+	setAxis(axis) { this.axis = axis }
+	
+	getAxis() { return this.axis }
 
 	getX(){ return this.x }
 
@@ -44,6 +61,10 @@ class CanvasObj {
 	getWidth(){ return this.width }
 
 	getHeight(){ return this.height }
+
+	getCenterX() { return this.getX() + (this.getWidth() / 2) }
+
+	getCenterY() { return this.getY() + (this.getHeight() / 2) }
 
 	getTicksLeft(){ return this.ticksLeft }
 }

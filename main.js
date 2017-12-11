@@ -54,12 +54,12 @@ function initHTML() {
 	$btnPause.appendTo($crewP)
 
 	let $btnResume = $("<a>", {"class" : "btn", "text" : "Resume Game", "onclick" : "resumeGameLoop()"})
-	$btnResume.click(resumeGameLoop())
 	$btnResume.appendTo($crewP)
 
 	let $btnToggleboot = $("<a>", {"class" : "btn", "text" : "Toggle Boot", "onclick" : "toggleBoot()"})
-	$btnToggleboot.click(toggleBoot())
+	$crewP.append('<br>')
 	$btnToggleboot.appendTo($crewP)
+	$crewP.append('<span id="isBoot"> OFF </span>')
 
 	// Populate Chips
 
@@ -120,7 +120,6 @@ function initHTML() {
 	// Populate Encylopedia
 
 
-
 }
 
 // General init
@@ -172,8 +171,15 @@ function loadAsteroids() {
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight() 
 
-	// Load Sprites
-	// Like in loadStars()
+	// Load Sprites (extracting the src from asteroidTypes)
+	for (k in gameData.consts.asteroidTypes) {
+		let thisSrc = gameData.consts.asteroidTypes[k].src
+
+		if (!gameData.src.sprites.asteroids.srcs.includes(thisSrc)) {
+			gameData.src.sprites.asteroids.srcs.push(thisSrc)
+		}
+	}
+
 	let srcs = gameData.src
 	for (let i = 0; i < srcs.sprites.asteroids.srcs.length; i++) {
 		let img = new Image()
@@ -182,7 +188,6 @@ function loadAsteroids() {
 
 		img.onload = function() {
 			gameData.src.sprites.asteroids.images[this.i] = img
-
 			let allAsteroidsLoaded = false
 
 			for (let j = 0; j < gameData.src.sprites.asteroids.srcs.length; j++) {
@@ -714,6 +719,19 @@ function renderAsteroids() {
 	for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
 		let a = gameData.canvas.asteroids[i]
 		a.moveDown()
+		
+		let transaltion = {
+			x : a.getCenterX() + a.getAxis().x,
+			//x : a.getCenterX() + 2,
+			y : a.getCenterY() + a.getAxis().y
+			//y : a.getCenterY() + 1
+		}
+		ctx.save()
+		ctx.translate(transaltion.x, transaltion.y)
+		a.rotate()
+		ctx.rotate(toRad(a.getRotation()))
+		ctx.translate(-transaltion.x, -transaltion.y)
+		
 
 		// If the star reaches the end of the screen, remove it and shift the array.
 		// In case the img hasn't fully loaded yet.
@@ -743,10 +761,11 @@ function renderAsteroids() {
 
 		// Draw the star
 		if (typeof a.img === 'undefined') {
-			console.log("ERROR: asteroid img Undefined. Ignoring asteroid.")
+			//console.log("ERROR: asteroid img Undefined. Ignoring asteroid.")
 		} else {
 			ctx.drawImage(a.img, a.x, a.y)
 		}
+		ctx.restore()
 	}		
 }
 
@@ -863,8 +882,14 @@ function newAsteroid() {
 	// Private internal function
 	function createAsteroid(){
 		let ast = getRandomAsteroidType()
+		let srcIndex = 0
 		// Contrary to the stars, the sprite is based on the asteroid, not a random one
-		let sprite = gameData.src.sprites.asteroids.images[ast.id]
+		for (let i = 0; i < gameData.src.sprites.asteroids.srcs.length; i++) {
+			if (gameData.src.sprites.asteroids.srcs[i] == ast.src) {
+				srcIndex = i
+			} 
+		}
+		let sprite = gameData.src.sprites.asteroids.images[srcIndex]
 		let a = new CanvasObj(x, 0, sprite, gameData.consts.asteroidSpeed)
 		if (!a.img) {
 			a.y = -64
@@ -882,10 +907,14 @@ function newAsteroid() {
 				gameData.consts.lastAsteroidUniqueID = 0
 			}
 		}
+		
+		let astObj = new AsteroidObj(ast)
 		a.uniqueID = ast.uniqueID
+		a.setRotationAmount(astObj.getRotationAmount())
+		a.setAxis(astObj.getAxis())
 
 		gameData.canvas.asteroids.push(a)
-		gameData.asteroidsData.push(new AsteroidObj(ast))
+		gameData.asteroidsData.push(astObj)
 	}
 }
 
@@ -914,24 +943,42 @@ function getRandomStartPos(mapW, itemW) {
 function getRandomStarSprite() {
 	let n = 0
 	let chances = gameData.src.sprites.stars.chances
+	let r = getRandom(1, 100)
 
 	// Recursively analyze the percentage and get the index of the random star src
-	function getStarChance(i) {
-		let r = getRandom(1, 100)
+	function getStarChance(i, r) {
+		if (i >= chances.length) {
+			return 0
+		}
 		if (r <= chances[i]) {
-			return getStarChance(i + 1)
+			return getStarChance((i + 1), r)
 		} else {
 			return i
 		}
 	}
-	n = getStarChance(0)
+	n = getStarChance(0, r)
 
 	return gameData.src.sprites.stars.images[n]	
 }
 
 function getRandomAsteroidType() {
-	let index = getRandom(0, gameData.consts.asteroidTypes.length)
-	let a = gameData.consts.asteroidTypes[index]
+	let r = getRandom(0, 100)
+	let asts = gameData.consts.asteroidTypes
+	let id = 0
+
+	function getAstChance(i, r) {
+		if (i >= asts.length) {
+			return asts[0]
+		}
+		if (r <= asts[i].chance) {
+			return getAstChance((i + 1), r)
+		} else {
+			return asts[i]
+		}
+	}
+	
+	let a = getAstChance(0, r)
+	//console.log("> " + a.id)
 	return a
 }
 
@@ -1287,8 +1334,12 @@ function convertToKM(n, u) {
 
 
 function toggleBoot() {
-	// TODO
-	//settings.visual.isConsoleBoot = !settings.visual.isConsoleBoot
+	settings.visual.isConsoleBoot = !settings.visual.isConsoleBoot
+	if (settings.visual.isConsoleBoot) {
+		$('#isBoot').text(' ON')
+	} else {
+		$('#isBoot').text(' OFF')
+	}
 }
 
 

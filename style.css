@@ -111,7 +111,7 @@ body { background: #40424A; }
 	background: #FFF;
 }
 
-#gameCanvas, canvas { 
+#gameCanvas { 
 	margin: 0; 
 	padding: 0; 
 	display: block;
