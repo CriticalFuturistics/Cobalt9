@@ -258,21 +258,25 @@ canvas { display:block; }
 .up-item {
 	position: relative;
 	width: 100%;
-	height: 130px;
-	padding-top: 5px;
+	height: 138px;
+	padding-top: 4px;
 	padding-left: 10px;
-	padding-right: 10px;
+	padding-right: 4px;
 	margin-top: 8px;
 	margin-bottom: 2px;
 
 	border: 1px solid #FFF;
 }
 
-.up-item-icon { float: right; height: 100%; cursor: pointer; }
-.up-item-name { font-size: 16px; color: #D9D727; }
+.up-item:hover {
+	background: rgba(1, 1, 1, 0.2);
+}
+
+.up-item-icon { float: right; height: 128px; cursor: pointer; }
+.up-item-name { font-size: 16px; color: #D9D727; padding-top: 5px; }
 .up-item-cost { 
 	position: absolute;
-	bottom: 4px;
+	bottom: 5px;
 	color: #77BBF4;
 
 }

@@ -79,7 +79,7 @@ function initHTML() {
 		let $upItem = $("<div>", {"class" : "up-item", "id" : ("up-" + ups[i].id)})
 		let $upName = $("<div>", {"class" : "up-item-name", "text" : ups[i].name})
 		let $upDex = $("<div>", {"class" : "up-item-dex", "text" : ups[i].dex})
-		let $upCost = $("<div>", {"class" : "up-item-cost", "text" : (ups[i].cost + " Qb")})
+		let $upCost = $("<div>", {"class" : "up-item-cost", "text" : (ups[i].cost.qb + " Qb")})
 
 		let $upIcon = $("<img>", {"class" : "up-item-icon"})
 		$upIcon.attr("src", ups[i].btnSrc)
@@ -107,7 +107,6 @@ function initHTML() {
 
 		$upItem.appendTo($upList)
 	}
-
 
 
 

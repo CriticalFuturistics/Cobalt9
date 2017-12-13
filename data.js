@@ -166,7 +166,7 @@ let gameData = {
 		starSpeed : 0.6,
 		asteroidSpeed : 0.8,
 		starSpawnRate : 18,	// The lower, the more likely
-		asteroidSpawnRate : 700, // The lower, the more likely
+		asteroidSpawnRate : 300, // The lower, the more likely
 		lastAsteroidUniqueID : 0,
 
 		maxConcurrentLasers :  1,
@@ -196,7 +196,6 @@ let gameData = {
 			n : 0.01,
 			u : 2,
 		},
-
 
 		asteroidTypes : [
 			{ 
@@ -258,8 +257,33 @@ let gameData = {
 			},
 			{ 
 				id : 2,
-				src : "src/sprite/a2.png",
+				src : "src/sprite/a1.png",
 				chance : 6,
+				rotation : [0.2, 0.6],
+				axis : {
+					x : [1, 1],
+					y : [1, 2]
+				},
+
+				r : {
+					titanium : 5,
+					copper : 4,
+					silicon: 0,
+					gold : 1,
+					uranium : 1,
+				},
+				multiplier : {
+					titanium : [0.4, 1.5],
+					copper : [1.6, 2.9],
+					silicon: [0, 0],
+					gold : [0.2, 1.3],
+					uranium : [1, 2.3],
+				}
+			},
+			{ 
+				id : 3,
+				src : "src/sprite/a2.png",
+				chance : 12,
 				rotation : [0.2, 0.7],
 				axis : {
 					x : [1, 2],
@@ -280,80 +304,108 @@ let gameData = {
 					gold : [0, 1],
 					uranium : [1.2, 2.7],
 				}
+			},
+			{ 
+				id : 4,
+				src : "src/sprite/a3.png",
+				chance : 3,
+				rotation : [0.1, 0.3],
+				axis : {
+					x : [0, 0],
+					y : [0, 0]
+				},
+
+				r : {
+					titanium : 0,
+					copper : 0,
+					silicon: 0,
+					gold : 9,
+					uranium : 0,
+				},
+				multiplier : {
+					titanium : [0, 0],
+					copper : [0, 0],
+					silicon: [0, 0],
+					gold : [1, 3.5],
+					uranium : [0, 0],
+				}
 			}
 		],
 
 		upgrades : [
 			{
 				id : 0,
+				level : 1,
 				name : "Basic Ship Upgrade",
-				dex : "Upgrade the ship to be able to fly faster. +10% turbo.",
+				dex : "+15 Storage",
 				fx : {
-					type : "turbo",
+					type : "storage",
 					mod : "bonus",
-					data : "10",
-					dataType : "%",
+					data : 15,
+					dataType : "n", //n -> number, % -> percentage
 				},
-				cost : 100,
+				cost : {
+					qb : 100,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 			{
 				id : 1,
-				name : "Concentrated Laser",
-				dex : "Upgrade the laser to be able to mine faster. +4 resources/s.",
+				level : 1,
+				name : "Laser Upgrade",
+				dex : "+4 resources/s",
 				fx : {
-					type : "minespeed",
+					type : "laser",
 					mod : "bonus",
-					data : "4",
-					dataType : "restick",
+					data : 4,
+					dataType : "n",
 				},
-				cost : 250,
+				cost : {
+					qb : 150,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 			{
 				id : 2,
-				name : "Advanced Ship Upgrade",
-				dex : "Upgrade the ship to be able to fly faster. +15% turbo.",
+				level : 1,
+				name : "Booster Capacitor Upgrade",
+				dex : "+5% turbo",
 				fx : {
 					type : "turbo",
 					mod : "bonus",
-					data : "15",
+					data : 5,
 					dataType : "%",
 				},
-				cost : 500,
+				cost : {
+					qb : 150,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 			{
 				id : 3,
-				name : "Isometric Laser",
-				dex : "+6 resources/s.",
+				level : 1,
+				name : "Solar Panel Upgrade",
+				dex : "+10 energy/s",
 				fx : {
-					type : "turbo",
+					type : "energy",
 					mod : "bonus",
-					data : "10",
-					dataType : "%",
+					data : 10,
+					dataType : "n",
 				},
-				cost : 440,
+				cost : {
+					qb : 150,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
-			{
-				id : 4,
-				name : "Upgrade Laser",
-				dex : "Upgrade the laser to be able to mine faster. +4 resource/s.",
-				fx : {
-					type : "minespeed",
-					mod : "bonus",
-					data : "4",
-					dataType : "resPerTick",
-				},
-				cost : 350,
-				btnSrc : "src/sprite/btnUpgrade.png",
-				prsSrc : "src/sprite/prsUpgrade.png",
-			},
+
 		]
 
 	},
