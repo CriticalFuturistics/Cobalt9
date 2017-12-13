@@ -61,11 +61,58 @@ function initHTML() {
 	$btnToggleboot.appendTo($crewP)
 	$crewP.append('<span id="isBoot"> OFF </span>')
 
+
+
 	// Populate Chips
 
+
+
+
 	// Populate Upgrades
+	let $up = $('#Upgrades .tab-html')
+	let ups = gameData.consts.upgrades
+
+	let $upList = $("<div>", {"class" : "up-list unselectable", "id" : "upList"})
+	$upList.appendTo($up)
+
+	for (var i = 0; i < ups.length; i++) {
+		let $upItem = $("<div>", {"class" : "up-item", "id" : ("up-" + ups[i].id)})
+		let $upName = $("<div>", {"class" : "up-item-name", "text" : ups[i].name})
+		let $upDex = $("<div>", {"class" : "up-item-dex", "text" : ups[i].dex})
+		let $upCost = $("<div>", {"class" : "up-item-cost", "text" : (ups[i].cost + " Qb")})
+
+		let $upIcon = $("<img>", {"class" : "up-item-icon"})
+		$upIcon.attr("src", ups[i].btnSrc)
+		$upIcon.css({"width" : $upIcon.css("height") + "px"})
+		$upIcon.attr('data-btnSrc', ups[i].btnSrc)
+		$upIcon.attr('data-prsSrc', ups[i].prsSrc)
+
+		$upIcon.mouseover(function(event) {
+			// TODO shade overlay?
+		})
+		$upIcon.mousedown(function(event) {
+			$(this).attr("src", $(this).attr("data-prsSrc"))
+		})
+		$upIcon.mouseup(function(event) {
+			$(this).attr("src", $(this).attr("data-btnSrc"))
+		})
+		$upIcon.mouseleave(function(event) {
+			$(this).attr("src", $(this).attr("data-btnSrc"))
+		})
+		
+		$upItem.append($upIcon)
+		$upItem.append($upName)
+		$upItem.append($upDex)
+		$upItem.append($upCost)
+
+		$upItem.appendTo($upList)
+	}
+
+
+
 
 	// Populate Settings
+
 
 
 	// Populate Resources
@@ -722,9 +769,7 @@ function renderAsteroids() {
 		
 		let transaltion = {
 			x : a.getCenterX() + a.getAxis().x,
-			//x : a.getCenterX() + 2,
 			y : a.getCenterY() + a.getAxis().y
-			//y : a.getCenterY() + 1
 		}
 		ctx.save()
 		ctx.translate(transaltion.x, transaltion.y)
@@ -978,7 +1023,6 @@ function getRandomAsteroidType() {
 	}
 	
 	let a = getAstChance(0, r)
-	//console.log("> " + a.id)
 	return a
 }
 
