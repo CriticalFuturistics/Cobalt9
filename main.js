@@ -64,6 +64,42 @@ function initHTML() {
 
 
 	// Populate Chips
+	let $chips = $('#Chips .tab-html')
+	let availableChips = game.availableChips
+
+	let $cList = $("<div>", {"class" : "c-list unselectable", "id" : "cList"})
+	$cList.appendTo($chips)
+
+	for (let i = 0; i < availableChips.length; i++) {
+		for (let j = 0; j < gameData.consts.chips.length; j++) {
+			if (gameData.consts.chips[j].id == availableChips[i]) {
+			
+				let c = gameData.consts.chips[j]
+				let $cItem = $("<div>", {"class" : "c-item", "id" : ("c-" + c.id)})
+				let $cName = $("<div>", {"class" : "c-item-name", "text" : c.name})
+				let $cDex = $("<div>", {"class" : "c-item-dex", "text" : c.dex})
+
+				let $cIcon = $("<img>", {"class" : "c-item-icon"})
+				if (c.hasOwnProperty('src')) {
+					$cIcon.attr("src", c.src)
+				} else {
+					$cIcon.attr("src", gameData.src.defaults.chips.src)
+				}
+				
+				$cIcon.css({"width" : $cIcon.css("height") + "px"})
+
+				// Add the item components together
+				$cItem.append($cIcon)
+				$cItem.append($cName)
+				$cItem.append($cDex)
+
+				// Append the complete item
+				$cItem.appendTo($cList)
+
+				break
+			}
+		}
+	}
 
 
 
@@ -75,10 +111,10 @@ function initHTML() {
 	let $upList = $("<div>", {"class" : "up-list unselectable", "id" : "upList"})
 	$upList.appendTo($up)
 
-	for (var i = 0; i < ups.length; i++) {
+	for (let i = 0; i < ups.length; i++) {
 		let $upItem = $("<div>", {"class" : "up-item", "id" : ("up-" + ups[i].id)})
 		let $upName = $("<div>", {"class" : "up-item-name", "text" : ups[i].name})
-		let $upDex = $("<div>", {"class" : "up-item-dex", "text" : ups[i].dex})
+		let $upDex  = $("<div>", {"class" : "up-item-dex", "text" : ups[i].dex})
 		let $upCost = $("<div>", {"class" : "up-item-cost", "text" : (ups[i].cost.qb + " Qb")})
 
 		let $upIcon = $("<img>", {"class" : "up-item-icon"})
@@ -100,17 +136,19 @@ function initHTML() {
 			$(this).attr("src", $(this).attr("data-btnSrc"))
 		})
 		
+		// Add the item components together
 		$upItem.append($upIcon)
 		$upItem.append($upName)
 		$upItem.append($upDex)
 		$upItem.append($upCost)
 
+		// Append the complete item
 		$upItem.appendTo($upList)
 	}
 
 
 
-	// Populate Settings
+	// Populate Lab
 
 
 

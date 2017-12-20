@@ -1,4 +1,7 @@
 // DataStructure containing the game state. Could be used as a savefile... maybe.
+// The aim is to use gameData for the constants the game is based one,
+// while 'game' should be used for the variables. 
+// TODO move stuff around for concistency
 let gameData = {
 	canvas : {
 		spaceship : null,
@@ -153,7 +156,17 @@ let gameData = {
 					image : null
 				},
 			}
-		}
+		},
+
+		defaults : {
+			chips : {
+				src : "src/sprite/chip.png",
+			},
+			upgrade : {
+				btnSrc : "src/sprite/btnUpgrade.png",
+				prsSrc : "src/sprite/prsUpgrade.png",
+			},
+		},
 	},
 
 	consts : {
@@ -167,13 +180,13 @@ let gameData = {
 		asteroidSpeed : 0.8,
 		starSpawnRate : 18,	// The lower, the more likely
 		asteroidSpawnRate : 300, // The lower, the more likely
-		lastAsteroidUniqueID : 0,
+		lastAsteroidUniqueID : 0, // Max 99
 
 		maxConcurrentLasers :  1,
 
 		turbo : 0,
 
-		miningStrength : 2,
+		miningStrength : 1,
 		miningPriority : 0,
 		maxMiningPriority : 5,
 
@@ -202,7 +215,7 @@ let gameData = {
 				id : 0,
 				src : "src/sprite/a1.png",
 				chance : 50,
-				rotation : [0.1, 0.5],
+				rotation : [0, 0.2],
 				axis : {
 					x : [1, 2.5],
 					y : [1, 3]
@@ -234,7 +247,7 @@ let gameData = {
 				id : 1,
 				src : "src/sprite/a1.png",
 				chance : 30,
-				rotation : [0.2, 0.4],
+				rotation : [0.1, 0.3],
 				axis : {
 					x : [1, 2],
 					y : [1, 2]
@@ -259,7 +272,7 @@ let gameData = {
 				id : 2,
 				src : "src/sprite/a1.png",
 				chance : 6,
-				rotation : [0.2, 0.6],
+				rotation : [0.1, 0.5],
 				axis : {
 					x : [1, 1],
 					y : [1, 2]
@@ -284,7 +297,7 @@ let gameData = {
 				id : 3,
 				src : "src/sprite/a2.png",
 				chance : 12,
-				rotation : [0.2, 0.7],
+				rotation : [0, 0.6],
 				axis : {
 					x : [1, 2],
 					y : [1, 2]
@@ -319,14 +332,14 @@ let gameData = {
 					titanium : 0,
 					copper : 0,
 					silicon: 0,
-					gold : 9,
+					gold : 10,
 					uranium : 0,
 				},
 				multiplier : {
 					titanium : [0, 0],
 					copper : [0, 0],
 					silicon: [0, 0],
-					gold : [1, 3.5],
+					gold : [1, 3.7],
 					uranium : [0, 0],
 				}
 			}
@@ -382,7 +395,6 @@ let gameData = {
 				},
 				cost : {
 					qb : 150,
-					// Other resources
 				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
@@ -405,18 +417,48 @@ let gameData = {
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
+		],
 
-		]
+		chips : [
+			{
+				id : 0,
+				name : "Energy Chip",
+				dex : "+300 Energy Storage",
+				//src : "", TODO
+
+				fx : {
+					type : "energyStorage",
+					mod : "bonus",
+					data : 300,
+					dataType : "n",
+				},
+			},
+			{
+				id : 1,
+				name : "Laser Intensifier Chip",
+				dex : "+1 Laser Strength (+4 resources/s)",
+				//src : "",
+
+				fx : {
+					type : "miningStrength",
+					mod : "bonus",
+					data : 1,
+					dataType : "n",
+				},
+			},
+		],
+
+
 
 	},
 
 
-
-	
-	_s : { // Strings
-
+	// Strings
+	_s : { 
 		qbits : "qbits",
+		qb : "qbits",
 		energy : "energy",
+		e : "energy",
 
 		r : { // Resources
 			titanium : "titanium",
@@ -427,11 +469,15 @@ let gameData = {
 			food : "food"
 		},
 
+		// Decresing order of default priority
 		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"]
 	}
 }
 
 
+
+
+// Contains the data that varies during the game
 let game = {
 
 	qbits : 0,
@@ -455,7 +501,12 @@ let game = {
 		food : 100,
 	}, 
 
+	// Array of IDs of the chips available (updates when needed)
+	availableChips : [0, 1]
+
 }
+
+
 
 
 
@@ -464,6 +515,8 @@ let settings = {
 		isConsoleBoot : false,
 	}
 }
+
+
 
 
 let animations = {
