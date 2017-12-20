@@ -424,6 +424,7 @@ let gameData = {
 				id : 0,
 				name : "Energy Chip",
 				dex : "+300 Energy Storage",
+				slot : "mobo",
 				//src : "", TODO
 
 				fx : {
@@ -437,6 +438,7 @@ let gameData = {
 				id : 1,
 				name : "Laser Intensifier Chip",
 				dex : "+1 Laser Strength (+4 resources/s)",
+				slot : "laser",
 				//src : "",
 
 				fx : {
@@ -481,7 +483,8 @@ let gameData = {
 let game = {
 
 	qbits : 0,
-	energy : 0,
+	energy : 368,
+	energyMax : 500,
 
 	resources : {
 		titanium : 0,

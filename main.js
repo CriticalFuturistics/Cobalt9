@@ -181,11 +181,7 @@ function initHTML() {
 		$item.attr('data-k', k)
 
 		$item.mouseover(function(event) {
-			createTootlip(	$(this), 
-							100, 
-							40,
-							'l',
-							caseString($(this).attr("data-k")))
+			createTootlip($(this), 100, 40, 'l', caseString($(this).attr("data-k")))
 		})
 		$item.mouseout(function(event) {
 			removeTooltip()
@@ -193,7 +189,19 @@ function initHTML() {
 
 
 		$resourcesList.append($item)
+
+
 	}
+	// Energy Bar
+	// Changind the position to relative so I can position absolutely the energy bar
+	$resources.css({position: 'relative'})
+
+	let $energyBar = $("<div>", { "class" : "energy-bar", "id" : "energyBar"})
+	let $energyN = $("<div>", { "class" : "energyN", "id" : "energyN", "text" : (game.energy + "/" + game.energyMax) })
+
+	$energyBar.append($energyN)
+	$resources.append($energyBar)
+
 	
 
 
