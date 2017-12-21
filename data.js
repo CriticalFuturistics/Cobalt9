@@ -159,9 +159,8 @@ let gameData = {
 		},
 
 		defaults : {
-			chips : {
-				src : "src/sprite/chip.png",
-			},
+			// Chip's index corresponds to its rarity.
+			chips : ["src/sprite/chipCommon.png", "src/sprite/chipUncommon.png", "src/sprite/chipRare.png", "src/sprite/chipEpic.png", "src/sprite/chipLegendary.png", ],
 			upgrade : {
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
@@ -425,6 +424,7 @@ let gameData = {
 				name : "Energy Chip",
 				dex : "+300 Energy Storage",
 				slot : "mobo",
+				rarity : 0,
 				//src : "", TODO
 
 				fx : {
@@ -439,6 +439,7 @@ let gameData = {
 				name : "Laser Intensifier Chip",
 				dex : "+1 Laser Strength (+4 resources/s)",
 				slot : "laser",
+				rarity : 0,
 				//src : "",
 
 				fx : {

@@ -83,7 +83,7 @@ function initHTML() {
 				if (c.hasOwnProperty('src')) {
 					$cIcon.attr("src", c.src)
 				} else {
-					$cIcon.attr("src", gameData.src.defaults.chips.src)
+					$cIcon.attr("src", gameData.src.defaults.chips[gameData.consts.chips[j].rarity])
 				}
 				
 				$cIcon.css({"width" : $cIcon.css("height") + "px"})
