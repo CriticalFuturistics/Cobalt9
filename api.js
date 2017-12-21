@@ -124,4 +124,3 @@ function clearTypeText(jQString) {
 function toRad(deg) {
 	return (deg * Math.PI / 180).toFixed(3)
 }
-

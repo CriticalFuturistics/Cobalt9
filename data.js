@@ -1,4 +1,7 @@
 // DataStructure containing the game state. Could be used as a savefile... maybe.
+// The aim is to use gameData for the constants the game is based one,
+// while 'game' should be used for the variables. 
+// TODO move stuff around for concistency
 let gameData = {
 	canvas : {
 		spaceship : null,
@@ -153,7 +156,17 @@ let gameData = {
 					image : null
 				},
 			}
-		}
+		},
+
+		defaults : {
+			chips : {
+				src : "src/sprite/chip.png",
+			},
+			upgrade : {
+				btnSrc : "src/sprite/btnUpgrade.png",
+				prsSrc : "src/sprite/prsUpgrade.png",
+			},
+		},
 	},
 
 	consts : {
@@ -166,14 +179,14 @@ let gameData = {
 		starSpeed : 0.6,
 		asteroidSpeed : 0.8,
 		starSpawnRate : 18,	// The lower, the more likely
-		asteroidSpawnRate : 700, // The lower, the more likely
-		lastAsteroidUniqueID : 0,
+		asteroidSpawnRate : 300, // The lower, the more likely
+		lastAsteroidUniqueID : 0, // Max 99
 
 		maxConcurrentLasers :  1,
 
 		turbo : 0,
 
-		miningStrength : 2,
+		miningStrength : 1,
 		miningPriority : 0,
 		maxMiningPriority : 5,
 
@@ -197,13 +210,12 @@ let gameData = {
 			u : 2,
 		},
 
-
 		asteroidTypes : [
 			{ 
 				id : 0,
 				src : "src/sprite/a1.png",
 				chance : 50,
-				rotation : [0.1, 0.5],
+				rotation : [0, 0.2],
 				axis : {
 					x : [1, 2.5],
 					y : [1, 3]
@@ -235,7 +247,7 @@ let gameData = {
 				id : 1,
 				src : "src/sprite/a1.png",
 				chance : 30,
-				rotation : [0.2, 0.4],
+				rotation : [0.1, 0.3],
 				axis : {
 					x : [1, 2],
 					y : [1, 2]
@@ -258,9 +270,34 @@ let gameData = {
 			},
 			{ 
 				id : 2,
-				src : "src/sprite/a2.png",
+				src : "src/sprite/a1.png",
 				chance : 6,
-				rotation : [0.2, 0.7],
+				rotation : [0.1, 0.5],
+				axis : {
+					x : [1, 1],
+					y : [1, 2]
+				},
+
+				r : {
+					titanium : 5,
+					copper : 4,
+					silicon: 0,
+					gold : 1,
+					uranium : 1,
+				},
+				multiplier : {
+					titanium : [0.4, 1.5],
+					copper : [1.6, 2.9],
+					silicon: [0, 0],
+					gold : [0.2, 1.3],
+					uranium : [1, 2.3],
+				}
+			},
+			{ 
+				id : 3,
+				src : "src/sprite/a2.png",
+				chance : 12,
+				rotation : [0, 0.6],
 				axis : {
 					x : [1, 2],
 					y : [1, 2]
@@ -280,91 +317,150 @@ let gameData = {
 					gold : [0, 1],
 					uranium : [1.2, 2.7],
 				}
+			},
+			{ 
+				id : 4,
+				src : "src/sprite/a3.png",
+				chance : 3,
+				rotation : [0.1, 0.3],
+				axis : {
+					x : [0, 0],
+					y : [0, 0]
+				},
+
+				r : {
+					titanium : 0,
+					copper : 0,
+					silicon: 0,
+					gold : 10,
+					uranium : 0,
+				},
+				multiplier : {
+					titanium : [0, 0],
+					copper : [0, 0],
+					silicon: [0, 0],
+					gold : [1, 3.7],
+					uranium : [0, 0],
+				}
 			}
 		],
 
 		upgrades : [
 			{
 				id : 0,
+				level : 1,
 				name : "Basic Ship Upgrade",
-				dex : "Upgrade the ship to be able to fly faster. +10% turbo.",
+				dex : "+15 Storage",
 				fx : {
-					type : "turbo",
+					type : "storage",
 					mod : "bonus",
-					data : "10",
-					dataType : "%",
+					data : 15,
+					dataType : "n", //n -> number, % -> percentage
 				},
-				cost : 100,
+				cost : {
+					qb : 100,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 			{
 				id : 1,
-				name : "Concentrated Laser",
-				dex : "Upgrade the laser to be able to mine faster. +4 resources/s.",
+				level : 1,
+				name : "Laser Upgrade",
+				dex : "+4 resources/s",
 				fx : {
-					type : "minespeed",
+					type : "laser",
 					mod : "bonus",
-					data : "4",
-					dataType : "restick",
+					data : 4,
+					dataType : "n",
 				},
-				cost : 250,
+				cost : {
+					qb : 150,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 			{
 				id : 2,
-				name : "Advanced Ship Upgrade",
-				dex : "Upgrade the ship to be able to fly faster. +15% turbo.",
+				level : 1,
+				name : "Booster Capacitor Upgrade",
+				dex : "+5% turbo",
 				fx : {
 					type : "turbo",
 					mod : "bonus",
-					data : "15",
+					data : 5,
 					dataType : "%",
 				},
-				cost : 500,
+				cost : {
+					qb : 150,
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 			{
 				id : 3,
-				name : "Isometric Laser",
-				dex : "+6 resources/s.",
+				level : 1,
+				name : "Solar Panel Upgrade",
+				dex : "+10 energy/s",
 				fx : {
-					type : "turbo",
+					type : "energy",
 					mod : "bonus",
-					data : "10",
-					dataType : "%",
+					data : 10,
+					dataType : "n",
 				},
-				cost : 440,
+				cost : {
+					qb : 150,
+					// Other resources
+				},
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
+			},
+		],
+
+		chips : [
+			{
+				id : 0,
+				name : "Energy Chip",
+				dex : "+300 Energy Storage",
+				slot : "mobo",
+				//src : "", TODO
+
+				fx : {
+					type : "energyStorage",
+					mod : "bonus",
+					data : 300,
+					dataType : "n",
+				},
 			},
 			{
-				id : 4,
-				name : "Upgrade Laser",
-				dex : "Upgrade the laser to be able to mine faster. +4 resource/s.",
+				id : 1,
+				name : "Laser Intensifier Chip",
+				dex : "+1 Laser Strength (+4 resources/s)",
+				slot : "laser",
+				//src : "",
+
 				fx : {
-					type : "minespeed",
+					type : "miningStrength",
 					mod : "bonus",
-					data : "4",
-					dataType : "resPerTick",
+					data : 1,
+					dataType : "n",
 				},
-				cost : 350,
-				btnSrc : "src/sprite/btnUpgrade.png",
-				prsSrc : "src/sprite/prsUpgrade.png",
 			},
-		]
+		],
+
+
 
 	},
 
 
-
-	
-	_s : { // Strings
-
+	// Strings
+	_s : { 
 		qbits : "qbits",
+		qb : "qbits",
 		energy : "energy",
+		e : "energy",
 
 		r : { // Resources
 			titanium : "titanium",
@@ -375,15 +471,20 @@ let gameData = {
 			food : "food"
 		},
 
+		// Decresing order of default priority
 		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"]
 	}
 }
 
 
+
+
+// Contains the data that varies during the game
 let game = {
 
 	qbits : 0,
-	energy : 0,
+	energy : 368,
+	energyMax : 500,
 
 	resources : {
 		titanium : 0,
@@ -403,7 +504,12 @@ let game = {
 		food : 100,
 	}, 
 
+	// Array of IDs of the chips available (updates when needed)
+	availableChips : [0, 1]
+
 }
+
+
 
 
 
@@ -412,6 +518,8 @@ let settings = {
 		isConsoleBoot : false,
 	}
 }
+
+
 
 
 let animations = {

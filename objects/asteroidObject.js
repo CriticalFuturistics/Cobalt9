@@ -70,7 +70,7 @@ class AsteroidObj {
 		}
 
 		// You can't mine food from asteroids you fool
-		if (priority == _s.r['food']) {
+		if (priority == _s.r.food) {
 			return null
 		}
 
@@ -104,16 +104,18 @@ class AsteroidObj {
 				return null
 
 			} else { // Mine something else based on priority rarest first
-				if (k != _s.r['uranium'] && cr[_s.r['uranium']] > 0) {
-					return this.mine(strength, _s.r['uranium'])
-				} else if (k != _s.r['gold'] && cr[_s.r['gold']] > 0) {
-					return this.mine(strength, _s.r['gold'])
-				} else if (k != _s.r['silicon'] && cr[_s.r['silicon']] > 0) {
-					return this.mine(strength, _s.r['silicon'])
-				} else if (k != _s.r['copper'] && cr[_s.r['copper']] > 0) {
-					return this.mine(strength, _s.r['copper'])
-				} else  if (k != _s.r['titanium'] && cr[_s.r['titanium']] > 0) {
-					return this.mine(strength, _s.r['titanium'])
+				if (k != _s.r.uranium && cr[_s.r.uranium] > 0) {
+					return this.mine(strength, _s.r.uranium)
+				} else if (k != _s.r.gold && cr[_s.r.gold] > 0) {
+					return this.mine(strength, _s.r.gold)
+				} else if (k != _s.r.silicon && cr[_s.r.silicon] > 0) {
+					return this.mine(strength, _s.r.silicon)
+				} else if (k != _s.r.copper && cr[_s.r.copper] > 0) {
+					return this.mine(strength, _s.r.copper)
+				} else if (k != _s.r.titanium && cr[_s.r.titanium] > 0) {
+					return this.mine(strength, _s.r.titanium)
+				} else {
+					return null
 				}
 			}
 		}
