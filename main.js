@@ -78,6 +78,8 @@ function initHTML() {
 				let $cItem = $("<div>", {"class" : "c-item", "id" : ("c-" + c.id)})
 				let $cName = $("<div>", {"class" : "c-item-name", "text" : c.name})
 				let $cDex = $("<div>", {"class" : "c-item-dex", "text" : c.dex})
+				let $cCompTitle = $("<div>", {"class" : "c-item-comp-title", "text" : "Compatibility"}) 
+				let $cComp = $("<div>", {"class" : "c-item-comp", "text" : getChipComp(c.compatibility)})
 
 				let $cIcon = $("<img>", {"class" : "c-item-icon"})
 				if (c.hasOwnProperty('src')) {
@@ -91,7 +93,9 @@ function initHTML() {
 				// Add the item components together
 				$cItem.append($cIcon)
 				$cItem.append($cName)
+				$cItem.append($cCompTitle)
 				$cItem.append($cDex)
+				$cItem.append($cComp)
 
 				// Append the complete item
 				$cItem.appendTo($cList)
@@ -99,6 +103,16 @@ function initHTML() {
 				break
 			}
 		}
+	}
+
+	function getChipComp(comps) {
+		let res = ""
+		for (let i = 0; i < comps.length; i++) {
+			let c = getFromObjArr(gameData.consts.chipSlots, "id", gameData.consts.chipSlots[i].id)
+			let isLast = (i == (comps.length - 1))
+			res = addTextList(res, c.fullName, isLast)
+		}
+		return res
 	}
 
 
@@ -210,8 +224,6 @@ function initHTML() {
 	// Populate Starmap
 
 	// Populate Encylopedia
-
-
 }
 
 // General init
@@ -222,7 +234,6 @@ function init(){
 
     // Initial Boot
 	bootConsole()
-
 }
 
 // Loads the sprites, but only after the initial terminal boot
@@ -387,7 +398,7 @@ function gameLoop() {
 	}
 
 	// Update every tick ---
-	decrementTurbo()	
+	decrementTurbo()
 }
 
 // 					(time TODO)
@@ -424,26 +435,45 @@ function updateTravelInfo() {
 
 function decrementTurbo() {
 	if (gameData.consts.turbo > 0) {
-		if (gameData.consts.turbo > 750) {
-			gameData.consts.starSpeed = 14
-			gameData.consts.starSpawnRate = 2
-			gameData.consts.turbo -= 12
-		} else if (gameData.consts.turbo > 500) {
-			gameData.consts.starSpeed = 9
-			gameData.consts.starSpawnRate = 4
-			gameData.consts.turbo -= 9
-		} else if (gameData.consts.turbo > 250) {
-			gameData.consts.starSpeed = 4
-			gameData.consts.starSpawnRate = 10
-			gameData.consts.turbo -= 7
-		} else {
-			gameData.consts.starSpeed = 0.7
-			gameData.consts.starSpawnRate = 18	
-			gameData.consts.turbo -= 6
-		}
 
+		// Formulas available at https://www.desmos.com/calculator/y8pibgbwxx
+
+		// Turbo decrement
+		let dec = 6 + Math.round(Math.pow(gameData.consts.turbo/10, 2)/940)
+		if (dec > 12) dec = 12
+		gameData.consts.turbo -= dec
+
+		// Star Speed increment
+		let sspeed = gameData.consts.baseStarSpeed + (Math.pow(gameData.consts.turbo/10, 1.6) * 0.013)
+		if (isNaN(sspeed)) sspeed = gameData.consts.baseStarSpeed
+		gameData.consts.starSpeed = sspeed
+
+		// Stars spawnrate increment
+		let srate = gameData.consts.baseStarSpawnRate - Math.pow(gameData.consts.turbo/10, (3/4.2))
+		if (isNaN(srate)) srate = gameData.consts.baseStarSpawnRate
+		if (srate < 2) srate = 2
+		gameData.consts.starSpawnRate = srate
+
+		// Asteroids speed increment
+		let aspeed = gameData.consts.baseAsteroidSpeed + (Math.pow(gameData.consts.turbo/10, 1.6) * 0.013)
+		if (isNaN(aspeed)) aspeed = gameData.consts.baseAsteroidSpeed
+		gameData.consts.asteroidSpeed = aspeed
+
+
+		// When moving real fast, no asteroids will spawn
+		if (gameData.consts.turbo > 10) {
+			gameData.consts.maxAsteroids = 0
+		} else {
+			gameData.consts.maxAsteroids = gameData.consts.baseMaxAsteroids
+		}
+		
+
+		// Update the new speeds on the currently displayed items
 		for (let i = 0; i < gameData.canvas.stars.length; i++) {
 			gameData.canvas.stars[i].speed = gameData.consts.starSpeed
+		}
+		for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
+			gameData.canvas.asteroids[i].speed = gameData.consts.asteroidSpeed
 		}
 	}
 }
@@ -948,26 +978,34 @@ function newAsteroid() {
 	}
 
 	let x = getRandomStartPos(canvas.width, asteroidW)
-	let minDistance = asteroidW
-
-	// Check if it's not too close to another asteroid.
-	let lastAsteroid = []
-	if (gameData.canvas.asteroids.length > 2) {
-		lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1])
-		lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 2])
+	let ship = gameData.canvas.spaceship
+	// Make sure the asteroid doesn't spawn direclty on top of the ship, otherwise it'd be a pain to mine
+	if (x > (ship.x) && x < (ship.x + ship.width)) {
+		newAsteroid()
 	} else {
-		for (let i = 0; i < lastAsteroid.length; i++) {
-			lastAsteroid[i].getX() = x + minDistance
+		let minDistance = asteroidW
+
+		// Check if it's not too close to another asteroid.
+		let lastAsteroid = []
+		if (gameData.canvas.asteroids.length > 2) {
+			lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1])
+			lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 2])
+		} else {
+			for (let i = 0; i < lastAsteroid.length; i++) {
+				lastAsteroid[i].getX() = x + minDistance
+			}
+		}
+		if (gameData.canvas.asteroids.length <= gameData.consts.maxAsteroids) {	
+			if (lastAsteroid.length == 0) {
+				createAsteroid()
+			} else if (Math.abs(lastAsteroid[0].getX() - x) < minDistance) {
+				newAsteroid()
+			} else {
+				createAsteroid()
+			}
 		}
 	}
 
-	if (lastAsteroid.length == 0) {
-		createAsteroid()
-	} else if (Math.abs(lastAsteroid[0].getX() - x) < minDistance) {
-		newAsteroid()
-	} else {
-		createAsteroid()
-	}
 
 	// Private internal function
 	function createAsteroid(){

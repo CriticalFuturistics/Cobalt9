@@ -124,3 +124,25 @@ function clearTypeText(jQString) {
 function toRad(deg) {
 	return (deg * Math.PI / 180).toFixed(3)
 }
+
+
+// Where objArr is an array of objects
+function getFromObjArr(objArr, prop, value) {
+	for (let i = 0; i < objArr.length; i++) {
+		if (objArr[i].hasOwnProperty(prop)) {
+			if (objArr[i][prop] == value) {
+				return objArr[i]
+			}
+		}
+	}
+	return null
+}
+
+
+// Concatenates text with commas
+function addTextList(main, text, isLast) {
+	if (isLast) main += text
+	else main += text + ", "
+
+	return main
+}

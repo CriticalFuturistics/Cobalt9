@@ -160,7 +160,14 @@ let gameData = {
 
 		defaults : {
 			// Chip's index corresponds to its rarity.
-			chips : ["src/sprite/chipCommon.png", "src/sprite/chipUncommon.png", "src/sprite/chipRare.png", "src/sprite/chipEpic.png", "src/sprite/chipLegendary.png", ],
+			chips : [
+				"src/sprite/chipCommon.png", 
+				"src/sprite/chipUncommon.png",
+				"src/sprite/chipRare.png",
+				"src/sprite/chipEpic.png",
+				"src/sprite/chipLegendary.png",
+				"src/sprite/chipImmortal.png"
+			],
 			upgrade : {
 				btnSrc : "src/sprite/btnUpgrade.png",
 				prsSrc : "src/sprite/prsUpgrade.png",
@@ -175,11 +182,20 @@ let gameData = {
 		isConsoleEventEnabled : false,
 		isGameEventEnabled : false,
 
+		baseStarSpeed : 0.6,
 		starSpeed : 0.6,
+
+		baseAsteroidSpeed : 0.8,
 		asteroidSpeed : 0.8,
+		
+		baseStarSpawnRate : 18,
 		starSpawnRate : 18,	// The lower, the more likely
-		asteroidSpawnRate : 300, // The lower, the more likely
+		
+		baseAsteroidSpawnRate : 400,
+		asteroidSpawnRate : 400, // The lower, the more likely
 		lastAsteroidUniqueID : 0, // Max 99
+		baseMaxAsteroids : 7,
+		maxAsteroids : 7,
 
 		maxConcurrentLasers :  1,
 
@@ -423,7 +439,7 @@ let gameData = {
 				id : 0,
 				name : "Energy Chip",
 				dex : "+300 Energy Storage",
-				slot : "mobo",
+				compatibility : ["mobo", "energyStorage"],
 				rarity : 0,
 				//src : "", TODO
 
@@ -438,7 +454,7 @@ let gameData = {
 				id : 1,
 				name : "Laser Intensifier Chip",
 				dex : "+1 Laser Strength (+4 resources/s)",
-				slot : "laser",
+				compatibility : ["laser"],
 				rarity : 0,
 				//src : "",
 
@@ -451,6 +467,23 @@ let gameData = {
 			},
 		],
 
+		chipSlots : [
+			{
+				id : 0,
+				name : "mobo",
+				fullName : "Motherboard",
+			},
+			{
+				id : 1,
+				name : "laser",
+				fullName : "Laser",
+			},
+			{
+				id : 2,
+				name : "energyStorage",
+				fullName : "Energy Storage",
+			},
+		],
 
 
 	},
@@ -473,7 +506,10 @@ let gameData = {
 		},
 
 		// Decresing order of default priority
-		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"]
+		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"],
+
+
+
 	}
 }
 

@@ -3,8 +3,8 @@
 
 class CanvasObj {
 	constructor(x, y, img, speed) {
-		this.x = x
-		this.y = y
+		this.x = parseInt(x)
+		this.y = parseInt(y)
 		this.scale = 1
 		this.img = img
 		this.rotationAmount = 0

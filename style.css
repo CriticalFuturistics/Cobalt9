@@ -188,7 +188,7 @@ canvas { display:block; }
 	height: 40px;
 	margin-left: 10px;
 	margin-right: 10px;
-	background: #35C3F7;
+	background: #38AADF;
 	border: 1px solid #FFF;
 }
 
@@ -317,5 +317,7 @@ canvas { display:block; }
 }
 
 .c-item-icon { float: right; height: 90%; cursor: pointer; }
-.c-item-name { font-size: 16px; color: #D9D727; padding-top: 10px; }
-.c-item-dex { font-size: 12px; color: #FFF; padding-top: 10px; }
+.c-item-name { width: 50%; font-size: 16px; color: #D9D727; padding-top: 8px; float: left;}
+.c-item-dex { width: 50%; font-size: 12px; color: #FFF; padding-top: 8px; float: left; }
+.c-item-comp-title { width: calc(50% - 90px); font-size: 16px; color: #D9D727; padding-top: 8px; float: left; }
+.c-item-comp { width: calc(50% - 90px); font-size: 12px; color: #FFF; padding-top: 8px; float: left; }
