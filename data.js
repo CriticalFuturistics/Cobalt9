@@ -505,6 +505,15 @@ let gameData = {
 			food : "food"
 		},
 
+		rColors : {
+			titanium : "#CDCDCD", // TODO actual colors
+			copper : "#C7711D",
+			silicon : "#B7B29F",
+			gold : "#DDDB0F",
+			uranium : "#24EC24",
+			food : "#784509"
+		},
+
 		// Decresing order of default priority
 		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"],
 
@@ -520,8 +529,8 @@ let gameData = {
 let game = {
 
 	qbits : 0,
-	energy : 368,
-	energyMax : 500,
+	energy : 400,
+	maxEnergy : 500,
 
 	resources : {
 		titanium : 0,
@@ -541,8 +550,22 @@ let game = {
 		food : 100,
 	}, 
 
+	invSlots : 10,
+	inv : [
+		null, null, null, null, null,
+		null, null, null, null, null,
+	],
+
 	// Array of IDs of the chips available (updates when needed)
-	availableChips : [0, 1]
+	availableChips : [0, 1],
+
+	pcbs : {
+		// Array of the installed chips. 
+		// Null means no chip is installed.
+		mobo : [null, null, null],
+		laser : [null],
+		energyStorage : [null],
+	},
 
 }
 

@@ -1,10 +1,16 @@
+// Prototype function to get fixed float numbers
+Number.prototype.toFixedNumber = function(x, base) {
+  var pow = Math.pow(base || 10, x)
+  return +(Math.round(this * pow) / pow)
+}
+
 // Basic method to get a random int between 2 values
 function getRandom(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min
 }
 // Same as getRandom, but returns a float.toFixed(fix)
 function getRandomFloat(min, max, fix) {
-	return ((Math.random() * (max - min)) + min).toFixed(fix)
+	return ((Math.random() * (max - min)) + min).toFixedNumber(fix)
 }
 
 // Properly case a string
@@ -15,6 +21,11 @@ function caseString(s) {
 // Get what % n is of m
 function getPercent(n, m) {
 	return (m / n) * 100
+}
+
+// Get the p% of n
+function getPercentOf(p, n) {
+	return p/100 * n
 }
 
 // Color gradient function from pure red (0%), to pure green (100%)
@@ -122,7 +133,7 @@ function clearTypeText(jQString) {
 
 
 function toRad(deg) {
-	return (deg * Math.PI / 180).toFixed(3)
+	return (deg * Math.PI / 180).toFixedNumber(3)
 }
 
 

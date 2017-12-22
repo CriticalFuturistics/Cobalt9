@@ -46,9 +46,9 @@ class CanvasObj {
 	// Where dpf is "degrees per frame"
 	setRotationAmount(dpf) { this.rotationAmount = dpf }
 
-	getRotationAmount() { return parseFloat(this.rotationAmount).toFixed(1) }
+	getRotationAmount() { return parseFloat(this.rotationAmount).toFixedNumber(1) }
 
-	getRotation() { return parseFloat(this.rotation).toFixed(1) }
+	getRotation() { return parseFloat(this.rotation).toFixedNumber(1) }
 	
 	setAxis(axis) { this.axis = axis }
 	

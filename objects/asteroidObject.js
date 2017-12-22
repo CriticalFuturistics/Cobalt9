@@ -27,7 +27,7 @@ class AsteroidObj {
 			uranium : 0,
 		}
 		for (k in base) {
-			let m = (getRandom(mult[k][0], mult[k][1])).toFixed(1)
+			let m = (getRandom(mult[k][0], mult[k][1])).toFixedNumber(1)
 			b[k] = (base[k] * m).toFixed() 
 		}
 		return b

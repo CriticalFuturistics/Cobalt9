@@ -19,6 +19,11 @@ let timeToUpdate = true
 let easeingShip = true
 let increment = .002
 
+let hasTileStart = false
+let hasTileTypeSelected = false
+let tileType = null
+let tileStart = null
+
 
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
@@ -30,9 +35,10 @@ $(document).ready(function($) {
 
 // Load the sound files into an HTML element.
 function initSound() {
-	sfx = document.createElement('audio')
-    sfx.setAttribute('src', 'src/sfx-hover.mp3')
-    sfx.volume = 0.1
+	sfx = {}
+	sfx.hover = document.createElement('audio')
+    sfx.hover.setAttribute('src', 'src/sfx-hover.mp3')
+    sfx.hover.volume = 0.1
 }
 
 // Change the initail CSS of some elements.
@@ -166,10 +172,10 @@ function initHTML() {
 
 
 
+
 	// Populate Resources
 	let $resources = $('#Resources .tab-html')
 	let $resourcesList = $('#Resources #resourcesList')
-
 	let r = game.resources
 
 	for (k in r){
@@ -203,23 +209,155 @@ function initHTML() {
 
 
 		$resourcesList.append($item)
-
-
 	}
+
 	// Energy Bar
 	// Changind the position to relative so I can position absolutely the energy bar
 	$resources.css({position: 'relative'})
 
+	let $energy = $("<div>", { "class" : "energy", "id" : "energy"})
 	let $energyBar = $("<div>", { "class" : "energy-bar", "id" : "energyBar"})
-	let $energyN = $("<div>", { "class" : "energyN", "id" : "energyN", "text" : (game.energy + "/" + game.energyMax) })
+	let $energyN = $("<div>", { "class" : "energyN", "id" : "energyN", "text" : (game.energy + "/" + game.maxEnergy) })
+	$energyBar.css({ "width" : getPercent(game.maxEnergy, game.energy) + "%"})
 
 	$energyBar.append($energyN)
-	$resources.append($energyBar)
+	$energy.append($energyBar)
+	$resources.append($energy)
 
 	
 
 
 	// Populate Inventory
+	let $inv = $('#Inventory .tab-html')
+	let $tiles = $("<div>", { "class" : "tiles", "width" : "70%" })
+	let $tileTypes = $("<div>", { "class" : "tile-types", "width" : "30%" })
+
+
+	let $tileDeselect = $("<div>", { "class" : "tile-deselect unselectable", "text" : "Deselect"})
+	$tileDeselect.click(function(event) {
+		hasTileStart = false
+		hasTileTypeSelected = false
+		tileType = null
+		deselectAllTypeTiles()
+	})
+	
+
+	// First setup an empty tile type (so you can clear allocations)
+	let $tileType = $("<div>", { "class" : "tile-type"})
+	let $tilePicker = $("<div>", { "class" : "tile-picker", "data-tile-type" : null})
+	
+	// Mark this tile type as selected
+	$tilePicker.click(function(event) {
+		hasTileTypeSelected = true
+		tileType = $(this).attr("data-tile-type")
+		deselectAllTypeTiles()
+		$(this).css({ "border-width" : "2px", "border-color" : "rgba(255, 255, 255, 1)"})
+	})
+
+	let $tileTypeName = $("<div>", { "class" : "tile-type-name", "text" : "Empty"})
+	$tileType.append($tilePicker)
+	$tileType.append($tileTypeName)
+
+	$tileTypes.append($tileType)
+
+	// Then setup the rest of resources
+	for (k in gameData._s.r) {
+		let $tileType = $("<div>", { "class" : "tile-type"})
+		let $tilePicker = $("<div>", { "class" : "tile-picker", "data-tile-type" : k})
+
+		$tilePicker.css({ "background-color" : gameData._s.rColors[k] })
+		// Mark this tile type as selected
+		$tilePicker.click(function(event) {
+			hasTileTypeSelected = true
+			tileType = $(this).attr("data-tile-type")
+			deselectAllTypeTiles()
+			$(this).css({ "border-width" : "2px", "border-color" : "rgba(255, 255, 255, 1)"})
+		})
+
+		let $tileTypeName = $("<div>", { "class" : "tile-type-name", "text" : caseString(k)})
+		$tileType.append($tilePicker)
+		$tileType.append($tileTypeName)
+
+		$tileTypes.append($tileType)
+	}
+
+	$tileTypes.append($tileDeselect)
+
+	function deselectAllTypeTiles() {	
+		$('.tile-picker').css({ "border-width" : "1px", "border-color" : "rgba(255, 255, 255, 0.3)"})
+	}
+
+	let inv = game.inv
+	for (let i = 0; i < game.invSlots; i++) {
+		// Create the tile
+		let $tile = null
+		if (i == 0)
+			$tile = $("<div>", { "class" : "box clear", "data-box-id" : i })
+		else 
+			$tile = $("<div>", { "class" : "box", "data-box-id" : i })
+
+		// Check what has been allocated and color it
+		if (inv[i] != null) {	
+			$tile.css({ "background-color" : gameData._s.rColors[inv[i]] })
+		}
+
+		// Add the tile
+		$tiles.append($tile)
+	}
+
+	$inv.append($tiles)
+	$inv.append($tileTypes)
+	
+
+	$('.box').click(function(event) {
+		event.preventDefault()
+		if (hasTileTypeSelected) {
+			if (hasTileStart) {
+				hasTileStart = false
+				let thisID = parseInt($(event.target).attr("data-box-id"))
+
+				if (tileStart <= thisID) {
+					for (var i = tileStart + 1; i <= thisID; i++) {
+						if (tileType == null) {
+							$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
+						} else {
+							$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+						}
+					}
+				} else {
+					for (var i = thisID; i <= tileStart; i++) {
+						if (tileType == null) {
+							$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
+						} else {
+							$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+						}
+					}
+				}
+				game.inv[i] = tileType
+
+			} else { 
+				hasTileStart = true
+				tileStart = parseInt($(event.target).attr("data-box-id"))
+				if (tileType == null) {
+					$(event.target).css({ "background-color" : "rgba(0, 0, 0, 0)"})
+				} else {
+					$(event.target).css({ "background-color" : gameData._s.rColors[tileType]})
+				}
+				game.inv[i] = tileType
+			}
+		} else {
+			// Print "No tile type selected"
+		}
+		
+	})
+
+
+	$(".box").mouseenter(function() {
+		sfx.hover.play()
+	}).mouseleave(function() {
+		sfx.hover.pause()
+		sfx.hover.currentTime = 0
+	})
 
 	// Populate Starmap
 
@@ -1414,7 +1552,7 @@ function unitConversion(n, u, type) {
 function convertToAU(n, u) {
 	// KM --> AU
 	if (u == 0) {
-		return { u : 1,	n : Math.round((n / 149598000).toFixed(1)) }
+		return { u : 1,	n : Math.round((n / 149598000).toFixedNumber(1)) }
 	} 
 	// PC --> AU
 	if (u == 2) {
@@ -1425,7 +1563,7 @@ function convertToAU(n, u) {
 function convertToPC(n, u) {
 	// AU --> PC
 	if (u == 1) {
-		return { u : 2,	n : Math.round((n / 206265).toFixed(1)) }
+		return { u : 2,	n : Math.round((n / 206265).toFixedNumber(1)) }
 	} 
 	// ?? --> PC
 	// If we need a higher unit of measurement
