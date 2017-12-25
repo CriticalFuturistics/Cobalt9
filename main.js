@@ -1,7 +1,7 @@
 /* Cobalt9 - 2017 - Critical Futuristics Copyright */
 
-const fps = 40
-const framerate = 1000 / fps
+const FPS = 40
+const FRAMERATE = 1000 / FPS
 
 
 let canvas = document.getElementById("gameCanvas")
@@ -27,6 +27,7 @@ let tileStart = null
 
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
+    loadSettings()
 	initSound()
 	initCSS()
 	initHTML()
@@ -37,7 +38,7 @@ $(document).ready(function($) {
 function initSound() {
 	sfx = {}
 	sfx.hover = document.createElement('audio')
-    sfx.hover.setAttribute('src', 'src/sfx-hover.mp3')
+    sfx.hover.setAttribute('src', gameData.src.sfx.hover)
     sfx.hover.volume = 0.1
 }
 
@@ -65,7 +66,10 @@ function initHTML() {
 	let $btnToggleboot = $("<a>", {"class" : "btn", "text" : "Toggle Boot", "onclick" : "toggleBoot()"})
 	$crewP.append('<br>')
 	$btnToggleboot.appendTo($crewP)
-	$crewP.append('<span id="isBoot"> OFF </span>')
+
+	let bootStatus = "OFF"
+	if (settings.visual.isConsoleBoot) bootStatus = " ON"
+	$crewP.append('<span id="isBoot"> ' + bootStatus + ' </span>')
 
 
 
@@ -229,6 +233,18 @@ function initHTML() {
 
 	// Populate Inventory
 	let $inv = $('#Inventory .tab-html')
+	let $tileDex = $("<div>", { "class" : "tile-dex"})
+	let $warning = $("<div>", { "class" : "warning", "id" : "tileWarning"})
+	$tileDex.html(gameData._dex.inv.tiles
+			+ "<br>"
+			+ gameData._dex.inv.capacityStart 
+			+ "<strong>" 
+			+ game.slotCapacity 
+			+ "</strong>" 
+			+ gameData._dex.inv.capacityEnd)
+	$inv.append($tileDex)
+	$inv.append($warning)
+
 	let $tiles = $("<div>", { "class" : "tiles", "width" : "70%" })
 	let $tileTypes = $("<div>", { "class" : "tile-types", "width" : "30%" })
 
@@ -283,7 +299,8 @@ function initHTML() {
 
 	$tileTypes.append($tileDeselect)
 
-	function deselectAllTypeTiles() {	
+	function deselectAllTypeTiles() {
+		$('#tileWarning').text("")
 		$('.tile-picker').css({ "border-width" : "1px", "border-color" : "rgba(255, 255, 255, 0.3)"})
 	}
 
@@ -312,6 +329,7 @@ function initHTML() {
 	$('.box').click(function(event) {
 		event.preventDefault()
 		if (hasTileTypeSelected) {
+			$('#tileWarning').text("")
 			if (hasTileStart) {
 				hasTileStart = false
 				let thisID = parseInt($(event.target).attr("data-box-id"))
@@ -346,9 +364,8 @@ function initHTML() {
 				game.inv[i] = tileType
 			}
 		} else {
-			// Print "No tile type selected"
+			$('#tileWarning').text(gameData._dex.inv.warning)
 		}
-		
 	})
 
 
@@ -372,6 +389,20 @@ function init(){
 
     // Initial Boot
 	bootConsole()
+}
+
+// Loads the settings from LocalStorage (or from PlayFab, but that's a TODO for later)
+function loadSettings() {
+	if (localStorage.getItem(gameData._c9.settings) != null) {
+		settings = JSON.parse(localStorage.getItem(gameData._c9.settings))
+	} else {
+		// Stuff to do if this is a new savefile TODO
+	}
+}
+
+// Saves the settings on LocalStorage (and on PlayFab, but that's a TODO for later)
+function saveSettings() {
+	localStorage.setItem(gameData._c9.settings, JSON.stringify(settings))
 }
 
 // Loads the sprites, but only after the initial terminal boot
@@ -507,7 +538,7 @@ function loadCanvas() {
         gameData.consts.isConsoleLoaded = false
         renderConsole()
 
-        gLoop = setInterval(gameLoop, framerate)
+        gLoop = setInterval(gameLoop, FRAMERATE)
     }
     resizeCanvas()
 }
@@ -631,12 +662,19 @@ function bootConsole() {
 		hideOverlay(jQString)
 		loadSprites()
 	} else {
+		// Play music
+		if (settings.sound.music && settings.sound.volume > 0) {
+			music = {}
+			music.hover = document.createElement('audio')
+		    music.hover.setAttribute('src', gameData.src.music.boot)
+		    music.hover.volume = 1.0
+		    music.hover.currentTime = 0
+			music.hover.play()
+		}
+
 		// Show the black terminal as an overlay
 		showOverlay(jQString)
 		jQString += " p"
-
-		// Start the music/sfx TODO
-		// ...
 
 		// Animate
 		setTimeout(animBootBlink, animations.boot.initDelay, 5, jQString)
@@ -1605,6 +1643,8 @@ function toggleBoot() {
 	} else {
 		$('#isBoot').text(' OFF')
 	}
+
+	saveSettings()
 }
 
 
@@ -1617,7 +1657,7 @@ function pauseGameLoop() {
 
 function resumeGameLoop() {
 	if (isPaused) {
-		gLoop = setInterval(gameLoop, framerate)
+		gLoop = setInterval(gameLoop, FRAMERATE)
 		isPaused = false
 	}
 }

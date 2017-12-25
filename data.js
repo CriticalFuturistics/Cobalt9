@@ -173,6 +173,14 @@ let gameData = {
 				prsSrc : "src/sprite/prsUpgrade.png",
 			},
 		},
+
+		sfx : {
+			hover : "src/sfx/hover.mp3"
+		},
+
+		music : {
+			boot : "src/score/boot.mp3"
+		}
 	},
 
 	consts : {
@@ -488,6 +496,11 @@ let gameData = {
 
 	},
 
+	// Escaped strings to ensure c9 works properly
+	_c9 : {
+		settings : "c9_settings",
+	},
+
 
 	// Strings
 	_s : { 
@@ -516,10 +529,17 @@ let gameData = {
 
 		// Decresing order of default priority
 		rPrio : ["uranium", "gold", "silicon", "copper", "titanium"],
+	},
 
-
-
-	}
+	// Object containing most descriptions for labels/hover boxes/etc.
+	_dex : {
+		inv : {
+			tiles : "Allocate the various resources in the ship's inventory.",
+			capacityStart : "Every box is housing ",
+			capacityEnd : " Resources.",
+			warning : "Select a tile type first",
+		}
+	},
 }
 
 
@@ -551,6 +571,7 @@ let game = {
 	}, 
 
 	invSlots : 10,
+	slotCapacity : 50,
 	inv : [
 		null, null, null, null, null,
 		null, null, null, null, null,
@@ -575,7 +596,12 @@ let game = {
 
 let settings = {
 	visual : {
-		isConsoleBoot : false,
+		isConsoleBoot : true,
+	},
+
+	sound : {
+		music : true,
+		volume : 1.0
 	}
 }
 
