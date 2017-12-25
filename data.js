@@ -207,6 +207,10 @@ let gameData = {
 
 		maxConcurrentLasers :  1,
 
+
+		invTilesPerRow : 6,
+		tileSelectionModes : ["Single", "Square", "Line"],
+
 		turbo : 0,
 
 		miningStrength : 1,
@@ -548,6 +552,7 @@ let gameData = {
 // Contains the data that varies during the game
 let game = {
 
+	// Resources
 	qbits : 0,
 	energy : 400,
 	maxEnergy : 500,
@@ -570,11 +575,18 @@ let game = {
 		food : 100,
 	}, 
 
-	invSlots : 10,
-	slotCapacity : 50,
+	// Inventory management
+	tileSelectionMode : 1,
+	hasTileStart : false,
+	invStartID : null,
+	invSlots : 30,
+	slotCapacity : 10,
 	inv : [
-		null, null, null, null, null,
-		null, null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null,
 	],
 
 	// Array of IDs of the chips available (updates when needed)
@@ -588,6 +600,8 @@ let game = {
 		energyStorage : [null],
 	},
 
+
+
 }
 
 
@@ -596,12 +610,17 @@ let game = {
 
 let settings = {
 	visual : {
-		isConsoleBoot : true,
+		isConsoleBoot : false,
 	},
 
 	sound : {
 		music : true,
 		volume : 1.0
+	},
+
+	sfx : {
+		sfx : true,
+		volume : 0.1
 	}
 }
 

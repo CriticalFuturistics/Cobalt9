@@ -19,7 +19,7 @@ let timeToUpdate = true
 let easeingShip = true
 let increment = .002
 
-let hasTileStart = false
+//let hasTileStart = false
 let hasTileTypeSelected = false
 let tileType = null
 let tileStart = null
@@ -39,7 +39,7 @@ function initSound() {
 	sfx = {}
 	sfx.hover = document.createElement('audio')
     sfx.hover.setAttribute('src', gameData.src.sfx.hover)
-    sfx.hover.volume = 0.1
+    sfx.hover.volume = settings.sfx.volume
 }
 
 // Change the initail CSS of some elements.
@@ -49,7 +49,7 @@ function initCSS() {
 
 	// Activate selected windows
 	$("[aria-controls='Crew']").parent().addClass('active')
-	$("[aria-controls='Resources']").parent().addClass('active')	
+	$("[aria-controls='Resources']").parent().addClass('active')
 }
 
 function initHTML() {
@@ -248,15 +248,29 @@ function initHTML() {
 	let $tiles = $("<div>", { "class" : "tiles", "width" : "70%" })
 	let $tileTypes = $("<div>", { "class" : "tile-types", "width" : "30%" })
 
-
-	let $tileDeselect = $("<div>", { "class" : "tile-deselect unselectable", "text" : "Deselect"})
+	let $tileDeselect = $("<div>", { "id" : "tileDeselect", "class" : "tile-deselect unselectable", "text" : "Deselect"})
 	$tileDeselect.click(function(event) {
-		hasTileStart = false
+		game.hasTileStart = false
 		hasTileTypeSelected = false
 		tileType = null
 		deselectAllTypeTiles()
 	})
+
+	let $tileMode = $("<div>", { "id" : "tileMode", "class" : "tile-mode unselectable", "text" : gameData.consts.tileSelectionModes[game.tileSelectionMode]})
+	$tileMode.click(function(event) {
+		hasTileTypeSelected = false
+		tileType = null
+		game.tileSelectionMode += 1
+		if (game.tileSelectionMode == gameData.consts.tileSelectionModes.length) {
+			game.tileSelectionMode = 0
+		}
+		$(this).text(gameData.consts.tileSelectionModes[game.tileSelectionMode])
+		deselectAllTypeTiles()
+	})
+
+	// TODO add Tile Mode tooltip to explain it
 	
+
 
 	// First setup an empty tile type (so you can clear allocations)
 	let $tileType = $("<div>", { "class" : "tile-type"})
@@ -298,21 +312,44 @@ function initHTML() {
 	}
 
 	$tileTypes.append($tileDeselect)
+	$tileTypes.append($tileMode)
 
 	function deselectAllTypeTiles() {
 		$('#tileWarning').text("")
 		$('.tile-picker').css({ "border-width" : "1px", "border-color" : "rgba(255, 255, 255, 0.3)"})
 	}
 
-	let inv = game.inv
-	for (let i = 0; i < game.invSlots; i++) {
-		// Create the tile
-		let $tile = null
-		if (i == 0)
-			$tile = $("<div>", { "class" : "box clear", "data-box-id" : i })
-		else 
-			$tile = $("<div>", { "class" : "box", "data-box-id" : i })
 
+	let inv = game.inv
+	let tilesPerRow = gameData.consts.invTilesPerRow
+	let effectiveWidth = Math.floor(getPercentOf(70, $(".tab-pane.active").width())) - parseFloat($tiles.css("padding-left"))
+	let tileW = Math.floor(effectiveWidth / tilesPerRow )
+	let tileH = tileW
+	
+	for (let i = 0; i < game.invSlots; i++) {
+		// Create the tiles
+		let $tile = null
+		let max = gameData.consts.invTilesPerRow
+		let c = 0
+		// TODO fix this mess
+		if (i / max < 1) { c = "A" }
+		else if (i / max < 2) { c = "B" }
+		else if (i / max < 3) { c = "C" }
+		else if (i / max < 4) { c = "D" }
+		else if (i / max < 5) { c = "E" }
+		else if (i / max < 6) { c = "F" }
+		else if (i / max < 7) { c = "G" }
+		else if (i / max < 8) { c = "H" }
+		else if (i / max < 9) { c = "I" }
+		else if (i / max < 10) { c = "J" }
+		else if (i / max < 11) { c = "K" }
+		else if (i / max < 12) { c = "L" }
+		else if (i / max < 13) { c = "M" }
+			// ...
+		c += getMinCom(max, i)
+		$tile = $("<div>", { "class" : "box", "data-box-id" : i, "data-box-coord" : c })
+		$tile.css({ "width" : tileW, "height" : tileH})
+		
 		// Check what has been allocated and color it
 		if (inv[i] != null) {	
 			$tile.css({ "background-color" : gameData._s.rColors[inv[i]] })
@@ -328,45 +365,161 @@ function initHTML() {
 
 	$('.box').click(function(event) {
 		event.preventDefault()
+		let thisID = parseInt($(event.target).attr("data-box-id"))
+
 		if (hasTileTypeSelected) {
 			$('#tileWarning').text("")
-			if (hasTileStart) {
-				hasTileStart = false
-				let thisID = parseInt($(event.target).attr("data-box-id"))
 
-				if (tileStart <= thisID) {
-					for (var i = tileStart + 1; i <= thisID; i++) {
-						if (tileType == null) {
-							$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
-						} else {
-							$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
-						}
-					}
-				} else {
-					for (var i = thisID; i <= tileStart; i++) {
-						if (tileType == null) {
-							$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
-						} else {
-							$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
-						}
-					}
-				}
-				game.inv[i] = tileType
+			switch(game.tileSelectionMode) {
 
-			} else { 
-				hasTileStart = true
-				tileStart = parseInt($(event.target).attr("data-box-id"))
-				if (tileType == null) {
-					$(event.target).css({ "background-color" : "rgba(0, 0, 0, 0)"})
-				} else {
-					$(event.target).css({ "background-color" : gameData._s.rColors[tileType]})
-				}
-				game.inv[i] = tileType
+				// Tile selection mode: Single
+			    case 0:
+					if (tileType == null) {
+						$(event.target).css({ "background-color" : "rgba(0, 0, 0, 0)"})
+					} else {
+						$(event.target).css({ "background-color" : gameData._s.rColors[tileType]})
+					}
+					game.inv[thisID] = tileType
+			    	break
+
+			   	// Tile selection mode: Square
+			    case 1:
+			    	if (game.hasTileStart) {
+						game.hasTileStart = false
+
+						let ids = []
+						ids.push(thisID)
+
+						if (thisID == game.invStartID) {
+							fillTiles(ids)
+							break
+
+						} else if (thisID < game.invStartID) {
+							let thisC = getBoxCoord(thisID)
+							let startC = getBoxCoord(game.invStartID)
+							
+							let thisN = thisC.charAt(1)
+							let startN = startC.charAt(1)
+
+							let thisL = thisC.charCodeAt(0)
+							let startL = startC.charCodeAt(0)
+
+							if (thisN <= startN) {
+								for (let i = thisN; i <= startN; i++) {
+									for (let j = thisL; j <= startL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							} else {
+								for (let i = startN; i <= thisN; i++) {
+									for (let j = thisL; j <= startL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							}
+
+							fillTiles(ids)
+
+						} else if (thisID > game.invStartID) {
+							let thisC = getBoxCoord(thisID)
+							let startC = getBoxCoord(game.invStartID)
+							
+							let thisN = thisC.charAt(1)
+							let startN = startC.charAt(1)
+
+							let thisL = thisC.charCodeAt(0)
+							let startL = startC.charCodeAt(0)
+
+							if (thisN >= startN) {
+								for (let i = startN; i <= thisN; i++) {
+									for (let j = startL; j <= thisL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							} else {
+								for (let i = thisN; i <= startN; i++) {
+									for (let j = startL; j <= thisL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							}
+
+							fillTiles(ids)
+						
+					    }
+					} else {
+						game.hasTileStart = true
+						game.invStartID = thisID
+					}
+
+			    	break
+			    
+			    // Tile selection mode: Line
+			    case 2:
+			    	if (game.hasTileStart) {
+						game.hasTileStart = false
+
+						if (game.invStartID <= thisID) {
+							for (var i = game.invStartID + 1; i <= thisID; i++) {
+								if (tileType == null) {
+									$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
+								} else {
+									$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+								}
+							}
+						} else {
+							for (var i = thisID; i <= game.invStartID; i++) {
+								if (tileType == null) {
+									$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
+								} else {
+									$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+								}
+							}
+						}
+						game.inv[i] = tileType
+
+					} else { 
+						game.hasTileStart = true
+						game.invStartID = parseInt($(event.target).attr("data-box-id"))
+						if (tileType == null) {
+							$(event.target).css({ "background-color" : "rgba(0, 0, 0, 0)"})
+						} else {
+							$(event.target).css({ "background-color" : gameData._s.rColors[tileType]})
+						}
+						game.inv[i] = tileType
+					}
+
+			        break
+
+			    default:
+			        break
 			}
+
+
 		} else {
 			$('#tileWarning').text(gameData._dex.inv.warning)
 		}
 	})
+
+	// Fills all the boxes in the given array with tileType
+	function fillTiles(list) {
+		for (let i = 0; i < list.length; i++) {
+			if (tileType == null) {
+				$('.box[data-box-id = ' + list[i] + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
+			} else {
+				$('.box[data-box-id = ' + list[i] + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+			}
+			game.inv[list[i]] = tileType
+		}
+	}
+
+	function getBoxCoord(tileID) {
+		return $('.box[data-box-id = ' + tileID + ']').attr("data-box-coord")
+	}
+
+	function getBoxID(tileCoord) {
+		return $('.box[data-box-coord = ' + tileCoord + ']').attr("data-box-id")
+	}
 
 
 	$(".box").mouseenter(function() {
@@ -393,8 +546,10 @@ function init(){
 
 // Loads the settings from LocalStorage (or from PlayFab, but that's a TODO for later)
 function loadSettings() {
+	// TODO check for new settings. If the settings.hasOwnProperty-s are not the same, add them.
+
 	if (localStorage.getItem(gameData._c9.settings) != null) {
-		settings = JSON.parse(localStorage.getItem(gameData._c9.settings))
+		//settings = JSON.parse(localStorage.getItem(gameData._c9.settings))
 	} else {
 		// Stuff to do if this is a new savefile TODO
 	}
@@ -535,6 +690,8 @@ function loadCanvas() {
         canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
 
+        resizeInventory()
+
         gameData.consts.isConsoleLoaded = false
         renderConsole()
 
@@ -665,11 +822,11 @@ function bootConsole() {
 		// Play music
 		if (settings.sound.music && settings.sound.volume > 0) {
 			music = {}
-			music.hover = document.createElement('audio')
-		    music.hover.setAttribute('src', gameData.src.music.boot)
-		    music.hover.volume = 1.0
-		    music.hover.currentTime = 0
-			music.hover.play()
+			music.boot = document.createElement('audio')
+		    music.boot.setAttribute('src', gameData.src.music.boot)
+		    music.boot.volume = settings.sound.volume
+		    music.boot.currentTime = 0
+			music.boot.play()
 		}
 
 		// Show the black terminal as an overlay
@@ -746,6 +903,23 @@ function updateUI() {
 			width: getPercent(game.resourcesMax[k], r[k]) + "%",
 			"background-color": getColorFromPercent(getPercent(game.resourcesMax[k], r[k]))
 		})
+	}
+}
+
+// Updates the sizes of the inventory boxes when the window resizes
+function resizeInventory() {
+	// Update, in the Inventory screen, the width of the inventory boxes
+	let $resources = $('#Resources .tab-html')
+	let $inv = $('#Inventory .tab-html')
+	let tilesPerRow = gameData.consts.invTilesPerRow
+	let effectiveWidth = Math.floor(getPercentOf(70, $(".tab-pane.active").width())) - parseFloat($('.tiles').css("padding-left"))
+
+	let tileW = Math.floor(effectiveWidth / tilesPerRow)
+	let tileH = tileW
+
+	for (let i = 0; i < game.invSlots; i++) {
+		$tile = $('.box[data-box-id = ' + i + ']')
+		$tile.css({ "width" : tileW, "height" : tileH})
 	}
 }
 
@@ -1339,18 +1513,18 @@ function addConsoleEvents() {
 				sliderDistance = 0
 				if (p < gameData.consts.maxMiningPriority) { 
 					p += 1
-					sfx.pause()
-					sfx.currentTime = 0
-					sfx.play()
+					sfx.hover.pause()
+					sfx.hover.currentTime = 0
+					sfx.hover.play()
 				}
 
 			} else if (sliderDistance < -(this.objects.slider.w/5) + this.objects.sliderSelector.w/5) {
 				sliderDistance = 0
 				if (p > 0) { 
 					p -= 1
-					sfx.pause()
-					sfx.currentTime = 0
-					sfx.play()
+					sfx.hover.pause()
+					sfx.hover.currentTime = 0
+					sfx.hover.play()
 				}
 			}
 			gameData.consts.miningPriority = p

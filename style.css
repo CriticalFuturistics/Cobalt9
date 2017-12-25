@@ -273,12 +273,10 @@ canvas { display:block; }
 /* Inventory */
 .clear { clear: both; }
 .tiles { padding-left: 10px; padding-top: 10px; float: left; }
-
 .tile-dex { padding: 10px; font-size: 12px; border-bottom: 1px solid #FFF; }
 
 .box {
-	width: 50px;
-	height: 50px;
+	
 	border: 1px solid white;
 	float: left;
 }
@@ -290,7 +288,7 @@ canvas { display:block; }
 
 .tile-types {
 	float: left;
-	padding-left: 5px;
+	padding-left: 10px;
 	padding-right: 5px;
 	padding-top: 10px;
 }
@@ -302,6 +300,20 @@ canvas { display:block; }
 	padding: 2px;
 	padding-left: 4px;
 	padding-right: 4px;
+	margin-top: 4px;
+	text-align: center; 
+	float: left;
+	color: #000;
+	cursor: pointer;
+}
+.tile-mode {
+	width: 100%; 
+	height: 25px; 
+	background: #EEEEEE; 
+	padding: 2px;
+	padding-left: 4px;
+	padding-right: 4px;
+	margin-top: 4px;
 	text-align: center; 
 	float: left;
 	color: #000;

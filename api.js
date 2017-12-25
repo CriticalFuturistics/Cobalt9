@@ -157,3 +157,14 @@ function addTextList(main, text, isLast) {
 
 	return main
 }
+
+
+function getMinCom(base, n) {
+	while (n >= base) {
+		n -= base
+	}
+
+	return n
+}
+
+
