@@ -24,10 +24,21 @@ let hasTileTypeSelected = false
 let tileType = null
 let tileStart = null
 
+function load() {
+	if (localStorage.getItem(gameData._c9.game) != null) {
+		game = JSON.parse(localStorage.getItem(gameData._c9.game))
+	} else {
+		// Stuff to do if this is a new savefile TODO
+	}
+}
+function save() {
+	localStorage.setItem(gameData._c9.game, JSON.stringify(game))
+}
 
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
     loadSettings()
+    load()
 	initSound()
 	initCSS()
 	initHTML()
@@ -313,8 +324,14 @@ function initHTML() {
 		$tileTypes.append($tileType)
 	}
 
+	let $tileConfirm = $("<div>", { "class" : "tile-confirm", "text" : gameData._dex.inv.confirm})
+	$tileConfirm.click(function(event) {
+		confirmTiles()
+	})
+
 	$tileTypes.append($tileDeselect)
 	$tileTypes.append($tileMode)
+	$tileTypes.append($tileConfirm)
 
 	function deselectAllTypeTiles() {
 		$('#tileWarning').text("")
@@ -322,6 +339,7 @@ function initHTML() {
 	}
 
 
+	// Calculate the optimal way to display inventory boxes
 	let inv = game.inv
 	let tilesPerRow = gameData.consts.invTilesPerRow
 	let effectiveWidth = Math.floor(getPercentOf(70, $(".tab-pane.active").width())) - parseFloat($tiles.css("padding-left"))
@@ -354,7 +372,6 @@ function initHTML() {
 		
 		// Check what has been allocated and color it
 		if (inv[i] != null) {	
-			//$tile.css({ "background-color" : gameData._s.rColors[inv[i]] })
 			$tile.addClass("tile-" + [inv[i]])
 		}
 
@@ -366,9 +383,26 @@ function initHTML() {
 	$inv.append($tileTypes)
 	
 
-	$('.box').click( function(e){ allocateTiles(e)} )
+	$('.box').click( function(e){ 
+		allocateTiles(e)
+		checkCommit()
+	} )
 	$('.box').mouseenter( function(e){ selectTiles(e) } ) 
 	
+	function checkCommit() {
+		let savedGame = JSON.parse(localStorage.getItem(gameData._c9.game))
+		if (!compareArrays(game.inv, savedGame)) {
+			$(".tile-confirm").css({ "display" : "inherit" })
+		} else {
+			$(".tile-confirm").css({ "display" : "none" })
+		}
+	}
+
+	function confirmTiles() {
+		save()
+		updateResourcesMax()
+		$(".tile-confirm").css({ "display" : "none" })
+	}
 
 	// Triggered when a tile is clicked, it allocates the selected tiles with the selected resource.
 	function allocateTiles(event) {
@@ -717,6 +751,8 @@ function initHTML() {
 		sfx.hover.currentTime = 0
 	})
 
+
+
 	// Populate Starmap
 
 	// Populate Encylopedia
@@ -726,10 +762,26 @@ function initHTML() {
 function init(){
 	// Init console data
 	consoleCanvas.width = $("#console").innerWidth()
-    consoleCanvas.height = $("#console").innerHeight() 
+    consoleCanvas.height = $("#console").innerHeight()
+
+    initResources()
 
     // Initial Boot
 	bootConsole()
+}
+
+function initResources() {
+	updateResourcesMax()
+	save()
+}
+
+function updateResourcesMax() {
+	for (k in gameData._s.r){
+		game.resourcesMax[k] = 0
+	}
+	for (let i = 0; i < game.inv.length; i++) {
+		game.resourcesMax[game.inv[i]] += game.slotCapacity
+	}
 }
 
 // Loads the settings from LocalStorage (or from PlayFab, but that's a TODO for later)
@@ -1978,13 +2030,6 @@ function convertToKM(n, u) {
 }
 
 // --------------------------------- Unit Conversion END ------------------------------ //
-
-
-
-
-
-
-
 
 
 

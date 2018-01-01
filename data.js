@@ -503,6 +503,7 @@ let gameData = {
 	// Escaped strings to ensure c9 works properly
 	_c9 : {
 		settings : "c9_settings",
+		game : "c9_game"
 	},
 
 
@@ -542,6 +543,7 @@ let gameData = {
 			capacityStart : "Every box is housing ",
 			capacityEnd : " Resources.",
 			warning : "Select a tile type first",
+			confirm : "Confirm"
 		}
 	},
 }
@@ -567,12 +569,12 @@ let game = {
 	}, 
 
 	resourcesMax : {
-		titanium : 100,
-		copper : 100,
-		silicon: 100,
-		gold : 100,
-		uranium : 100,
-		food : 100,
+		titanium : 0,
+		copper : 0,
+		silicon: 0,
+		gold : 0,
+		uranium : 0,
+		food : 0,
 	}, 
 
 	// Inventory management
@@ -580,9 +582,9 @@ let game = {
 	hasTileStart : false,
 	invStartID : null,
 	invSlots : 30,
-	slotCapacity : 10,
+	slotCapacity : 25,
 	inv : [
-		null, null, null, null, null, null,
+		"titanium", "titanium", null, null, null, null,
 		null, null, null, null, null, null,
 		null, null, null, null, null, null,
 		null, null, null, null, null, null,
