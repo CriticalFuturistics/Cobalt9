@@ -254,6 +254,7 @@ function initHTML() {
 		hasTileTypeSelected = false
 		tileType = null
 		deselectAllTypeTiles()
+		uncolorTiles(game.inv)
 	})
 
 	let $tileMode = $("<div>", { "id" : "tileMode", "class" : "tile-mode unselectable", "text" : gameData.consts.tileSelectionModes[game.tileSelectionMode]})
@@ -266,6 +267,7 @@ function initHTML() {
 		}
 		$(this).text(gameData.consts.tileSelectionModes[game.tileSelectionMode])
 		deselectAllTypeTiles()
+		uncolorTiles(game.inv)
 	})
 
 	// TODO add Tile Mode tooltip to explain it
@@ -352,7 +354,8 @@ function initHTML() {
 		
 		// Check what has been allocated and color it
 		if (inv[i] != null) {	
-			$tile.css({ "background-color" : gameData._s.rColors[inv[i]] })
+			//$tile.css({ "background-color" : gameData._s.rColors[inv[i]] })
+			$tile.addClass("tile-" + [inv[i]])
 		}
 
 		// Add the tile
@@ -363,7 +366,12 @@ function initHTML() {
 	$inv.append($tileTypes)
 	
 
-	$('.box').click(function(event) {
+	$('.box').click( function(e){ allocateTiles(e)} )
+	$('.box').mouseenter( function(e){ selectTiles(e) } ) 
+	
+
+	// Triggered when a tile is clicked, it allocates the selected tiles with the selected resource.
+	function allocateTiles(event) {
 		event.preventDefault()
 		let thisID = parseInt($(event.target).attr("data-box-id"))
 
@@ -374,10 +382,11 @@ function initHTML() {
 
 				// Tile selection mode: Single
 			    case 0:
-					if (tileType == null) {
-						$(event.target).css({ "background-color" : "rgba(0, 0, 0, 0)"})
+			    	clearTileClasses($(event.target))
+					if (tileType == null) {	
+						$(event.target).addClass("tile-empty")
 					} else {
-						$(event.target).css({ "background-color" : gameData._s.rColors[tileType]})
+						$(event.target).addClass("tile-" + tileType)
 					}
 					game.inv[thisID] = tileType
 			    	break
@@ -396,7 +405,7 @@ function initHTML() {
 
 						} else if (thisID < game.invStartID) {
 							let thisC = getBoxCoord(thisID)
-							let startC = getBoxCoord(game.invStartID)
+							let startC = getBoxCoord(parseInt(game.invStartID))
 							
 							let thisN = thisC.charAt(1)
 							let startN = startC.charAt(1)
@@ -459,34 +468,34 @@ function initHTML() {
 			    	if (game.hasTileStart) {
 						game.hasTileStart = false
 
-						if (game.invStartID <= thisID) {
-							for (var i = game.invStartID + 1; i <= thisID; i++) {
-								if (tileType == null) {
-									$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
-								} else {
-									$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
-								}
+						let ids = []
+						ids.push(thisID)
+						ids.push(game.invStartID)
+
+						if (thisID == game.invStartID) {
+							fillTiles(ids[0])
+							break
+
+						} else if (game.invStartID <= thisID) {
+							for (let i = game.invStartID + 1; i <= thisID; i++) {
+								clearTileClasses($('.box[data-box-id = ' + i + ']'))
+								ids.push(i)
 							}
+							fillTiles(ids)
+
 						} else {
 							for (var i = thisID; i <= game.invStartID; i++) {
-								if (tileType == null) {
-									$('.box[data-box-id = ' + i + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
-								} else {
-									$('.box[data-box-id = ' + i + ']').css({ "background-color" : gameData._s.rColors[tileType]})
-								}
+								clearTileClasses($('.box[data-box-id = ' + i + ']'))
+								ids.push(i)
 							}
+							fillTiles(ids)
+
 						}
 						game.inv[i] = tileType
 
 					} else { 
 						game.hasTileStart = true
-						game.invStartID = parseInt($(event.target).attr("data-box-id"))
-						if (tileType == null) {
-							$(event.target).css({ "background-color" : "rgba(0, 0, 0, 0)"})
-						} else {
-							$(event.target).css({ "background-color" : gameData._s.rColors[tileType]})
-						}
-						game.inv[i] = tileType
+						game.invStartID = thisID			
 					}
 
 			        break
@@ -494,31 +503,210 @@ function initHTML() {
 			    default:
 			        break
 			}
-
-
 		} else {
 			$('#tileWarning').text(gameData._dex.inv.warning)
 		}
-	})
+	}
+
+	// Triggered on mouseover, it only colors the tiles that would be allocated
+	function selectTiles(event) {
+		event.preventDefault()
+		let t = $(event.target)
+		let thisID = parseInt(t.attr("data-box-id"))
+
+		if (hasTileTypeSelected) {
+			switch(game.tileSelectionMode) {
+				// Ignoring case: 0, since we don't need to highlight single-selection
+
+			   	// Tile selection mode: Square
+			    case 1:
+			    	if (game.hasTileStart) {
+						
+						let ids = []
+						ids.push(thisID)
+
+						if (thisID == game.invStartID) {
+							colorTiles(ids)
+							break
+
+						} else if (thisID < game.invStartID) {
+							let thisC = getBoxCoord(thisID)
+							let startC = getBoxCoord(game.invStartID)
+							
+							let thisN = thisC.charAt(1)
+							let startN = startC.charAt(1)
+
+							let thisL = thisC.charCodeAt(0)
+							let startL = startC.charCodeAt(0)
+
+							if (thisN <= startN) {
+								for (let i = thisN; i <= startN; i++) {
+									for (let j = thisL; j <= startL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							} else {
+								for (let i = startN; i <= thisN; i++) {
+									for (let j = thisL; j <= startL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							}
+
+							colorTiles(ids)
+
+						} else if (thisID > game.invStartID) {
+							let thisC = getBoxCoord(thisID)
+							let startC = getBoxCoord(game.invStartID)
+							
+							let thisN = thisC.charAt(1)
+							let startN = startC.charAt(1)
+
+							let thisL = thisC.charCodeAt(0)
+							let startL = startC.charCodeAt(0)
+
+							if (thisN >= startN) {
+								for (let i = startN; i <= thisN; i++) {
+									for (let j = startL; j <= thisL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							} else {
+								for (let i = thisN; i <= startN; i++) {
+									for (let j = startL; j <= thisL; j++) {
+										ids.push(getBoxID(String.fromCharCode(j) + i))
+									}
+								}
+							}
+
+							colorTiles(ids)
+						
+						}
+					} else {
+						colorTiles([parseInt(t.attr("data-box-id"))])
+					}
+
+			    	break
+			    
+			    // Tile selection mode: Line
+			    case 2:
+			    if (game.hasTileStart) {
+
+						let ids = []
+						ids.push(thisID)
+						ids.push(game.invStartID)
+
+						if (thisID == game.invStartID) {
+							colorTiles(ids[0])
+							break
+
+						} else if (game.invStartID <= thisID) {
+							for (let i = game.invStartID + 1; i <= thisID; i++) {
+								clearTileClasses($('.box[data-box-id = ' + i + ']'))
+								ids.push(i)
+							}
+							colorTiles(ids)
+
+						} else {
+							for (var i = thisID; i <= game.invStartID; i++) {
+								clearTileClasses($('.box[data-box-id = ' + i + ']'))
+								ids.push(i)
+							}
+							colorTiles(ids)
+
+						}
+						
+
+					} else { 
+						colorTiles([parseInt(t.attr("data-box-id"))])			
+					}
+
+			        break
+
+			    default:
+			        break
+			}
+		}
+	}
+
+
 
 	// Fills all the boxes in the given array with tileType
 	function fillTiles(list) {
 		for (let i = 0; i < list.length; i++) {
-			if (tileType == null) {
-				$('.box[data-box-id = ' + list[i] + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
-			} else {
-				$('.box[data-box-id = ' + list[i] + ']').css({ "background-color" : gameData._s.rColors[tileType]})
-			}
+			fillTile(list[i], tileType)
 			game.inv[list[i]] = tileType
 		}
 	}
+
+	function fillTile(tileID, type) {
+		let t = $('.box[data-box-id = ' + tileID + ']')
+		clearTileClasses(t)
+		if (tileType == null) {
+			t.addClass("tile-empty")
+		} else {
+			t.addClass("tile-" + type)
+		}
+	}
+
+	function clearTileClasses(target) {
+		let g = gameData._s.r
+		target.removeClass("tile-" + g[k])
+		target.css({ "background-color" : "" })
+		for (k in g) {
+			target.removeClass("tile-" + g[k])
+		}
+	}
+
+	function colorTile(tileID) {
+		if (tileType == null) {
+			$('.box[data-box-id = ' + tileID + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
+		} else {
+			$('.box[data-box-id = ' + tileID + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+		}	
+	}
+
+	// Calls iteratively colorTile()
+	// Also makes the non-selecable tiles go back to an uncolored state
+	function colorTiles(tiles) {
+		for (let i = 0; i < tiles.length; i++) {
+			colorTile(tiles[i])
+		}
+		uncolorTiles(tiles)
+	}
+
+	function uncolorTiles(tiles) {
+		if (!Array.isArray(tiles)) {
+			for (let j = 0; j < game.invSlots; j++) {
+				if (tiles != j) {
+					$('.box[data-box-id = ' + j + ']').css({ "background-color" : ""})
+				}
+			}
+		} else {
+			for (let j = 0; j < game.invSlots; j++) {
+				if (!tiles.includes(j)) {
+					$('.box[data-box-id = ' + j + ']').css({ "background-color" : ""})
+				}				
+			}
+		}
+	}
+
+	$(".nav-item").click(function(event) {
+		game.hasTileStart = false
+		hasTileTypeSelected = false
+		tileType = null
+		deselectAllTypeTiles()
+		uncolorTiles(game.inv)
+	})
+
+
 
 	function getBoxCoord(tileID) {
 		return $('.box[data-box-id = ' + tileID + ']').attr("data-box-coord")
 	}
 
 	function getBoxID(tileCoord) {
-		return $('.box[data-box-coord = ' + tileCoord + ']').attr("data-box-id")
+		return parseInt($('.box[data-box-coord = ' + tileCoord + ']').attr("data-box-id"))
 	}
 
 

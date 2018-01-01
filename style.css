@@ -275,8 +275,15 @@ canvas { display:block; }
 .tiles { padding-left: 10px; padding-top: 10px; float: left; }
 .tile-dex { padding: 10px; font-size: 12px; border-bottom: 1px solid #FFF; }
 
+.tile-empty { background: rgba(0, 0, 0, 0); }
+.tile-titanium { background: #CDCDCD; }
+.tile-copper { background: #C7711D; }
+.tile-silicon { background: #B7B29F; }
+.tile-gold { background: #DDDB0F; }
+.tile-uranium { background: #24EC24; }
+.tile-food { background: #784509; }
+
 .box {
-	
 	border: 1px solid white;
 	float: left;
 }
@@ -326,6 +333,10 @@ canvas { display:block; }
 	border: 1px solid rgba(255, 255, 255, 0.3); 
 	float: left;
 	cursor: pointer;
+	transition: margin 0.1s ease;
+}
+.tile-picker:hover {
+	margin-right: 8px;
 }
 
 .tile-type-name {
