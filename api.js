@@ -28,6 +28,20 @@ function getPercentOf(p, n) {
 	return p/100 * n
 }
 
+// Compares 2 arrays
+function compareArrays(a, b) {
+	if (a === b) return true
+	if (a == null || b == null) return false
+	if (a.length != b.length) return false
+
+	for (var i = 0; i < a.length; ++i) {
+		if (a[i] !== b[i]) return false
+	}
+
+	return true
+}
+
+
 // Color gradient function from pure red (0%), to pure green (100%)
 // With 40% alpha
 function getColorFromPercent(p) {
@@ -74,6 +88,8 @@ function createTootlip(parent, w, h, pos, html) {
 	})
 	$("body").prepend($tooltip)
 }
+
+
 
 
 
