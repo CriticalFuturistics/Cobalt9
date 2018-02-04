@@ -39,21 +39,21 @@ $(document).ready(function($) {
 		console.log("Error while trying to load the game data. Try reloading the page.")
 	})
 	.done(function(){
-		$.getJSON("/game.json", function(g) {
+		$.getJSON("game.json", function(g) {
 			game = g
 		})
 		.fail(function(){ 
 			console.log("Error while trying to load the game data. Try reloading the page.")
 		})
 		.done(function(){
-			$.getJSON("/settings.json", function(s) {
+			$.getJSON("settings.json", function(s) {
 				settings = s
 			})
 			.fail(function(){ 
 				console.log("Error while trying to load the game data. Try reloading the page.")
 			})
 			.done(function(){
-				$.getJSON("/animations.json", function(a) {
+				$.getJSON("animations.json", function(a) {
 					animations = a
 				})
 				.fail(function(){ 
