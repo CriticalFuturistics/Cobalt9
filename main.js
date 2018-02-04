@@ -36,7 +36,7 @@ $(document).ready(function($) {
 		data.canvas.height = canvas.height
 	})
 	.fail(function(){ 
-		console.log("Error while trying to load the game data. Try reloading the page.")
+		console.log("Error while trying to load the data. Try reloading the page.")
 	})
 	.done(function(){
 		$.getJSON("game.json", function(g) {
@@ -50,14 +50,14 @@ $(document).ready(function($) {
 				settings = s
 			})
 			.fail(function(){ 
-				console.log("Error while trying to load the game data. Try reloading the page.")
+				console.log("Error while trying to load the settings. Try reloading the page.")
 			})
 			.done(function(){
 				$.getJSON("animations.json", function(a) {
 					animations = a
 				})
 				.fail(function(){ 
-					console.log("Error while trying to load the game data. Try reloading the page.")
+					console.log("Error while trying to load the animations' data. Try reloading the page.")
 				})
 				.done(function(){
 					// Creates a worker that works on a separate thread
@@ -1323,7 +1323,9 @@ function renderControlPannel() {
 
 		controlCanvas.width = $("#controlCanvas").innerWidth()
 		// Scale the canvas so that the motherboard fits perfeclty
-		controlCanvas.height = scaleToFit(controlCanvas.width, 610, 210, "h")
+		controlCanvas.height = scaleToFit(controlCanvas.width,
+										data.src.sprites.controlPannel.background.image.width, 
+										data.src.sprites.controlPannel.background.image.height, "h")
 		controlCtx.clearRect(0, 0, controlCanvas.width, controlCanvas.height)
 
 		data.canvas.controlPannel.background.image = data.src.sprites.controlPannel.background.image
