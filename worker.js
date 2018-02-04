@@ -1,0 +1,1 @@
+// Basic empty worker to be used during initialization

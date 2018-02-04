@@ -1,0 +1,15 @@
+{
+	"visual" : {
+		"isConsoleBoot" : false
+	},
+
+	"sound" : {
+		"music" : true,
+		"volume" : 1.0
+	},
+
+	"sfx" : {
+		"sfx" : true,
+		"volume" : 0.1
+	}
+}

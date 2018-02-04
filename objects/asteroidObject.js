@@ -1,4 +1,4 @@
-// Asteroid Object to be stored in gameData.asteroidsData.
+// Asteroid Object to be stored in data.asteroidsData.
 // Contains the information about the resources inside the asteroid
 // and other info
 
@@ -26,7 +26,7 @@ class AsteroidObj {
 			gold : 0,
 			uranium : 0,
 		}
-		for (k in base) {
+		for (let k in base) {
 			let m = (getRandom(mult[k][0], mult[k][1])).toFixedNumber(1)
 			b[k] = (base[k] * m).toFixed() 
 		}
@@ -62,11 +62,11 @@ class AsteroidObj {
 	// not present, it mines the rest, rarest first
 	mine(strength, priority) {
 		//console.log("mining " + priority)
-		let _s = gameData._s
+		let _s = data._s
 
 		// If priority didn't get declared, get it from the slider slection
 		if (priority == null) {
-			priority = _s.rPrio[gameData.miningPriority]
+			priority = _s.rPrio[data.miningPriority]
 		}
 
 		// You can't mine food from asteroids you fool
@@ -125,15 +125,15 @@ class AsteroidObj {
 	// Destroys the asteroid once the resources have been depleated.
 	// astID is NOT this.typeID, it is the index of the asteroid in asteroidsData.
 	destroy(astID) {
-		// Remove the asteroid from gameData.asteroidsData and the canvas
-		if (astID > -1 && gameData.asteroidsData.length > 0 && gameData.canvas.asteroids.length > 0) {
-			gameData.asteroidsData.splice(astID, 1)
-			gameData.canvas.asteroids.splice(astID, 1)
+		// Remove the asteroid from data.asteroidsData and the canvas
+		if (astID > -1 && data.asteroidsData.length > 0 && data.canvas.asteroids.length > 0) {
+			data.asteroidsData.splice(astID, 1)
+			data.canvas.asteroids.splice(astID, 1)
 
 			//Also remove the relative laser, if it was mining
-			for (let i = 0; i < gameData.canvas.lasers.length; i++) {
-				if (gameData.canvas.lasers[i].uniqueID == this.uniqueID) {
-					gameData.canvas.lasers = []
+			for (let i = 0; i < data.canvas.lasers.length; i++) {
+				if (data.canvas.lasers[i].uniqueID == this.uniqueID) {
+					data.canvas.lasers = []
 				}
 			}
 
@@ -159,8 +159,8 @@ class AsteroidObj {
 	getAxis() { return this.axis }
 
 	getAstID() { 
-		for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
-			if (gameData.canvas.asteroids[i].uniqueID == this.uniqueID) {
+		for (let i = 0; i < data.canvas.asteroids.length; i++) {
+			if (data.canvas.asteroids[i].uniqueID == this.uniqueID) {
 				return i
 			}
 		}

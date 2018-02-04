@@ -106,10 +106,17 @@ body { background: #40424A; }
 	background: #666;
 }
 
-.control-panel {
-	height: 210px;
-	background: #B94587;
+.control-pannel {
+	width: 100%;
+	height: 100%;
 }
+
+.control-pannel canvas {
+	width: 100%;
+	height: 100%;
+	border: 1px solid #353935;
+}
+
 
 .ad {
 	height: 100px;

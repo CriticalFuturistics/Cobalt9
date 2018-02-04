@@ -1,0 +1,45 @@
+{
+	"qbits" : 0,
+	"energy" : 400,
+	"maxEnergy" : 500,
+
+	"resources" : {
+		"titanium" : 0,
+		"copper" : 0,
+		"silicon": 0,
+		"gold" : 0,
+		"uranium" : 0,
+		"food" : 0
+	}, 
+
+	"resourcesMax" : {
+		"titanium" : 0,
+		"copper" : 0,
+		"silicon": 0,
+		"gold" : 0,
+		"uranium" : 0,
+		"food" : 0
+	}, 
+
+	"tileSelectionMode" : 1,
+	"hasTileStart" : false,
+	"invStartID" : null,
+	"invSlots" : 30,
+	"slotCapacity" : 25,
+	"inv" : [
+		"titanium", "titanium", null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null,
+		null, null, null, null, null, null
+	],
+
+	"availableChips" : [0, 1],
+
+	"pcbs" : {
+		"_comment_pcbs" : "Array of the installed chips. Null means no chip is installed.",
+		"mobo" : [null, null, null],
+		"laser" : [null],
+		"energyStorage" : [null]
+	}
+}
