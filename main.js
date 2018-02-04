@@ -26,7 +26,7 @@ let Renderer = new Worker('worker.js')
 // Called once the HTML document has finished loading.
 $(document).ready(function($) {
 
-	$.getJSON("/data.json", function(d) {
+	$.getJSON("data.json", function(d) {
 		data = d
 
 		canvas.width = $("#game").innerWidth()
