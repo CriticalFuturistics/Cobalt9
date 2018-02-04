@@ -1322,18 +1322,19 @@ function renderControlPannel() {
 		data.consts.isControlPannelLoaded = true
 
 		controlCanvas.width = $("#controlCanvas").innerWidth()
+
 		// Scale the canvas so that the motherboard fits perfeclty
 		controlCanvas.height = scaleToFit(controlCanvas.width,
 										data.src.sprites.controlPannel.background.image.width, 
 										data.src.sprites.controlPannel.background.image.height, "h")
 		controlCtx.clearRect(0, 0, controlCanvas.width, controlCanvas.height)
 
+		// Update the loaded image into the data.canvas object. BERRY IMPORTANT
 		data.canvas.controlPannel.background.image = data.src.sprites.controlPannel.background.image
 
 		let cp = new CanvasObj(0, 0, data.canvas.controlPannel.background.image, 0)
 		controlCtx.drawImage(cp.img, cp.x, cp.y, controlCanvas.width, controlCanvas.height)
 	}
-
 }
 
 

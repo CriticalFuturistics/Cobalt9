@@ -169,6 +169,10 @@
 				"background" : {
 					"src" : "src/sprite/motherboard3Slots.png",
 					"image" : null
+				},
+				"mobo" : {
+					"src" : "src/sprite/motherboard3Slots.png",
+					"image" : null
 				}
 			}
 		},

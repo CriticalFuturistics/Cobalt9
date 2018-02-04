@@ -62,10 +62,10 @@ function getColorFromPercent(p) {
 function scaleToFit(x, scaleW, scaleH, type) {
 	if (type == "h") {
 		// x : res = scaleW : scaleH
-		return (x * scaleH) / scaleW
+		return Math.round((x * scaleH) / scaleW)
 	} else {
 		// res : x = scaleW : scaleH
-		return (x * scaleW) / scaleH
+		return Math.round((x * scaleW) / scaleH)
 	}
 }
 
