@@ -1,17 +1,21 @@
-// Canvas Object to be stored in the gameData object.
+// Canvas Object to be stored in the data object.
 // Contains the information about the position and the state of an element on the canvas
 
 class CanvasObj {
 	constructor(x, y, img, speed) {
 		this.x = parseInt(x)
 		this.y = parseInt(y)
+		this.parent = {
+			width : 0,
+			height : 0,
+		}
 		this.scale = 1
 		this.img = img
 		this.rotationAmount = 0
 		this.rotation = 0
 		this.axis = 0
 
-		if (!this.img || !img) {
+		if (!this.img) {
 			this.width = 0
 			this.height = 0
 		} else {

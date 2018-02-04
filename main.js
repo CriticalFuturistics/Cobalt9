@@ -1,7 +1,89 @@
-/* Cobalt9 - 2017 - Critical Futuristics Copyright */
+/* 
+	Cobalt9 - by Critical Futuristics
+	Authors: M. Zyke - G. Sgabruz
+	Design: Zyke & Sgabruz
+	Code maintenence: Zyke
+	Sprites: Sgabruz
+	Score: J. Jaxx
+
+	Version: v0.01
+	Copyright: GNU 2017-2018
+*/
+
+
 
 const FPS = 40
 const FRAMERATE = 1000 / FPS
+
+let data = null
+let game = null
+let settings = null
+let animations = null
+
+let Renderer = new Worker('worker.js')
+
+
+// Called once the HTML document has finished loading.
+$(document).ready(function($) {
+
+	$.getJSON("data.json", function(d) {
+		data = d
+
+		canvas.width = $("#game").innerWidth()
+        canvas.height = $("#game").innerWidth()
+
+		data.canvas.width = canvas.width
+		data.canvas.height = canvas.height
+	})
+	.fail(function(){ 
+		console.log("Error while trying to load the data. Try reloading the page.")
+	})
+	.done(function(){
+		$.getJSON("game.json", function(g) {
+			game = g
+		})
+		.fail(function(){ 
+			console.log("Error while trying to load the game data. Try reloading the page.")
+		})
+		.done(function(){
+			$.getJSON("settings.json", function(s) {
+				settings = s
+			})
+			.fail(function(){ 
+				console.log("Error while trying to load the settings. Try reloading the page.")
+			})
+			.done(function(){
+				$.getJSON("animations.json", function(a) {
+					animations = a
+				})
+				.fail(function(){ 
+					console.log("Error while trying to load the animations' data. Try reloading the page.")
+				})
+				.done(function(){
+					// Creates a worker that works on a separate thread
+					if (window.Worker) {
+						
+
+						loadSettings()
+					    load()
+						initSound()
+						initCSS()
+						initHTML()
+						init()
+						Renderer = new Worker("renderer.js")
+						
+					} else {
+						// TODO Find a better solution, like running the renderer as an interval
+						alert("This browser does not support Web Workers.")
+					}	
+
+				    
+				})
+			})		
+		})
+	})
+})
+
 
 
 let canvas = document.getElementById("gameCanvas")
@@ -9,6 +91,9 @@ let ctx = canvas.getContext("2d")
 
 let consoleCanvas = document.getElementById("consoleCanvas")
 let consoleCtx = consoleCanvas.getContext("2d")
+
+let controlCanvas = document.getElementById("controlCanvas")
+let controlCtx = controlCanvas.getContext("2d")
 
 let sfx = null
 
@@ -25,31 +110,22 @@ let tileType = null
 let tileStart = null
 
 function load() {
-	if (localStorage.getItem(gameData._c9.game) != null) {
-		game = JSON.parse(localStorage.getItem(gameData._c9.game))
+	if (localStorage.getItem(data._c9.game) != null) {
+		game = JSON.parse(localStorage.getItem(data._c9.game))
 	} else {
 		// Stuff to do if this is a new savefile TODO
 	}
 }
-function save() {
-	localStorage.setItem(gameData._c9.game, JSON.stringify(game))
-}
 
-// Called once the HTML document has finished loading.
-$(document).ready(function($) {
-    loadSettings()
-    load()
-	initSound()
-	initCSS()
-	initHTML()
-	init()
-})
+function save() {
+	localStorage.setItem(data._c9.game, JSON.stringify(game))
+}
 
 // Load the sound files into an HTML element.
 function initSound() {
 	sfx = {}
 	sfx.hover = document.createElement('audio')
-    sfx.hover.setAttribute('src', gameData.src.sfx.hover)
+    sfx.hover.setAttribute('src', data.src.sfx.hover)
     sfx.hover.volume = settings.sfx.volume
 }
 
@@ -92,10 +168,10 @@ function initHTML() {
 	$cList.appendTo($chips)
 
 	for (let i = 0; i < availableChips.length; i++) {
-		for (let j = 0; j < gameData.consts.chips.length; j++) {
-			if (gameData.consts.chips[j].id == availableChips[i]) {
+		for (let j = 0; j < data.consts.chips.length; j++) {
+			if (data.consts.chips[j].id == availableChips[i]) {
 			
-				let c = gameData.consts.chips[j]
+				let c = data.consts.chips[j]
 				let $cItem = $("<div>", {"class" : "c-item", "id" : ("c-" + c.id)})
 				let $cName = $("<div>", {"class" : "c-item-name", "text" : c.name})
 				let $cDex = $("<div>", {"class" : "c-item-dex", "text" : c.dex})
@@ -106,7 +182,7 @@ function initHTML() {
 				if (c.hasOwnProperty('src')) {
 					$cIcon.attr("src", c.src)
 				} else {
-					$cIcon.attr("src", gameData.src.defaults.chips[gameData.consts.chips[j].rarity])
+					$cIcon.attr("src", data.src.defaults.chips[data.consts.chips[j].rarity])
 				}
 				
 				$cIcon.css({"width" : $cIcon.css("height") + "px"})
@@ -129,7 +205,7 @@ function initHTML() {
 	function getChipComp(comps) {
 		let res = ""
 		for (let i = 0; i < comps.length; i++) {
-			let c = getFromObjArr(gameData.consts.chipSlots, "id", gameData.consts.chipSlots[i].id)
+			let c = getFromObjArr(data.consts.chipSlots, "id", data.consts.chipSlots[i].id)
 			let isLast = (i == (comps.length - 1))
 			res = addTextList(res, c.fullName, isLast)
 		}
@@ -141,7 +217,7 @@ function initHTML() {
 
 	// Populate Upgrades
 	let $up = $('#Upgrades .tab-html')
-	let ups = gameData.consts.upgrades
+	let ups = data.consts.upgrades
 
 	let $upList = $("<div>", {"class" : "up-list unselectable", "id" : "upList"})
 	$upList.appendTo($up)
@@ -246,13 +322,13 @@ function initHTML() {
 	let $inv = $('#Inventory .tab-html')
 	let $tileDex = $("<div>", { "class" : "tile-dex"})
 	let $warning = $("<div>", { "class" : "warning", "id" : "tileWarning"})
-	$tileDex.html(gameData._dex.inv.tiles
+	$tileDex.html(data._dex.inv.tiles
 			+ "<br>"
-			+ gameData._dex.inv.capacityStart 
+			+ data._dex.inv.capacityStart 
 			+ "<strong>" 
 			+ game.slotCapacity 
 			+ "</strong>" 
-			+ gameData._dex.inv.capacityEnd)
+			+ data._dex.inv.capacityEnd)
 	$inv.append($tileDex)
 	$inv.append($warning)
 
@@ -268,15 +344,15 @@ function initHTML() {
 		uncolorTiles(game.inv)
 	})
 
-	let $tileMode = $("<div>", { "id" : "tileMode", "class" : "tile-mode unselectable", "text" : gameData.consts.tileSelectionModes[game.tileSelectionMode]})
+	let $tileMode = $("<div>", { "id" : "tileMode", "class" : "tile-mode unselectable", "text" : data.consts.tileSelectionModes[game.tileSelectionMode]})
 	$tileMode.click(function(event) {
 		hasTileTypeSelected = false
 		tileType = null
 		game.tileSelectionMode += 1
-		if (game.tileSelectionMode == gameData.consts.tileSelectionModes.length) {
+		if (game.tileSelectionMode == data.consts.tileSelectionModes.length) {
 			game.tileSelectionMode = 0
 		}
-		$(this).text(gameData.consts.tileSelectionModes[game.tileSelectionMode])
+		$(this).text(data.consts.tileSelectionModes[game.tileSelectionMode])
 		deselectAllTypeTiles()
 		uncolorTiles(game.inv)
 	})
@@ -304,11 +380,11 @@ function initHTML() {
 	$tileTypes.append($tileType)
 
 	// Then setup the rest of resources
-	for (k in gameData._s.r) {
+	for (k in data._s.r) {
 		let $tileType = $("<div>", { "class" : "tile-type"})
 		let $tilePicker = $("<div>", { "class" : "tile-picker", "data-tile-type" : k})
 
-		$tilePicker.css({ "background-color" : gameData._s.rColors[k] })
+		$tilePicker.css({ "background-color" : data._s.rColors[k] })
 		// Mark this tile type as selected
 		$tilePicker.click(function(event) {
 			hasTileTypeSelected = true
@@ -324,7 +400,7 @@ function initHTML() {
 		$tileTypes.append($tileType)
 	}
 
-	let $tileConfirm = $("<div>", { "class" : "tile-confirm", "text" : gameData._dex.inv.confirm})
+	let $tileConfirm = $("<div>", { "class" : "tile-confirm", "text" : data._dex.inv.confirm})
 	$tileConfirm.click(function(event) {
 		confirmTiles()
 	})
@@ -341,7 +417,7 @@ function initHTML() {
 
 	// Calculate the optimal way to display inventory boxes
 	let inv = game.inv
-	let tilesPerRow = gameData.consts.invTilesPerRow
+	let tilesPerRow = data.consts.invTilesPerRow
 	let effectiveWidth = Math.floor(getPercentOf(70, $(".tab-pane.active").width())) - parseFloat($tiles.css("padding-left"))
 	let tileW = Math.floor(effectiveWidth / tilesPerRow )
 	let tileH = tileW
@@ -349,7 +425,7 @@ function initHTML() {
 	for (let i = 0; i < game.invSlots; i++) {
 		// Create the tiles
 		let $tile = null
-		let max = gameData.consts.invTilesPerRow
+		let max = data.consts.invTilesPerRow
 		let c = 0
 		// TODO fix this mess
 		if (i / max < 1) { c = "A" }
@@ -390,7 +466,7 @@ function initHTML() {
 	$('.box').mouseenter( function(e){ selectTiles(e) } ) 
 	
 	function checkCommit() {
-		let savedGame = JSON.parse(localStorage.getItem(gameData._c9.game))
+		let savedGame = JSON.parse(localStorage.getItem(data._c9.game))
 		if (!compareArrays(game.inv, savedGame)) {
 			$(".tile-confirm").css({ "display" : "inherit" })
 		} else {
@@ -538,7 +614,7 @@ function initHTML() {
 			        break
 			}
 		} else {
-			$('#tileWarning').text(gameData._dex.inv.warning)
+			$('#tileWarning').text(data._dex.inv.warning)
 		}
 	}
 
@@ -684,7 +760,7 @@ function initHTML() {
 	}
 
 	function clearTileClasses(target) {
-		let g = gameData._s.r
+		let g = data._s.r
 		target.removeClass("tile-" + g[k])
 		target.css({ "background-color" : "" })
 		for (k in g) {
@@ -696,7 +772,7 @@ function initHTML() {
 		if (tileType == null) {
 			$('.box[data-box-id = ' + tileID + ']').css({ "background-color" : "rgba(0, 0, 0, 0)"})
 		} else {
-			$('.box[data-box-id = ' + tileID + ']').css({ "background-color" : gameData._s.rColors[tileType]})
+			$('.box[data-box-id = ' + tileID + ']').css({ "background-color" : data._s.rColors[tileType]})
 		}	
 	}
 
@@ -764,6 +840,7 @@ function init(){
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight()
 
+
     initResources()
 
     // Initial Boot
@@ -776,7 +853,7 @@ function initResources() {
 }
 
 function updateResourcesMax() {
-	for (k in gameData._s.r){
+	for (k in data._s.r){
 		game.resourcesMax[k] = 0
 	}
 	for (let i = 0; i < game.inv.length; i++) {
@@ -788,8 +865,8 @@ function updateResourcesMax() {
 function loadSettings() {
 	// TODO check for new settings. If the settings.hasOwnProperty-s are not the same, add them.
 
-	if (localStorage.getItem(gameData._c9.settings) != null) {
-		//settings = JSON.parse(localStorage.getItem(gameData._c9.settings))
+	if (localStorage.getItem(data._c9.settings) != null) {
+		//settings = JSON.parse(localStorage.getItem(data._c9.settings))
 	} else {
 		// Stuff to do if this is a new savefile TODO
 	}
@@ -797,28 +874,32 @@ function loadSettings() {
 
 // Saves the settings on LocalStorage (and on PlayFab, but that's a TODO for later)
 function saveSettings() {
-	localStorage.setItem(gameData._c9.settings, JSON.stringify(settings))
+	localStorage.setItem(data._c9.settings, JSON.stringify(settings))
 }
 
 // Loads the sprites, but only after the initial terminal boot
 function loadSprites() {
+	loadStars()
+}
+// Loads the stars, then chain-calls loadAsteroids()
+function loadStars() {
 	// Load Sprites
 	// In order to not load the same sprites evey frame, load them from the src once at the start.
 	// Once the stars are loaded, it starts to load the asteroids and then the ship.
-	let srcs = gameData.src
+	let srcs = data.src
 	for (let i = 0; i < srcs.sprites.stars.srcs.length; i++) {
 		let img = new Image()
 		img.src = srcs.sprites.stars.srcs[i]
 		img.i = i
 
 		img.onload = function() {
-			gameData.src.sprites.stars.images[this.i] = img
+			data.src.sprites.stars.images[this.i] = img
 
 			let allStarsLoaded = false
 
-			for (let j = 0; j < gameData.src.sprites.stars.srcs.length; j++) {
+			for (let j = 0; j < data.src.sprites.stars.srcs.length; j++) {
 
-				if (typeof gameData.src.sprites.stars.images[j] !== 'undefined' && gameData.src.sprites.stars.images[j] != null) {
+				if (typeof data.src.sprites.stars.images[j] !== 'undefined' && data.src.sprites.stars.images[j] != null) {
 					allStarsLoaded = true
 				} else {
 					allStarsLoaded = false
@@ -831,35 +912,34 @@ function loadSprites() {
 		}
 	}
 }
-
-// Loads the ship, then chain-calls loadShip().
+// Loads the asteroids, then chain-calls loadShip().
 function loadAsteroids() {
 	// Initial console data
 	consoleCanvas.width = $("#console").innerWidth()
     consoleCanvas.height = $("#console").innerHeight() 
 
 	// Load Sprites (extracting the src from asteroidTypes)
-	for (k in gameData.consts.asteroidTypes) {
-		let thisSrc = gameData.consts.asteroidTypes[k].src
+	for (k in data.consts.asteroidTypes) {
+		let thisSrc = data.consts.asteroidTypes[k].src
 
-		if (!gameData.src.sprites.asteroids.srcs.includes(thisSrc)) {
-			gameData.src.sprites.asteroids.srcs.push(thisSrc)
+		if (!data.src.sprites.asteroids.srcs.includes(thisSrc)) {
+			data.src.sprites.asteroids.srcs.push(thisSrc)
 		}
 	}
 
-	let srcs = gameData.src
+	let srcs = data.src
 	for (let i = 0; i < srcs.sprites.asteroids.srcs.length; i++) {
 		let img = new Image()
 		img.src = srcs.sprites.asteroids.srcs[i]
 		img.i = i
 
 		img.onload = function() {
-			gameData.src.sprites.asteroids.images[this.i] = img
+			data.src.sprites.asteroids.images[this.i] = img
 			let allAsteroidsLoaded = false
 
-			for (let j = 0; j < gameData.src.sprites.asteroids.srcs.length; j++) {
+			for (let j = 0; j < data.src.sprites.asteroids.srcs.length; j++) {
 
-				if (typeof gameData.src.sprites.asteroids.images[j] !== 'undefined' && gameData.src.sprites.asteroids.images[j] != null) {
+				if (typeof data.src.sprites.asteroids.images[j] !== 'undefined' && data.src.sprites.asteroids.images[j] != null) {
 					allAsteroidsLoaded = true
 				} else {
 					allAsteroidsLoaded = false
@@ -872,14 +952,13 @@ function loadAsteroids() {
 		}
 	}
 }
-
 // Loads the ship, then chain-calls loadConsole().
 function loadShip() {
 	let ship = new Image()
-	ship.src = gameData.src.sprites.spaceship.srcs
+	ship.src = data.src.sprites.spaceship.srcs
 
 	ship.onload = function(){
-		gameData.src.sprites.spaceship.srcs = ship
+		data.src.sprites.spaceship.srcs = ship
 
 		canvas.width = $("#game").innerWidth()
 		canvas.height = $("#game").innerWidth()
@@ -887,14 +966,14 @@ function loadShip() {
 		let sc = new CanvasObj(canvas.width/2 - 64, canvas.height * 1.2, ship, 1)
 		sc.height = 128
 		sc.width = 128
-		gameData.canvas.spaceship = sc
+		data.canvas.spaceship = sc
 
 		loadConsole()
 	}
 }
-// Loads the console, then chain-calls loadCanvas().
+// Loads the console, then chain-calls loadControlPannel().
 function loadConsole() {
-	let c = gameData.src.sprites.console
+	let c = data.src.sprites.console
 	for (let k in c){
 		let img = new Image()
 		img.src = c[k].src
@@ -914,6 +993,34 @@ function loadConsole() {
 			}
 
 			if (allLoaded) {
+				loadControlPannel()
+			}
+		}
+	}
+}
+// Loads the console, then chain-calls loadCanvas().
+function loadControlPannel() {
+	let c = data.src.sprites.controlPannel
+	for (let k in c){
+		let img = new Image()
+		img.src = c[k].src
+		img.k = k
+
+		img.onload = function() {
+			c[this.k].image = img
+			let allLoaded = false
+
+			for (x in c){
+				if (typeof c[x].image === 'undefined' || c[x].image == null) {
+					allLoaded = false
+					break
+				} else {
+					allLoaded = true
+				}
+			}
+
+			if (allLoaded) {
+				renderControlPannel()
 				loadCanvas()
 			}
 		}
@@ -923,17 +1030,48 @@ function loadConsole() {
 function loadCanvas() {
 	window.addEventListener('resize', resizeCanvas, false)
 
+	Renderer.onmessage = function(e) {
+		if (e.data.hasOwnProperty('updateCanvas')) {
+			loopCanvas()
+
+			// Clear the current canvas
+			//
+
+			
+
+			// Recreate the canvas with the passed data
+			// Temporarely save loaded Image objects (can't be sent to worker)
+			//let tempSrc = data.src
+			//data = JSON.parse(e.data.updateCanvas.data)
+			//data.src = tempSrc
+
+			//renderCanvas()
+		}
+	}
+
 	function resizeCanvas() {
 		if (gLoop) {
 			clearInterval(gLoop)
+			Renderer.postMessage({ stopCanvas : true })
 		}
-        canvas.width = $("#game").innerWidth()
+
+		canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
+       
+
+		Renderer.postMessage({ 
+			data : JSON.stringify(data),
+			loopCanvas : {
+				framerate : FRAMERATE,
+			}
+		})
 
         resizeInventory()
 
-        gameData.consts.isConsoleLoaded = false
+        data.consts.isConsoleLoaded = false
+        data.consts.isControlPannelLoaded = false
         renderConsole()
+        renderControlPannel()
 
         gLoop = setInterval(gameLoop, FRAMERATE)
     }
@@ -941,17 +1079,33 @@ function loadCanvas() {
 }
 
 
-
 // ----------------------------------- Game Loop ------------------------------------- //
 
-function gameLoop() {
-	loopCanvas()
 
-	if (gameData.consts.updateTime >= 3) {
-		gameData.consts.updateTime = 0
+
+
+
+function renderCanvas() {
+	// loop through whats loopable and draw it
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+	renderAsteroids()
+	renderLasers()
+	renderSpaceship()
+	renderConsole()
+}
+
+
+
+function gameLoop() {
+	//loopCanvas()
+
+
+	if (data.consts.updateTime >= 3) {
+		data.consts.updateTime = 0
 		timeToUpdate = true
 	} else {
-		gameData.consts.updateTime += 1
+		data.consts.updateTime += 1
 		timeToUpdate = false
 	}
 
@@ -970,76 +1124,76 @@ function gameLoop() {
 // 					(time TODO)
 // Updates distance, time and speed.
 function updateTravelInfo() {
-	let m = gameData.consts.turbo/10 + 1
+	let m = data.consts.turbo/10 + 1
 
-	let d = gameData.consts.distance.n
-	if (d >= gameData.consts.distanceMax 
-	||  d <= gameData.consts.speed.n * 2
+	let d = data.consts.distance.n
+	if (d >= data.consts.distanceMax 
+	||  d <= data.consts.speed.n * 2
 	||  d <= 2
-	&& !gameData.consts.isStopped) {
+	&& !data.consts.isStopped) {
 		if (d == 0 && d <= 0) {
-			gameData.consts.distance.n = 0
-			gameData.consts.speed.n = 0
+			data.consts.distance.n = 0
+			data.consts.speed.n = 0
 		} else {			
 			updateDistance()
 		}
 		
 	}
-	if (gameData.consts.distance.n >= gameData.consts.speed.n * m) {
-		gameData.consts.distance.n -= gameData.consts.speed.n * m	
+	if (data.consts.distance.n >= data.consts.speed.n * m) {
+		data.consts.distance.n -= data.consts.speed.n * m	
 	} else {
 		// Arrived at destination
-		gameData.consts.distance.n = 0
-		gameData.consts.distance.u = 0
+		data.consts.distance.n = 0
+		data.consts.distance.u = 0
 
-		gameData.consts.speed.u = 0
-		gameData.consts.speed.n = 0
+		data.consts.speed.u = 0
+		data.consts.speed.n = 0
 
-		gameData.consts.isStopped = true
+		data.consts.isStopped = true
 	}
 }
 
 function decrementTurbo() {
-	if (gameData.consts.turbo > 0) {
+	if (data.consts.turbo > 0) {
 
 		// Formulas available at https://www.desmos.com/calculator/y8pibgbwxx
 
 		// Turbo decrement
-		let dec = 6 + Math.round(Math.pow(gameData.consts.turbo/10, 2)/940)
+		let dec = 6 + Math.round(Math.pow(data.consts.turbo/10, 2)/940)
 		if (dec > 12) dec = 12
-		gameData.consts.turbo -= dec
+		data.consts.turbo -= dec
 
 		// Star Speed increment
-		let sspeed = gameData.consts.baseStarSpeed + (Math.pow(gameData.consts.turbo/10, 1.6) * 0.013)
-		if (isNaN(sspeed)) sspeed = gameData.consts.baseStarSpeed
-		gameData.consts.starSpeed = sspeed
+		let sspeed = data.consts.baseStarSpeed + (Math.pow(data.consts.turbo/10, 1.6) * 0.013)
+		if (isNaN(sspeed)) sspeed = data.consts.baseStarSpeed
+		data.consts.starSpeed = sspeed
 
 		// Stars spawnrate increment
-		let srate = gameData.consts.baseStarSpawnRate - Math.pow(gameData.consts.turbo/10, (3/4.2))
-		if (isNaN(srate)) srate = gameData.consts.baseStarSpawnRate
+		let srate = data.consts.baseStarSpawnRate - Math.pow(data.consts.turbo/10, (3/4.2))
+		if (isNaN(srate)) srate = data.consts.baseStarSpawnRate
 		if (srate < 2) srate = 2
-		gameData.consts.starSpawnRate = srate
+		data.consts.starSpawnRate = srate
 
 		// Asteroids speed increment
-		let aspeed = gameData.consts.baseAsteroidSpeed + (Math.pow(gameData.consts.turbo/10, 1.6) * 0.013)
-		if (isNaN(aspeed)) aspeed = gameData.consts.baseAsteroidSpeed
-		gameData.consts.asteroidSpeed = aspeed
+		let aspeed = data.consts.baseAsteroidSpeed + (Math.pow(data.consts.turbo/10, 1.6) * 0.013)
+		if (isNaN(aspeed)) aspeed = data.consts.baseAsteroidSpeed
+		data.consts.asteroidSpeed = aspeed
 
 
 		// When moving real fast, no asteroids will spawn
-		if (gameData.consts.turbo > 10) {
-			gameData.consts.maxAsteroids = 0
+		if (data.consts.turbo > 10) {
+			data.consts.maxAsteroids = 0
 		} else {
-			gameData.consts.maxAsteroids = gameData.consts.baseMaxAsteroids
+			data.consts.maxAsteroids = data.consts.baseMaxAsteroids
 		}
 		
 
 		// Update the new speeds on the currently displayed items
-		for (let i = 0; i < gameData.canvas.stars.length; i++) {
-			gameData.canvas.stars[i].speed = gameData.consts.starSpeed
+		for (let i = 0; i < data.canvas.stars.length; i++) {
+			data.canvas.stars[i].speed = data.consts.starSpeed
 		}
-		for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
-			gameData.canvas.asteroids[i].speed = gameData.consts.asteroidSpeed
+		for (let i = 0; i < data.canvas.asteroids.length; i++) {
+			data.canvas.asteroids[i].speed = data.consts.asteroidSpeed
 		}
 	}
 }
@@ -1063,7 +1217,7 @@ function bootConsole() {
 		if (settings.sound.music && settings.sound.volume > 0) {
 			music = {}
 			music.boot = document.createElement('audio')
-		    music.boot.setAttribute('src', gameData.src.music.boot)
+		    music.boot.setAttribute('src', data.src.music.boot)
 		    music.boot.volume = settings.sound.volume
 		    music.boot.currentTime = 0
 			music.boot.play()
@@ -1151,7 +1305,7 @@ function resizeInventory() {
 	// Update, in the Inventory screen, the width of the inventory boxes
 	let $resources = $('#Resources .tab-html')
 	let $inv = $('#Inventory .tab-html')
-	let tilesPerRow = gameData.consts.invTilesPerRow
+	let tilesPerRow = data.consts.invTilesPerRow
 	let effectiveWidth = Math.floor(getPercentOf(70, $(".tab-pane.active").width())) - parseFloat($('.tiles').css("padding-left"))
 
 	let tileW = Math.floor(effectiveWidth / tilesPerRow)
@@ -1160,6 +1314,26 @@ function resizeInventory() {
 	for (let i = 0; i < game.invSlots; i++) {
 		$tile = $('.box[data-box-id = ' + i + ']')
 		$tile.css({ "width" : tileW, "height" : tileH})
+	}
+}
+
+function renderControlPannel() {
+	if (!data.consts.isControlPannelLoaded) {
+		data.consts.isControlPannelLoaded = true
+
+		controlCanvas.width = $("#controlCanvas").innerWidth()
+
+		// Scale the canvas so that the motherboard fits perfeclty
+		controlCanvas.height = scaleToFit(controlCanvas.width,
+										data.src.sprites.controlPannel.background.image.width, 
+										data.src.sprites.controlPannel.background.image.height, "h")
+		controlCtx.clearRect(0, 0, controlCanvas.width, controlCanvas.height)
+
+		// Update the loaded image into the data.canvas object. BERRY IMPORTANT
+		data.canvas.controlPannel.background.image = data.src.sprites.controlPannel.background.image
+
+		let cp = new CanvasObj(0, 0, data.canvas.controlPannel.background.image, 0)
+		controlCtx.drawImage(cp.img, cp.x, cp.y, controlCanvas.width, controlCanvas.height)
 	}
 }
 
@@ -1173,18 +1347,18 @@ function renderConsole() {
 	let w = consoleCanvas.width
 	let h = consoleCanvas.height
 
-	let q = gameData.consts.turbo
+	let q = data.consts.turbo
 	// So that it doesn't divide by zero
 	if (q == 0) { q = 0.1 }
 
 	// ----- This is ran once -----
 
-	if (!gameData.consts.isConsoleLoaded) {
-		gameData.consts.isConsoleLoaded = true
+	if (!data.consts.isConsoleLoaded) {
+		data.consts.isConsoleLoaded = true
 
-		let c = gameData.canvas.console
+		let c = data.canvas.console
 		for(k in c){
-			c[k].image = gameData.src.sprites.console[k].image
+			c[k].image = data.src.sprites.console[k].image
 			c[k].h = c[k].image.height
 			c[k].w = c[k].image.width
 		}
@@ -1213,12 +1387,12 @@ function renderConsole() {
     	c.slider.y = h/2 - c.slider.image.height/2 - c.slider.image.height/4
 		
 		// Mining Priority
-    	c.sliderSelector.spacing = gameData.consts.miningPriority * (c.slider.image.width/5 - 1)
+    	c.sliderSelector.spacing = data.consts.miningPriority * (c.slider.image.width/5 - 1)
 
     	c.sliderSelector.x = (c.slider.x - (c.sliderSelector.image.width/2) + 3) + c.sliderSelector.spacing
     	c.sliderSelector.y = (c.slider.y/2) + parseInt(c.slider.image.height/16)
 
-    	gameData.canvas.console.sliderSelector.x = c.sliderSelector.x
+    	data.canvas.console.sliderSelector.x = c.sliderSelector.x
 
     	
 
@@ -1240,7 +1414,7 @@ function renderConsole() {
 			    	c[k].x, c[k].y,
 			    	c[k].image.width / (1000/q), c[k].h)
 			} else if (k == "sliderSelector") {
-				c[k].spacing = gameData.consts.miningPriority * (c.slider.image.width/5 - 1)
+				c[k].spacing = data.consts.miningPriority * (c.slider.image.width/5 - 1)
 				consoleCtx.drawImage(c[k].image, c[k].x + c[k].spacing, c[k].y)			  
 			} else if (c[k].hasOwnProperty("clip")) {
 				consoleCtx.drawImage(c[k].image,
@@ -1296,8 +1470,8 @@ function renderConsole() {
 		"text-align" : "right"
 	})
 
-	let temp = gameData.consts.distance.n
-	if (gameData.consts.distance.n > gameData.consts.distanceMax || gameData.consts.distance.n < 0) {
+	let temp = data.consts.distance.n
+	if (data.consts.distance.n > data.consts.distanceMax || data.consts.distance.n < 0) {
 		temp = 0
 	}
 	$("#distance").html(Math.round(temp))
@@ -1310,7 +1484,7 @@ function renderConsole() {
 		"text-align" : "right"
 	})
 
-	$("#distanceUnit").html(gameData.consts.distanceUnits[gameData.consts.distance.u])
+	$("#distanceUnit").html(data.consts.distanceUnits[data.consts.distance.u])
 	$("#distanceUnit").css({
 		position : 'absolute',
 		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
@@ -1320,7 +1494,7 @@ function renderConsole() {
 		"text-align" : "right"
 	})
 
-	$("#time").html(Math.round(gameData.consts.time.n))
+	$("#time").html(Math.round(data.consts.time.n))
 	$("#time").css({
 		position : 'absolute',
 		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
@@ -1330,7 +1504,7 @@ function renderConsole() {
 		"text-align" : "right"
 	})
 
-	$("#timeUnit").html(gameData.consts.timeUnits[gameData.consts.time.u])
+	$("#timeUnit").html(data.consts.timeUnits[data.consts.time.u])
 	$("#timeUnit").css({
 		position : 'absolute',
 		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
@@ -1344,12 +1518,12 @@ function renderConsole() {
 	// ----------------------------
 
 
-   	if (!gameData.consts.isGameEventEnabled) {
-   		gameData.consts.isGameEventEnabled = true
+   	if (!data.consts.isGameEventEnabled) {
+   		data.consts.isGameEventEnabled = true
    		addConsoleEvents()
    	}
-   	if (!gameData.consts.isConsoleEventEnabled) {
-   		gameData.consts.isConsoleEventEnabled = true
+   	if (!data.consts.isConsoleEventEnabled) {
+   		data.consts.isConsoleEventEnabled = true
    		addGameEvents()
    	}
 }
@@ -1357,7 +1531,7 @@ function renderConsole() {
 
 
 function loopCanvas() {
-	// clear canvas
+	// Clear canvas
 	ctx.clearRect(0, 0, canvas.width, canvas.height)
 
 
@@ -1378,7 +1552,7 @@ function loopCanvas() {
 }	
 
 function renderSpaceship() {
-	let ship = gameData.canvas.spaceship
+	let ship = data.canvas.spaceship
 
 	// EaseIn of the ship when the game starts.
 	if (easeingShip) {
@@ -1397,20 +1571,20 @@ function renderSpaceship() {
 
 // Renders the mining laser
 function renderLasers() {
-	if (gameData.canvas.lasers.length > 0) {
-		for (let i = 0; i < gameData.canvas.lasers.length; i++) {
-			let l = gameData.canvas.lasers[i]
+	if (data.canvas.lasers.length > 0) {
+		for (let i = 0; i < data.canvas.lasers.length; i++) {
+			let l = data.canvas.lasers[i]
 			
-			let astC = gameData.canvas.asteroids[0] // Default value that's, unfortunately, necessary
-			for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
-				if (gameData.canvas.asteroids[i].uniqueID == l.uniqueID) {
-					astC = gameData.canvas.asteroids[i]
+			let astC = data.canvas.asteroids[0] // Default value that's, unfortunately, necessary
+			for (let i = 0; i < data.canvas.asteroids.length; i++) {
+				if (data.canvas.asteroids[i].uniqueID == l.uniqueID) {
+					astC = data.canvas.asteroids[i]
 					break
 				}
 			}
 
-			let shipX = gameData.canvas.spaceship.x + gameData.canvas.spaceship.width/2
-			let shipY = gameData.canvas.spaceship.y + gameData.canvas.spaceship.height/2
+			let shipX = data.canvas.spaceship.x + data.canvas.spaceship.width/2
+			let shipY = data.canvas.spaceship.y + data.canvas.spaceship.height/2
 			let astCenterX = astC.getX() + astC.getWidth()/2
 			let astCenterY = astC.getY() + astC.getHeight()/2
 			l.reposition(shipX, shipY, astCenterX, astCenterY)
@@ -1428,8 +1602,8 @@ function renderLasers() {
 
 // Loops every asteroid and renders it like renderStars()
 function renderAsteroids() {
-	for (let i = 0; i < gameData.canvas.asteroids.length; i++) {
-		let a = gameData.canvas.asteroids[i]
+	for (let i = 0; i < data.canvas.asteroids.length; i++) {
+		let a = data.canvas.asteroids[i]
 		a.moveDown()
 		
 		let transaltion = {
@@ -1451,22 +1625,22 @@ function renderAsteroids() {
 		} 
 		if (a.y > canvas.height + distance/2) {
 			// Remove the relative laser if it was being mined
-			if (gameData.canvas.lasers.length > 0) {
-				let ls = gameData.canvas.lasers 
-				let as = gameData.canvas.asteroids
+			if (data.canvas.lasers.length > 0) {
+				let ls = data.canvas.lasers 
+				let as = data.canvas.asteroids
 
 				for (let k = 0; k < ls.length; k++) {
 					if (as[0].uniqueID == ls[k].uniqueID) {
 						// Splice() will be needed when we have multiple lasers
 						//ls.splice(i, 1)
-						gameData.canvas.lasers = []
+						data.canvas.lasers = []
 						break
 					}
 				}
 			}
 
-			// destroy() also removes the canvas object from gameData.canvas
-			gameData.asteroidsData[0].destroy(0)			
+			// destroy() also removes the canvas object from data.canvas
+			data.asteroidsData[0].destroy(0)			
 		}
 
 		// Draw the star
@@ -1481,19 +1655,19 @@ function renderAsteroids() {
 
 // Loops every star, renders it and moves it at the start of every frame.
 function renderStars() {
-	for (let i = 0; i < gameData.canvas.stars.length; i++) {
-		let s = gameData.canvas.stars[i]
+	for (let i = 0; i < data.canvas.stars.length; i++) {
+		let s = data.canvas.stars[i]
 		s.moveDown()
 
 		// If the star reaches the end of the screen, remove it and shift the array.
 		if (!s.img) {
 			// In case the img hasn't fully loaded yet
 			if (s.y > canvas.height + 64) {
-				gameData.canvas.stars.shift()
+				data.canvas.stars.shift()
 			}
 		} else {
 			if (s.y > canvas.height + s.img.height) {
-				gameData.canvas.stars.shift()
+				data.canvas.stars.shift()
 			}
 		}
 
@@ -1506,21 +1680,21 @@ function renderStars() {
 	}	
 }
 
-// Adds a new star with a random X coord to gameData.canvas.stars.
+// Adds a new star with a random X coord to data.canvas.stars.
 function newStar() {
 	let starW = 32
-	if (gameData.canvas.stars.length > 1) {
-		starW = gameData.canvas.stars[gameData.canvas.stars.length - 1].getWidth()
+	if (data.canvas.stars.length > 1) {
+		starW = data.canvas.stars[data.canvas.stars.length - 1].getWidth()
 	}
 	let x = getRandomStartPos(canvas.width, starW)
 	let minDistance = 32
 
 	// Check if it's not too close to another star.
 	let lastStars = []
-	if (gameData.canvas.stars.length > 2) {
-		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 1])
-		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 2])
-		lastStars.push(gameData.canvas.stars[gameData.canvas.stars.length - 3])
+	if (data.canvas.stars.length > 2) {
+		lastStars.push(data.canvas.stars[data.canvas.stars.length - 1])
+		lastStars.push(data.canvas.stars[data.canvas.stars.length - 2])
+		lastStars.push(data.canvas.stars[data.canvas.stars.length - 3])
 	} else {
 		for (let i = 0; i < lastStars.length; i++) {
 			lastStars[i].getX() = x + minDistance
@@ -1531,13 +1705,13 @@ function newStar() {
 	// If it's not enought, random a new star.
 	if (lastStars.length == 0) {
 		let sprite = getRandomStarSprite()
-		let s = new CanvasObj(x, 0, sprite, gameData.consts.starSpeed)
+		let s = new CanvasObj(x, 0, sprite, data.consts.starSpeed)
 		if (!s.img) {
 			s.y = -18
 		} else {
 			s.y = -(s.img.height)
 		}
-		gameData.canvas.stars.push(s)
+		data.canvas.stars.push(s)
 
 	} else if (Math.abs(lastStars[0].getX() - x) < minDistance ||
 		Math.abs(lastStars[1].getX() - x) < minDistance ||
@@ -1547,7 +1721,7 @@ function newStar() {
 	} else {
 		// Adds the star to the list of stars.
 		let sprite = getRandomStarSprite()
-		let s = new CanvasObj(x, 0, sprite, gameData.consts.starSpeed)
+		let s = new CanvasObj(x, 0, sprite, data.consts.starSpeed)
 		if (!s.img) {
 			s.y = -18
 		} else {
@@ -1556,19 +1730,19 @@ function newStar() {
 		
 		// Deprecated. Having stars move at different speeds overloaded the game.
 		//s.speed += getRandom(0, 2)
-		gameData.canvas.stars.push(s)
+		data.canvas.stars.push(s)
 	}	
 }
 
 // Adds a new random asteroid
 function newAsteroid() {
 	let asteroidW = 64
-	if (gameData.canvas.asteroids.length > 1) {
-		asteroidW = gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1].getWidth()
+	if (data.canvas.asteroids.length > 1) {
+		asteroidW = data.canvas.asteroids[data.canvas.asteroids.length - 1].getWidth()
 	}
 
 	let x = getRandomStartPos(canvas.width, asteroidW)
-	let ship = gameData.canvas.spaceship
+	let ship = data.canvas.spaceship
 	// Make sure the asteroid doesn't spawn direclty on top of the ship, otherwise it'd be a pain to mine
 	if (x > (ship.x) && x < (ship.x + ship.width)) {
 		newAsteroid()
@@ -1577,15 +1751,15 @@ function newAsteroid() {
 
 		// Check if it's not too close to another asteroid.
 		let lastAsteroid = []
-		if (gameData.canvas.asteroids.length > 2) {
-			lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 1])
-			lastAsteroid.push(gameData.canvas.asteroids[gameData.canvas.asteroids.length - 2])
+		if (data.canvas.asteroids.length > 2) {
+			lastAsteroid.push(data.canvas.asteroids[data.canvas.asteroids.length - 1])
+			lastAsteroid.push(data.canvas.asteroids[data.canvas.asteroids.length - 2])
 		} else {
 			for (let i = 0; i < lastAsteroid.length; i++) {
 				lastAsteroid[i].getX() = x + minDistance
 			}
 		}
-		if (gameData.canvas.asteroids.length <= gameData.consts.maxAsteroids) {	
+		if (data.canvas.asteroids.length <= data.consts.maxAsteroids) {	
 			if (lastAsteroid.length == 0) {
 				createAsteroid()
 			} else if (Math.abs(lastAsteroid[0].getX() - x) < minDistance) {
@@ -1602,13 +1776,13 @@ function newAsteroid() {
 		let ast = getRandomAsteroidType()
 		let srcIndex = 0
 		// Contrary to the stars, the sprite is based on the asteroid, not a random one
-		for (let i = 0; i < gameData.src.sprites.asteroids.srcs.length; i++) {
-			if (gameData.src.sprites.asteroids.srcs[i] == ast.src) {
+		for (let i = 0; i < data.src.sprites.asteroids.srcs.length; i++) {
+			if (data.src.sprites.asteroids.srcs[i] == ast.src) {
 				srcIndex = i
 			} 
 		}
-		let sprite = gameData.src.sprites.asteroids.images[srcIndex]
-		let a = new CanvasObj(x, 0, sprite, gameData.consts.asteroidSpeed)
+		let sprite = data.src.sprites.asteroids.images[srcIndex]
+		let a = new CanvasObj(x, 0, sprite, data.consts.asteroidSpeed)
 		if (!a.img) {
 			a.y = -64
 		} else {
@@ -1617,12 +1791,12 @@ function newAsteroid() {
 
 		// Makes sure to create a unique ID that the asteroid and the laser share
 		ast.uniqueID = 0
-		if (gameData.canvas.asteroids.length > 0) {
-			ast.uniqueID = gameData.consts.lastAsteroidUniqueID + 1
-			gameData.consts.lastAsteroidUniqueID = ast.uniqueID
+		if (data.canvas.asteroids.length > 0) {
+			ast.uniqueID = data.consts.lastAsteroidUniqueID + 1
+			data.consts.lastAsteroidUniqueID = ast.uniqueID
 			if (ast.uniqueID > 100) {
 				ast.uniqueID = 0
-				gameData.consts.lastAsteroidUniqueID = 0
+				data.consts.lastAsteroidUniqueID = 0
 			}
 		}
 		
@@ -1631,8 +1805,8 @@ function newAsteroid() {
 		a.setRotationAmount(astObj.getRotationAmount())
 		a.setAxis(astObj.getAxis())
 
-		gameData.canvas.asteroids.push(a)
-		gameData.asteroidsData.push(astObj)
+		data.canvas.asteroids.push(a)
+		data.asteroidsData.push(astObj)
 	}
 }
 
@@ -1641,12 +1815,12 @@ function newAsteroid() {
 
 function isRandomStarSpawning() {
 
-	return getRandom(0, gameData.consts.starSpawnRate) == 1
+	return getRandom(0, data.consts.starSpawnRate) == 1
 }
 
 function isAsteroidSpawning() {
 
-	return getRandom(0, gameData.consts.asteroidSpawnRate) == 1
+	return getRandom(0, data.consts.asteroidSpawnRate) == 1
 }
 
 function getRandomStartPos(mapW, itemW) {
@@ -1657,10 +1831,10 @@ function getRandomStartPos(mapW, itemW) {
 	return randomNumber
 }
 
-// Randomly selects a star sprite from gameData.src.sprites.stars
+// Randomly selects a star sprite from data.src.sprites.stars
 function getRandomStarSprite() {
 	let n = 0
-	let chances = gameData.src.sprites.stars.chances
+	let chances = data.src.sprites.stars.chances
 	let r = getRandom(1, 100)
 
 	// Recursively analyze the percentage and get the index of the random star src
@@ -1676,12 +1850,12 @@ function getRandomStarSprite() {
 	}
 	n = getStarChance(0, r)
 
-	return gameData.src.sprites.stars.images[n]	
+	return data.src.sprites.stars.images[n]	
 }
 
 function getRandomAsteroidType() {
 	let r = getRandom(0, 100)
-	let asts = gameData.consts.asteroidTypes
+	let asts = data.consts.asteroidTypes
 	let id = 0
 
 	function getAstChance(i, r) {
@@ -1703,8 +1877,8 @@ function getRandomAsteroidType() {
 
 
 function hyperdrive() {
-	if (gameData.consts.turbo < 1000) {
-		gameData.consts.turbo += 60
+	if (data.consts.turbo < 1000) {
+		data.consts.turbo += 60
 	}
 }
 
@@ -1727,7 +1901,7 @@ function addConsoleEvents() {
     	let w = k.w * scaleX
     	let h = k.h * scaleY
 
-    	let kx = k.x + gameData.consts.miningPriority * (this.objects.slider.image.width/5 - 1)
+    	let kx = k.x + data.consts.miningPriority * (this.objects.slider.image.width/5 - 1)
 
 		if (!isPaused &&
 			y > k.y && y < k.y + h && 
@@ -1747,11 +1921,11 @@ function addConsoleEvents() {
 			startX = x
 
 			sliderDistance += dx
-			let p = gameData.consts.miningPriority
+			let p = data.consts.miningPriority
 
 			if (sliderDistance > this.objects.slider.w/5 - this.objects.sliderSelector.w/5) {
 				sliderDistance = 0
-				if (p < gameData.consts.maxMiningPriority) { 
+				if (p < data.consts.maxMiningPriority) { 
 					p += 1
 					sfx.hover.pause()
 					sfx.hover.currentTime = 0
@@ -1767,7 +1941,7 @@ function addConsoleEvents() {
 					sfx.hover.play()
 				}
 			}
-			gameData.consts.miningPriority = p
+			data.consts.miningPriority = p
 
 		}
 	})
@@ -1836,7 +2010,7 @@ function addGameEvents() {
     	let x = Math.floor((e.clientX - rect.left) * scaleX)
     	let y = Math.floor((e.clientY - rect.top) * scaleY)
 
-    	let asts = gameData.canvas.asteroids
+    	let asts = data.canvas.asteroids
 
     	if (!isPaused) {
     		// Reverse for-loop so it can always select the topmost asteroid
@@ -1847,7 +2021,7 @@ function addGameEvents() {
 
 	    		if (y > a.y && y < aYend && 
 					x > a.x && x < aXend) {
-	    			if (gameData.asteroidsData[i]) {
+	    			if (data.asteroidsData[i]) {
 	    				startMining(i)
 						break
 	    			}
@@ -1891,17 +2065,17 @@ function addGameEvents() {
 
 // --------------------------------- Mining Handler ---------------------------------- //
 
-// Calculates the stars and end point of the laser and adds it to gameData.canvas.lasers
+// Calculates the stars and end point of the laser and adds it to data.canvas.lasers
 // Then it keeps mining every 4 ticks
 function startMining(targetID) {
-	if (gameData.canvas.lasers.length >= gameData.consts.maxConcurrentLasers) {
+	if (data.canvas.lasers.length >= data.consts.maxConcurrentLasers) {
 		// Remove existing lasers
 		// This minght need to be changed when we implement auto-lasers.
-		gameData.canvas.lasers = []
+		data.canvas.lasers = []
 	}
 
-	if (gameData.canvas.lasers.length > 0) {
-		if (gameData.canvas.lasers[0].uniqueID != uniqueID) {
+	if (data.canvas.lasers.length > 0) {
+		if (data.canvas.lasers[0].uniqueID != uniqueID) {
 			makeLaser()
 		}
 	} else {
@@ -1911,32 +2085,32 @@ function startMining(targetID) {
 	// Private function
 	function makeLaser() {
 		// Rendering
-		let astC = gameData.canvas.asteroids[targetID]
-		let shipX = gameData.canvas.spaceship.x + gameData.canvas.spaceship.width/2
-		let shipY = gameData.canvas.spaceship.y + gameData.canvas.spaceship.height/2
+		let astC = data.canvas.asteroids[targetID]
+		let shipX = data.canvas.spaceship.x + data.canvas.spaceship.width/2
+		let shipY = data.canvas.spaceship.y + data.canvas.spaceship.height/2
 		
 		let astCenterX = astC.getX() + astC.getWidth()/2
 		let astCenterY = astC.getY() + astC.getHeight()/2
 		
 		let lineObj = new LineObject(shipX, shipY, astCenterX, astCenterY, 2, '#AA0000')
 		lineObj.uniqueID = astC.uniqueID
-		gameData.canvas.lasers.push(lineObj)
+		data.canvas.lasers.push(lineObj)
 	}
 }
 
 // Loops the active lasers and calls asteroidObj.mine()
 function updateMining() {
 	let inv = game.resources
-	let ls = gameData.canvas.lasers
-	let as = gameData.asteroidsData
+	let ls = data.canvas.lasers
+	let as = data.asteroidsData
 
 	for (let i = 0; i < ls.length; i++) {
 		for (let j = 0; j < as.length; j++) {
 			if (as[j].uniqueID == ls[i].uniqueID) {
-				gameData._s.rPrio.reverse()
-				let prio = gameData._s.rPrio[gameData.consts.miningPriority]
-				gameData._s.rPrio.reverse()
-				let mined = as[j].mine(gameData.consts.miningStrength, prio)	
+				data._s.rPrio.reverse()
+				let prio = data._s.rPrio[data.consts.miningPriority]
+				data._s.rPrio.reverse()
+				let mined = as[j].mine(data.consts.miningStrength, prio)	
 				if (mined != null) {
 					addResource(mined.resource, mined.n)
 				}		
@@ -1965,24 +2139,24 @@ function addResource(r, n) {
 
 
 function updateDistance() {
-	if (gameData.consts.distance.n >= gameData.consts.distanceMax || gameData.consts.distance.n <= gameData.consts.speed.n * 2 || gameData.consts.distance.n <= 2) {
-		let newVal = unitConversion(gameData.consts.distance.n, gameData.consts.distance.u, 'd')
-		gameData.consts.distance.n = newVal.n
-		gameData.consts.distance.u = newVal.u
+	if (data.consts.distance.n >= data.consts.distanceMax || data.consts.distance.n <= data.consts.speed.n * 2 || data.consts.distance.n <= 2) {
+		let newVal = unitConversion(data.consts.distance.n, data.consts.distance.u, 'd')
+		data.consts.distance.n = newVal.n
+		data.consts.distance.u = newVal.u
 		updateSpeed()
 	}
 }
 
 function updateSpeed() {
-	let newVal = unitConversion(gameData.consts.speed.n, gameData.consts.speed.u, 's')
-	gameData.consts.speed.n = newVal.n
-	gameData.consts.speed.u = newVal.u
+	let newVal = unitConversion(data.consts.speed.n, data.consts.speed.u, 's')
+	data.consts.speed.n = newVal.n
+	data.consts.speed.u = newVal.u
 }
 
 
 function unitConversion(n, u, type) {
 	if (type == 'd') {
-		if (n >= gameData.consts.distanceMax) {
+		if (n >= data.consts.distanceMax) {
 			if (u == 0)	return convertToAU(n, u)
 			if (u == 1)	return convertToPC(n, u)
 		} else {
@@ -1990,7 +2164,7 @@ function unitConversion(n, u, type) {
 			if (u == 1)	return convertToKM(n, u)
 		}
 	} else if (type == 's') {
-		if (n >= gameData.consts.distanceMax) {
+		if (n >= data.consts.distanceMax) {
 			if (u == 0)	return convertToAU(n, u)
 			if (u == 1)	return convertToPC(n, u)
 		} else {
@@ -2058,6 +2232,7 @@ function toggleBoot() {
 function pauseGameLoop() {
 	if (gLoop) {
 		clearInterval(gLoop)
+		Renderer.postMessage({ stopCanvas : true })
 		isPaused = true
 	}
 }
@@ -2065,6 +2240,7 @@ function pauseGameLoop() {
 function resumeGameLoop() {
 	if (isPaused) {
 		gLoop = setInterval(gameLoop, FRAMERATE)
+		Renderer.postMessage({resumeCanvas : true})
 		isPaused = false
 	}
 }

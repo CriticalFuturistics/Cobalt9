@@ -55,6 +55,26 @@ function getColorFromPercent(p) {
 	return "hsla("+ c +", 100%, 50%, 0.4)"
 }
 
+
+// Returns the corresponding value of a sclaed dimension
+// i.e. If we want to scale the height x to be 16:9ths, we can call
+// scaleToFit(value, 16, 9, "h")  or "w" for width
+function scaleToFit(x, scaleW, scaleH, type) {
+	if (type == "h") {
+		// x : res = scaleW : scaleH
+		return Math.round((x * scaleH) / scaleW)
+	} else {
+		// res : x = scaleW : scaleH
+		return Math.round((x * scaleW) / scaleH)
+	}
+}
+
+
+
+
+
+
+
 function removeTooltip() {
 	$(".ctooltip").remove()
 }
@@ -88,7 +108,6 @@ function createTootlip(parent, w, h, pos, html) {
 	})
 	$("body").prepend($tooltip)
 }
-
 
 
 
