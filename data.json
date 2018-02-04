@@ -125,7 +125,7 @@
 
 			"console" : {
 				"background" : {
-					"src" : "src/sprite/console_2.png",
+					"src" : "src/sprite/console.png",
 					"image" : null
 				},
 
@@ -219,8 +219,8 @@
 		"baseStarSpawnRate" : 18,
 		"starSpawnRate" : 18,
 		
-		"baseAsteroidSpawnRate" : 400,
-		"asteroidSpawnRate" : 400,
+		"baseAsteroidSpawnRate" : 600,
+		"asteroidSpawnRate" : 600,
 
 		"_comment" : "lastAsteroidUniqueID max 99",
 		"lastAsteroidUniqueID" : 0,
@@ -263,7 +263,7 @@
 			{ 
 				"id" : 0,
 				"src" : "src/sprite/a1.png",
-				"chance" : 50,
+				"chance" : 40,
 				"rotation" : [0, 0.2],
 				"axis" : {
 					"x" : [1, 2.5],
@@ -290,8 +290,33 @@
 			},
 			{ 
 				"id" : 1,
+				"src" : "src/sprite/a4.png",
+				"chance" : 24,
+				"rotation" : [-0.6, 0.4],
+				"axis" : {
+					"x" : [0, 1],
+					"y" : [-1, 0]
+				},
+
+				"r" : {
+					"titanium" : 22,
+					"copper" : 7,
+					"silicon": 14,
+					"gold" : 0,
+					"uranium" : 0
+				},
+				"multiplier" : {
+					"titanium" : [0.5, 1.4],
+					"copper" : [0.5, 1.2],
+					"silicon": [0.5, 4],
+					"gold" : [0 ,0],
+					"uranium" : [0, 0]
+				}
+			},
+			{ 
+				"id" : 2,
 				"src" : "src/sprite/a1.png",
-				"chance" : 30,
+				"chance" : 15,
 				"rotation" : [0.1, 0.3],
 				"axis" : {
 					"x" : [1, 2],
@@ -314,9 +339,9 @@
 				}
 			},
 			{ 
-				"id" : 2,
+				"id" : 3,
 				"src" : "src/sprite/a1.png",
-				"chance" : 6,
+				"chance" : 12,
 				"rotation" : [0.1, 0.5],
 				"axis" : {
 					"x" : [1, 1],
@@ -339,9 +364,9 @@
 				}
 			},
 			{ 
-				"id" : 3,
+				"id" : 4,
 				"src" : "src/sprite/a2.png",
-				"chance" : 12,
+				"chance" : 6,
 				"rotation" : [0, 0.6],
 				"axis" : {
 					"x" : [1, 2],
@@ -364,7 +389,7 @@
 				}
 			},
 			{ 
-				"id" : 4,
+				"id" : 5,
 				"src" : "src/sprite/a3.png",
 				"chance" : 3,
 				"rotation" : [0.1, 0.3],
@@ -387,7 +412,7 @@
 					"gold" : [1, 3.7],
 					"uranium" : [0, 0]
 				}
-			}
+			}			
 		],
 
 		"upgrades" : [
