@@ -1,4 +1,6 @@
 {
+	"isPaused" : false,
+
 	"qbits" : 0,
 	"energy" : 400,
 	"maxEnergy" : 500,
