@@ -1,9 +1,10 @@
 /* 
 	Cobalt9 - by Critical Futuristics
-	Authors: M. Zyke - G. Sgabruz
-	Design: Zyke & Sgabruz
+
+	Authors: M. Zyke - G. sgabruz
+	Design: Zyke & sgabruz
 	Code maintenence: Zyke
-	Sprites: Sgabruz
+	Sprites: sgabruz
 	Score: J. Jaxx
 
 	Version: v0.01
@@ -20,7 +21,13 @@ let game = null
 let settings = null
 let animations = null
 
-let Renderer = new Worker('worker.js')
+let Renderer = null
+let RenderHandler = new Worker('worker.js')
+let GameWorker = new Worker('worker.js')
+
+// Setup function to enable focusIn and focusOut of the browser window.
+// Shoud be ran as soon as possible when loading the page.
+setupFocus()
 
 
 // Called once the HTML document has finished loading.
@@ -59,30 +66,34 @@ $(document).ready(function($) {
 				.fail(function(){ 
 					console.log("Error while trying to load the animations' data. Try reloading the page.")
 				})
-				.done(function(){
-					// Creates a worker that works on a separate thread
-					if (window.Worker) {
-						
-
-						loadSettings()
-					    load()
-						initSound()
-						initCSS()
-						initHTML()
-						init()
-						Renderer = new Worker("renderer.js")
-						
-					} else {
-						// TODO Find a better solution, like running the renderer as an interval
-						alert("This browser does not support Web Workers.")
-					}	
-
-				    
+				.done(function(){	
+					initAfterLoad()		    
 				})
 			})		
 		})
 	})
 })
+
+function initAfterLoad() {
+	// Creates workers to work on separate threads
+	if (window.Worker) {
+		// GameWorker handles the gameloop
+		GameWorker = new Worker("gameWorker.js")
+
+		// RenderHandler handles the renderer and its fps
+		RenderHandler = new Worker("renderHandler.js")
+	} else {
+		// TODO Find a better solution
+		alert("This browser does not support Web Workers, so the game is not able to work :(")
+	}	
+
+	loadSettings()
+    load()
+	initSound()
+	initCSS()
+	initHTML()
+	init()
+}
 
 
 
@@ -96,15 +107,9 @@ let controlCanvas = document.getElementById("controlCanvas")
 let controlCtx = controlCanvas.getContext("2d")
 
 let sfx = null
-
-let gLoop = null
-let isPaused = false
 let timeToUpdate = true
 
-let easeingShip = true
-let increment = .002
 
-//let hasTileStart = false
 let hasTileTypeSelected = false
 let tileType = null
 let tileStart = null
@@ -998,7 +1003,7 @@ function loadConsole() {
 		}
 	}
 }
-// Loads the console, then chain-calls loadCanvas().
+// Loads the control pannel, then chain-calls loadCanvas().
 function loadControlPannel() {
 	let c = data.src.sprites.controlPannel
 	for (let k in c){
@@ -1021,51 +1026,20 @@ function loadControlPannel() {
 
 			if (allLoaded) {
 				renderControlPannel()
-				loadCanvas()
+				start()
 			}
 		}
 	}
 }
-// Loads the canvas, then stars the Gameloop.
-function loadCanvas() {
+
+// Stars the Gameloop.
+function start() {
 	window.addEventListener('resize', resizeCanvas, false)
 
-	Renderer.onmessage = function(e) {
-		if (e.data.hasOwnProperty('updateCanvas')) {
-			loopCanvas()
-
-			// Clear the current canvas
-			//
-
-			
-
-			// Recreate the canvas with the passed data
-			// Temporarely save loaded Image objects (can't be sent to worker)
-			//let tempSrc = data.src
-			//data = JSON.parse(e.data.updateCanvas.data)
-			//data.src = tempSrc
-
-			//renderCanvas()
-		}
-	}
-
 	function resizeCanvas() {
-		if (gLoop) {
-			clearInterval(gLoop)
-			Renderer.postMessage({ stopCanvas : true })
-		}
-
 		canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
        
-
-		Renderer.postMessage({ 
-			data : JSON.stringify(data),
-			loopCanvas : {
-				framerate : FRAMERATE,
-			}
-		})
-
         resizeInventory()
 
         data.consts.isConsoleLoaded = false
@@ -1073,33 +1047,26 @@ function loadCanvas() {
         renderConsole()
         renderControlPannel()
 
-        gLoop = setInterval(gameLoop, FRAMERATE)
+        RenderHandler.postMessage({ init : true, framerate : FRAMERATE })
     }
     resizeCanvas()
+
+    RenderHandler.onmessage = function(e) {
+		if (e.data.render) {
+			loopCanvas()
+		}
+	}
 }
+
+
+
+
 
 
 // ----------------------------------- Game Loop ------------------------------------- //
 
 
-
-
-
-function renderCanvas() {
-	// loop through whats loopable and draw it
-	ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-	renderAsteroids()
-	renderLasers()
-	renderSpaceship()
-	renderConsole()
-}
-
-
-
 function gameLoop() {
-	//loopCanvas()
-
 
 	if (data.consts.updateTime >= 3) {
 		data.consts.updateTime = 0
@@ -1555,13 +1522,13 @@ function renderSpaceship() {
 	let ship = data.canvas.spaceship
 
 	// EaseIn of the ship when the game starts.
-	if (easeingShip) {
-		increment += .016
-		ship.y -= 1 / increment
+	if (animations.ship.entrance.easeing) {
+		animations.ship.entrance.increment += animations.ship.entrance.factor
+		ship.y -= 1 / animations.ship.entrance.increment
 
 		if (ship.y <= canvas.height/2) {
-			increment = 0
-			easeingShip = false
+			animations.ship.entrance.increment = 0
+			animations.ship.entrance.easeing = false
 		}
 		ctx.drawImage(ship.img, ship.x, ship.y)
 	} else {
@@ -1903,7 +1870,7 @@ function addConsoleEvents() {
 
     	let kx = k.x + data.consts.miningPriority * (this.objects.slider.image.width/5 - 1)
 
-		if (!isPaused &&
+		if (!game.isPaused &&
 			y > k.y && y < k.y + h && 
 			x > kx && x < kx + w) {
 			startX = x
@@ -1913,7 +1880,7 @@ function addConsoleEvents() {
 	})
 
 	$("#consoleCanvas").mousemove(function (e) {
-		if (!isPaused && isSliderSelected) {
+		if (!game.isPaused && isSliderSelected) {
 			let rect = consoleCanvas.getBoundingClientRect()
 			let scaleX = consoleCanvas.width / rect.width
 			let x = Math.floor((e.clientX - rect.left) * scaleX)
@@ -1946,7 +1913,7 @@ function addConsoleEvents() {
 		}
 	})
 	$("#consoleCanvas").mouseup(function (e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 			isSliderSelected = false
 		
 			consoleCanvas.objects.btnTurbo.visible = true
@@ -1955,7 +1922,7 @@ function addConsoleEvents() {
 	})
 
 	$("#consoleCanvas").mouseout(function (e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 			if (isSliderSelected){
 				isSliderSelected = false
 			}
@@ -1966,14 +1933,14 @@ function addConsoleEvents() {
 
 
 	consoleCanvas.addEventListener('mouseup', function(e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 			consoleCanvas.objects.btnTurbo.visible = true
 			consoleCanvas.objects.prsTurbo.visible = false
 		}
 	})
 
 	consoleCanvas.addEventListener('mousedown', function(e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 			let k = this.objects.btnTurbo
 
 			let rect = consoleCanvas.getBoundingClientRect()
@@ -2012,7 +1979,7 @@ function addGameEvents() {
 
     	let asts = data.canvas.asteroids
 
-    	if (!isPaused) {
+    	if (!game.isPaused) {
     		// Reverse for-loop so it can always select the topmost asteroid
     		for (let i = asts.length - 1; i >= 0; i--) {
 				let a = asts[i]
@@ -2032,30 +1999,30 @@ function addGameEvents() {
     	
 	})
 	$("#gameCanvas").mousemove(function (e) {
-		if (!isPaused) {
+		if (!game.isPaused) {
 			
 		}
 	})
 	$("#gameCanvas").mouseup(function (e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 
 		}
 	})
 
 	$("#gameCanvas").mouseout(function (e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 
 		}
 	})
 
 	gameCanvas.addEventListener('mouseup', function(e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 
 		}
 	})
 
 	gameCanvas.addEventListener('mousedown', function(e) {
-		if(!isPaused) {
+		if(!game.isPaused) {
 					
 		}
 	}, false)
@@ -2230,17 +2197,64 @@ function toggleBoot() {
 
 
 function pauseGameLoop() {
-	if (gLoop) {
-		clearInterval(gLoop)
-		Renderer.postMessage({ stopCanvas : true })
-		isPaused = true
+	if (!game.isPaused) {
+		game.isPaused = true
+
+		// Warn renderHandler
+		RenderHandler.postMessage({ stop : true })
+
+		// Warn gameWorker
+		GameWorker.postMessage({ stop : true })
 	}
 }
 
 function resumeGameLoop() {
-	if (isPaused) {
-		gLoop = setInterval(gameLoop, FRAMERATE)
-		Renderer.postMessage({resumeCanvas : true})
-		isPaused = false
+	if (game.isPaused) {
+		game.isPaused = false
+
+		// Warn renderHandler
+		RenderHandler.postMessage({ resume : true })
+
+		// Warn gameWorker
+		GameWorker.postMessage({ resume : true })
 	}
+}
+
+
+
+// Setup function to enable focusIn and focusOut of the browser window.
+function setupFocus() {
+  let hidden = "hidden"
+
+  // Standards:
+  if (hidden in document)
+    document.addEventListener("visibilitychange", onchange)
+  else if ((hidden = "mozHidden") in document)
+    document.addEventListener("mozvisibilitychange", onchange)
+  else if ((hidden = "webkitHidden") in document)
+    document.addEventListener("webkitvisibilitychange", onchange)
+  else if ((hidden = "msHidden") in document)
+    document.addEventListener("msvisibilitychange", onchange)
+  // IE 9 and lower:
+  else if ("onfocusin" in document)
+    document.onfocusin = document.onfocusout = onchange
+  // All others:
+  else
+    window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange
+
+  function onchange(evt) {
+    let v = "visible", h = "hidden", evtMap = {
+        	focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
+        }
+
+    evt = evt || window.event
+    if (evt.type in evtMap)
+      document.body.className = evtMap[evt.type]
+    else
+      document.body.className = this[hidden] ? "hidden" : "visible"
+  }
+
+  // set the initial state (but only if browser supports the Page Visibility API)
+  if(document[hidden] !== undefined)
+    onchange({type: document[hidden] ? "blur" : "focus"})
 }

@@ -63,5 +63,13 @@
 			"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"
 		]
 
+	},
+
+	"ship" : {
+		"entrance" : {
+			"easeing" : true,
+			"increment" : 0.002,
+			"factor" : 0.016
+		}
 	}
 }

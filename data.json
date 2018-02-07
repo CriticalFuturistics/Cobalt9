@@ -1,4 +1,6 @@
 {
+	"version" : "v0.01",
+
 	"canvas" : {
 		"width" : 0,
 		"height" : 0,
@@ -216,8 +218,8 @@
 		"baseAsteroidSpeed" : 0.8,
 		"asteroidSpeed" : 0.8,
 		
-		"baseStarSpawnRate" : 18,
-		"starSpawnRate" : 18,
+		"baseStarSpawnRate" : 24,
+		"starSpawnRate" : 24,
 		
 		"baseAsteroidSpawnRate" : 600,
 		"asteroidSpawnRate" : 600,
