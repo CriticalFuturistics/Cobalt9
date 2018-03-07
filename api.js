@@ -1,7 +1,12 @@
 // Prototype function to get fixed float numbers
 Number.prototype.toFixedNumber = function(x, base) {
-  var pow = Math.pow(base || 10, x)
-  return +(Math.round(this * pow) / pow)
+	let pow = Math.pow(base || 10, x)
+	return +(Math.round(this * pow) / pow)
+}
+
+function precisionRound(value, precision) {
+    let multiplier = Math.pow(10, precision || 0)
+    return Math.round(value * multiplier) / multiplier
 }
 
 // Basic method to get a random int between 2 values
@@ -108,6 +113,31 @@ function createTootlip(parent, w, h, pos, html) {
 	})
 	$("body").prepend($tooltip)
 }
+
+
+
+// Removes the image object reference from a list of canvasObjs.
+// Returns an array of deep-cloned objects.
+// Deep-cloned objects, however, don't contain non-enum-based values.
+function removeImgReferences(objs) {
+	if (typeof objs === 'undefined' || objs == null) {
+		return null
+	}
+
+	if (!Array.isArray(objs)) {
+		return removeImgReferences([objs])
+	}
+
+	let res = []
+	for (let i = 0; i < objs.length; i++) {
+		let newObj = JSON.parse(JSON.stringify(objs[i]))
+		newObj.img = null
+		res.push(newObj)
+	}
+	return res
+}
+
+
 
 
 

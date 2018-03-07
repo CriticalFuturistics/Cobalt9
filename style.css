@@ -94,7 +94,11 @@ body { background: #40424A; }
 	border: 2px solid #FFF;
 	width: 100%;
     /*padding-top: 100%;*/
+    position: relative;
+    overflow: hidden;
 }
+
+
 
 .game-header {
 	height: 42px;
@@ -123,12 +127,26 @@ body { background: #40424A; }
 	background: #FFF;
 }
 
-#gameCanvas { 
+#starsCanvas {
+	position: absolute;
+	width: 100%;
+	top: 0;
+	left: 0;
+	margin: 0; 
+	padding: 0; 
+}
+
+#gameCanvas {
+	position: absolute;
+	width: 100%;
+	top: 0;
+	left: 0;
 	margin: 0; 
 	padding: 0; 
 	display: block;
-	cursor : url('src/sprite/crosshair.png'), auto;
+	cursor : url('src/sprite/crosshair.png') 16 16, auto;
 }
+
 
 canvas { display:block; }
 

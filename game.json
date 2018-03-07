@@ -1,5 +1,6 @@
 {
 	"isPaused" : false,
+	"readyToRender" : true,
 
 	"qbits" : 0,
 	"energy" : 400,

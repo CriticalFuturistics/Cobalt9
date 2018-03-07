@@ -2,7 +2,7 @@
 // Contains the information about the position and the state of an element on the canvas
 
 class CanvasObj {
-	constructor(x, y, img, speed) {
+	constructor(x, y, img, speed, w = 0, h = 0) {
 		this.x = parseInt(x)
 		this.y = parseInt(y)
 		this.parent = {
@@ -16,8 +16,8 @@ class CanvasObj {
 		this.axis = 0
 
 		if (!this.img) {
-			this.width = 0
-			this.height = 0
+			this.width = w
+			this.height = h
 		} else {
 			this.width = this.img.width
 			this.height = this.img.height
@@ -28,15 +28,15 @@ class CanvasObj {
 		this.speed = speed
 	}
 
-	moveDown(){ 
+	moveDown() {
 		this.y += this.speed
 	}
 
-	moveUp(){ 
+	moveUp() { 
 		this.y -= this.speed
 	}
 
-	moveTo(x, y){
+	moveTo(x, y) {
 		this.x = x
 		this.y = y
 	}
@@ -71,4 +71,42 @@ class CanvasObj {
 	getCenterY() { return this.getY() + (this.getHeight() / 2) }
 
 	getTicksLeft(){ return this.ticksLeft }
+
+
+
+	// Static methods that can be called from CanvasObject.method(), passing the instance as argument
+
+	static getWidth(s) {
+		return s.width
+	}
+
+	static setX(s, x) {
+		s.x = x
+	}
+
+	static getX(s) {
+		return s.x
+	}
+
+	static getY(s) {
+		return s.y
+	}
+
+
+	static moveDown(s) { 
+		s.y += s.speed
+	}
+
+	static moveUp(s) { 
+		s.y -= s.speed
+	}
+
+	static moveTo(s, x, y) {
+		s.x = x
+		s.y = y
+	}
+
+	static rotate(s) {
+		s.rotation += parseFloat(s.rotationAmount).toFixedNumber(1)
+	}
 }

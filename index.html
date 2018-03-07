@@ -56,7 +56,7 @@
 				  			<br><br>
 				  			
 				  		</div>
-				  		<div class="ad"></div>
+				  		<div class="ad"> </div>
 					</div>
 					<div class="tab-pane" id="Chips" role="tabpannel"> 
 						<div class="tab-html">
@@ -78,9 +78,6 @@
 
 
 
-
-
-
 			<div class="col-lg-4">
 				<div class="game-header">
 					<div class="distance"> </div>
@@ -89,6 +86,7 @@
 				</div>
 
 				<div class="game" id="game">
+					<!-- <canvas id="starsCanvas"></canvas> -->
 					<canvas id="gameCanvas"></canvas>
 				</div>
 
@@ -113,10 +111,6 @@
 
 
 
-
-
-
-
 			<div class="col-lg-4 high">
 				<ul class="nav nav-tabs nav-justified" id="tab2" role="tablist">
 				  <li class="nav-item">
@@ -126,10 +120,10 @@
 				    <a class="nav-link unselectable" data-toggle="tab" href="#Inventory" role="tab" aria-controls="Inventory">Inventory</a>
 				  </li>
 				  <li class="nav-item">
-				    <a class="nav-link unselectable" data-toggle="tab" href="#Starmap" role="tab" aria-controls="Starmap">Starmap</a>
+				    <a class="nav-link unselectable" data-toggle="tab" href="#Quests" role="tab" aria-controls="Quests">Quests</a>
 				  </li>
 				  <li class="nav-item">
-				    <a class="nav-link unselectable" data-toggle="tab" href="#Encylopedia" role="tab" aria-controls="Encylopedia">Encylopedia</a>
+				    <a class="nav-link unselectable" data-toggle="tab" href="#Encyclopedia" role="tab" aria-controls="Encyclopedia">Encyclopedia</a>
 				  </li>
 				</ul>
 
@@ -143,14 +137,21 @@
 				  		<div class="ad"></div>
 				  	</div>
 					<div class="tab-pane" id="Inventory" role="tabpannel"><div class="tab-html"></div> <div class="ad"></div></div>
-					<div class="tab-pane" id="Starmap" role="tabpannel"><div class="tab-html"></div> <div class="ad"></div></div>
-					<div class="tab-pane" id="Encylopedia" role="tabpannel"> <div class="tab-html"></div><div class="ad"></div></div>
+					<div class="tab-pane" id="Quests" role="tabpannel"><div class="tab-html"></div> <div class="ad"></div></div>
+					<div class="tab-pane" id="Encyclopedia" role="tabpannel"> <div class="tab-html"></div><div class="ad"></div></div>
 				</div>
 
 			</div>
 		</div>
 	</div>
 
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+			// Init code to force the game area to be square.
+			$("#game").css({ "height" : $("#game").width() })
+			//$("#starsCanvas").css({ "height" : $("#starsCanvas").width() })
+		})	
+	</script>
 	<script src="main.js"></script>
 </body>
 

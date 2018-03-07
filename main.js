@@ -1,11 +1,10 @@
 /* 
 	Cobalt9 - by Critical Futuristics
 
-	Authors: M. Zyke - G. sgabruz
 	Design: Zyke & sgabruz
 	Code maintenence: Zyke
 	Sprites: sgabruz
-	Score: J. Jaxx
+	OST: J. Jaxx
 
 	Version: v0.01
 	Copyright: GNU 2017-2018
@@ -14,12 +13,17 @@
 
 
 const FPS = 40
-const FRAMERATE = 1000 / FPS
+const FRAMERATE = Math.round(1000 / FPS)
+const TICKRATE = Math.round(1000 / 60) // 17ms
+
+let focus = false
 
 let data = null
 let game = null
 let settings = null
 let animations = null
+
+let renderLoop = null
 
 let Renderer = null
 let RenderHandler = new Worker('worker.js')
@@ -84,7 +88,7 @@ function initAfterLoad() {
 		RenderHandler = new Worker("renderHandler.js")
 	} else {
 		// TODO Find a better solution
-		alert("This browser does not support Web Workers, so the game is not able to work :(")
+		alert("This browser does not support Web Workers, so the game is not able to run :(")
 	}	
 
 	loadSettings()
@@ -884,6 +888,7 @@ function saveSettings() {
 
 // Loads the sprites, but only after the initial terminal boot
 function loadSprites() {
+
 	loadStars()
 }
 // Loads the stars, then chain-calls loadAsteroids()
@@ -1032,11 +1037,12 @@ function loadControlPannel() {
 	}
 }
 
-// Stars the Gameloop.
+// Starts the Gameloop and the Rendering engine.
 function start() {
 	window.addEventListener('resize', resizeCanvas, false)
 
 	function resizeCanvas() {
+		$("#game").css({ height: $("#game").innerWidth() })
 		canvas.width = $("#game").innerWidth()
         canvas.height = $("#game").innerWidth()
        
@@ -1046,16 +1052,70 @@ function start() {
         data.consts.isControlPannelLoaded = false
         renderConsole()
         renderControlPannel()
-
-        RenderHandler.postMessage({ init : true, framerate : FRAMERATE })
+       
     }
     resizeCanvas()
 
-    RenderHandler.onmessage = function(e) {
-		if (e.data.render) {
-			loopCanvas()
-		}
+
+	// Initialize the gameloop, if it hasn't been yet
+	if (!data.consts.isGameloopInit) {
+		data.consts.isGameloopInit = true
+
+		GameWorker.postMessage({
+			init : true,
+			tickrate : TICKRATE,
+			game : game,
+			data : {
+				consts : data.consts,
+				canvas : {
+					width : data.canvas.width,
+					height : data.canvas.height
+				},
+				asteroidsData : data.asteroidsData,
+				lasersData : data.lasersData,
+				_s : data._s,
+				_dex : data._dex
+			}
+		})
+
+		update()
 	}
+	
+
+	// Initialize the renderer, if it hasn't been yet
+	if (!data.consts.isRendererInit) {
+		data.consts.isRendererInit = true
+		
+		RenderHandler.postMessage({
+				init : true,
+				framerate : FRAMERATE,
+				data : {
+					consts : data.consts,
+					astsrc : data.src.sprites.asteroids.srcs,
+					canvas : {
+						width : data.canvas.width,
+						height : data.canvas.height,
+						spaceship : { // TODO find a more elegant solution
+							x : 0,
+							width : 0
+						},
+						stars : removeImgReferences(data.canvas.stars),
+						asteroids : removeImgReferences(data.canvas.asteroids),
+						//lasers : canvas.lasers,
+						//planets : canvas.planets,
+						//currentPlanet : canvas.currentPlanet,
+						//enemyShips : canvas.enemyShips,
+						//otherProps : canvas.otherProps,
+
+						//controlPannel : canvas.controlPannel,
+						//console : canvas.console
+					}
+				}
+		})
+
+		render()
+	}
+
 }
 
 
@@ -1065,7 +1125,7 @@ function start() {
 
 // ----------------------------------- Game Loop ------------------------------------- //
 
-
+/*
 function gameLoop() {
 
 	if (data.consts.updateTime >= 3) {
@@ -1164,6 +1224,51 @@ function decrementTurbo() {
 		}
 	}
 }
+*/
+
+
+// Updates the current data values and visual information when it
+// recieves a message from the GameWorker thread.
+function update() {
+	GameWorker.onmessage = function(e) {
+		// Decode the data from e.data and update data.const values.
+		// TODO move these to game.values.
+
+		let c = e.data.speedConstants
+
+		data.consts.turbo = c.turbo
+		data.consts.starSpeed = c.starSpeed
+		data.consts.starSpawnRate = c.starSpawnRate
+		data.consts.asteroidSpeed = c.asteroidSpeed
+		data.consts.maxAsteroids = c.maxAsteroids
+
+		// Update the new speeds on the currently displayed items
+		for (let i = 0; i < data.canvas.stars.length; i++) {
+			data.canvas.stars[i].speed = data.consts.starSpeed
+		}
+		for (let i = 0; i < data.canvas.asteroids.length; i++) {
+			data.canvas.asteroids[i].speed = data.consts.asteroidSpeed
+		}
+
+
+		if (e.data.updateUI) {
+			updateUI()
+		}
+
+		if (e.data.updateMining) {
+			updateMining()
+		}
+
+
+
+
+		
+	}
+}
+
+
+
+
 
 
 
@@ -1370,7 +1475,7 @@ function renderConsole() {
 
 	let c = consoleCanvas.objects
 
-	for(k in c){
+	for (k in c){
 		if (c[k].visible) {
 			if (k == "background") {
 				consoleCtx.drawImage(c[k].image, c[k].x, c[k].y, w, h)
@@ -1496,28 +1601,61 @@ function renderConsole() {
 }
 
 
+// Renders the game interface every frame.
+function render() {
+	// Ask for the next frame
+	RenderHandler.postMessage({
+			render : true,
+			data : {
+				consts : data.consts,
+				astsrc : data.src.sprites.asteroids.srcs,
+				canvas : {
+					width : data.canvas.width,
+					height : data.canvas.height,
+					spaceship : {
+						x : data.canvas.spaceship.getX(),
+						width : data.canvas.spaceship.getWidth()
+					},
+					stars : removeImgReferences(data.canvas.stars),
+					asteroids : removeImgReferences(data.canvas.asteroids),
+					//lasers : canvas.lasers,
+					//planets : canvas.planets,
+					//currentPlanet : canvas.currentPlanet,
+					//enemyShips : canvas.enemyShips,
+					//otherProps : canvas.otherProps,
 
-function loopCanvas() {
-	// Clear canvas
-	ctx.clearRect(0, 0, canvas.width, canvas.height)
+					//controlPannel : canvas.controlPannel,
+					//console : canvas.console
+				}
+			}
+	})
 
+	RenderHandler.onmessage = function(e) {
+    	if (e.data.hasOwnProperty('newFrame')) {
+    		if (e.data.newFrame) {
+    			let newData = e.data
+    			// Clear canvas
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-	// Get a random number. If it's 1, spawn a new star
-	if (isRandomStarSpawning()) {
-		newStar()
-	}
-	// Same for asteroids (much less likely)
-	if (isAsteroidSpawning()) {
-		newAsteroid()
-	}
+				renderStars(newData)
+				renderAsteroids(newData.newAst)
 
-	renderStars()
-	renderAsteroids()
-	renderLasers()
-	renderSpaceship()
-	renderConsole()
-}	
+				renderLasers()
+				renderSpaceship()
+				renderConsole()
+				
+				// Calling requestAnimationFrame garantees that the next render() call
+				// will be ran on the next frame, at a rate of 60fps.
+				renderLoop = window.requestAnimationFrame(render)
 
+				// TODO check https://stackoverflow.com/questions/35028470/make-requestanimationframe-animation-persist-when-on-different-tab
+    			// also check the if focus in renderStars()
+    		}
+    	}
+    }
+}
+
+// TODO move this to the rendering thread.
 function renderSpaceship() {
 	let ship = data.canvas.spaceship
 
@@ -1568,9 +1706,11 @@ function renderLasers() {
 }
 
 // Loops every asteroid and renders it like renderStars()
-function renderAsteroids() {
+function renderAsteroids(newAst) {
 	for (let i = 0; i < data.canvas.asteroids.length; i++) {
 		let a = data.canvas.asteroids[i]
+		// MoveDown is the only part that could be moved to the
+		// rendering thread, so it wouldn't be worthwhile.
 		a.moveDown()
 		
 		let transaltion = {
@@ -1589,7 +1729,8 @@ function renderAsteroids() {
 		let distance = 64
 		if (a.img) {			
 			distance = a.img.height
-		} 
+		}
+		// Remove asteroids below the screen 
 		if (a.y > canvas.height + distance/2) {
 			// Remove the relative laser if it was being mined
 			if (data.canvas.lasers.length > 0) {
@@ -1614,62 +1755,64 @@ function renderAsteroids() {
 		if (typeof a.img === 'undefined') {
 			//console.log("ERROR: asteroid img Undefined. Ignoring asteroid.")
 		} else {
-			ctx.drawImage(a.img, a.x, a.y)
+			if (focus) {
+				ctx.drawImage(a.img, a.x, a.y)
+			}
 		}
 		ctx.restore()
-	}		
+	}
+
+	// If a new asteroid needs to spawn, add it to the list.
+	// It will be rendered on the NEXT frame iteration.
+	if (newAst.new) {
+		let na = newAsteroid(newAst)
+	}
+
 }
 
-// Loops every star, renders it and moves it at the start of every frame.
-function renderStars() {
+// Loops every star, rendering it at the start of every frame.
+function renderStars(newData) {
 	for (let i = 0; i < data.canvas.stars.length; i++) {
 		let s = data.canvas.stars[i]
-		s.moveDown()
-
-		// If the star reaches the end of the screen, remove it and shift the array.
-		if (!s.img) {
-			// In case the img hasn't fully loaded yet
-			if (s.y > canvas.height + 64) {
-				data.canvas.stars.shift()
-			}
-		} else {
-			if (s.y > canvas.height + s.img.height) {
-				data.canvas.stars.shift()
-			}
+		// If the new coordinate exists, apply it to the star.
+		if (typeof newData.data.canvas.starsCoords[i] !== 'undefined') {
+			s.y = newData.data.canvas.starsCoords[i].y
 		}
-
+		
 		// Draw the star
-		if (typeof s.img === 'undefined') {
-			console.log("ERROR: star img Undefined. Ignoring star.")
-		} else {
-			ctx.drawImage(s.img, s.x, s.y)
+		if (typeof s.img !== 'undefined') {
+			if (focus) {
+				ctx.drawImage(s.img, s.x, s.y)
+			}
 		}
-	}	
+	}
+
+	// If a star has been removed, remove it from the array.
+	if (newData.hasOwnProperty('hasShifted')) {
+		if (newData.hasShifted) {
+			data.canvas.stars.shift()
+		}
+	}
+
+	// If a new star needs to spawn, add it to the list.
+	// It will be rendered on the NEXT frame iteration.
+	if (newData.hasOwnProperty('newStar')) {
+		if (newData.newStar.new) {
+			let ns = newStar(newData.newStar.lastStars, newData.newStar.x)
+			if (ns != null) {
+				data.canvas.stars.push(ns)
+			}
+		}
+	}
 }
 
-// Adds a new star with a random X coord to data.canvas.stars.
-function newStar() {
-	let starW = 32
-	if (data.canvas.stars.length > 1) {
-		starW = data.canvas.stars[data.canvas.stars.length - 1].getWidth()
-	}
-	let x = getRandomStartPos(canvas.width, starW)
-	let minDistance = 32
 
-	// Check if it's not too close to another star.
-	let lastStars = []
-	if (data.canvas.stars.length > 2) {
-		lastStars.push(data.canvas.stars[data.canvas.stars.length - 1])
-		lastStars.push(data.canvas.stars[data.canvas.stars.length - 2])
-		lastStars.push(data.canvas.stars[data.canvas.stars.length - 3])
-	} else {
-		for (let i = 0; i < lastStars.length; i++) {
-			lastStars[i].getX() = x + minDistance
-		}
-	}
-
+// Returns a new star with a random X coord
+function newStar(lastStars, x) {
 	// Checks the distance between the new star and the last 3 stars.
-	// If it's not enought, random a new star.
+	// If the star coudn't spawn in an appropriate location, it won't spawn altogether.
+
+	let minDistance = 32
 	if (lastStars.length == 0) {
 		let sprite = getRandomStarSprite()
 		let s = new CanvasObj(x, 0, sprite, data.consts.starSpeed)
@@ -1678,13 +1821,13 @@ function newStar() {
 		} else {
 			s.y = -(s.img.height)
 		}
-		data.canvas.stars.push(s)
+		return s
 
-	} else if (Math.abs(lastStars[0].getX() - x) < minDistance ||
-		Math.abs(lastStars[1].getX() - x) < minDistance ||
-		Math.abs(lastStars[2].getX() - x) < minDistance) 
-	{
-		newStar()
+	} else if (Math.abs(CanvasObj.getX(lastStars[0]) - x) < minDistance ||
+			Math.abs(CanvasObj.getX(lastStars[1]) - x) < minDistance ||
+			Math.abs(CanvasObj.getX(lastStars[2]) - x) < minDistance) {
+		// newStar() - Deprecated (could slow rendering)
+		return null
 	} else {
 		// Adds the star to the list of stars.
 		let sprite = getRandomStarSprite()
@@ -1697,99 +1840,59 @@ function newStar() {
 		
 		// Deprecated. Having stars move at different speeds overloaded the game.
 		//s.speed += getRandom(0, 2)
-		data.canvas.stars.push(s)
+		return s 
 	}	
 }
 
+
 // Adds a new random asteroid
-function newAsteroid() {
-	let asteroidW = 64
-	if (data.canvas.asteroids.length > 1) {
-		asteroidW = data.canvas.asteroids[data.canvas.asteroids.length - 1].getWidth()
-	}
-
-	let x = getRandomStartPos(canvas.width, asteroidW)
-	let ship = data.canvas.spaceship
-	// Make sure the asteroid doesn't spawn direclty on top of the ship, otherwise it'd be a pain to mine
-	if (x > (ship.x) && x < (ship.x + ship.width)) {
-		newAsteroid()
+function newAsteroid(newAst) {
+	let ast = newAst.ast
+	let sprite = data.src.sprites.asteroids.images[newAst.srcIndex]
+	let a = new CanvasObj(newAst.x, 0, sprite, data.consts.asteroidSpeed)
+	if (!a.img) {
+		a.y = -64
 	} else {
-		let minDistance = asteroidW
-
-		// Check if it's not too close to another asteroid.
-		let lastAsteroid = []
-		if (data.canvas.asteroids.length > 2) {
-			lastAsteroid.push(data.canvas.asteroids[data.canvas.asteroids.length - 1])
-			lastAsteroid.push(data.canvas.asteroids[data.canvas.asteroids.length - 2])
-		} else {
-			for (let i = 0; i < lastAsteroid.length; i++) {
-				lastAsteroid[i].getX() = x + minDistance
-			}
-		}
-		if (data.canvas.asteroids.length <= data.consts.maxAsteroids) {	
-			if (lastAsteroid.length == 0) {
-				createAsteroid()
-			} else if (Math.abs(lastAsteroid[0].getX() - x) < minDistance) {
-				newAsteroid()
-			} else {
-				createAsteroid()
-			}
-		}
+		a.y = -(a.img.height)
 	}
 
-
-	// Private internal function
-	function createAsteroid(){
-		let ast = getRandomAsteroidType()
-		let srcIndex = 0
-		// Contrary to the stars, the sprite is based on the asteroid, not a random one
-		for (let i = 0; i < data.src.sprites.asteroids.srcs.length; i++) {
-			if (data.src.sprites.asteroids.srcs[i] == ast.src) {
-				srcIndex = i
-			} 
+	// Makes sure to create a unique ID that the asteroid and the laser share
+	ast.uniqueID = 0
+	if (data.canvas.asteroids.length > 0) {
+		ast.uniqueID = data.consts.lastAsteroidsUniqueID + 1
+		data.consts.lastAsteroidsUniqueID = ast.uniqueID
+		if (ast.uniqueID > 100) {
+			ast.uniqueID = 0
+			data.consts.lastAsteroidsUniqueID = 0
 		}
-		let sprite = data.src.sprites.asteroids.images[srcIndex]
-		let a = new CanvasObj(x, 0, sprite, data.consts.asteroidSpeed)
-		if (!a.img) {
-			a.y = -64
-		} else {
-			a.y = -(a.img.height)
-		}
-
-		// Makes sure to create a unique ID that the asteroid and the laser share
-		ast.uniqueID = 0
-		if (data.canvas.asteroids.length > 0) {
-			ast.uniqueID = data.consts.lastAsteroidUniqueID + 1
-			data.consts.lastAsteroidUniqueID = ast.uniqueID
-			if (ast.uniqueID > 100) {
-				ast.uniqueID = 0
-				data.consts.lastAsteroidUniqueID = 0
-			}
-		}
-		
-		let astObj = new AsteroidObj(ast)
-		a.uniqueID = ast.uniqueID
-		a.setRotationAmount(astObj.getRotationAmount())
-		a.setAxis(astObj.getAxis())
-
-		data.canvas.asteroids.push(a)
-		data.asteroidsData.push(astObj)
 	}
+	
+	let astObj = new AsteroidObj(ast)
+	a.uniqueID = ast.uniqueID
+	a.setRotationAmount(astObj.getRotationAmount())
+	a.setAxis(astObj.getAxis())
+
+	data.canvas.asteroids.push(a)
+	data.asteroidsData.push(astObj)
 }
 
 
 
-
+/* Deprecated
 function isRandomStarSpawning() {
 
 	return getRandom(0, data.consts.starSpawnRate) == 1
 }
+*/
 
+/* Deprecated
 function isAsteroidSpawning() {
 
 	return getRandom(0, data.consts.asteroidSpawnRate) == 1
 }
+*/
 
+/* Deprecated
 function getRandomStartPos(mapW, itemW) {
 	// Offset per non clippare ai lati
 	let offset = itemW + 2
@@ -1797,6 +1900,7 @@ function getRandomStartPos(mapW, itemW) {
 		
 	return randomNumber
 }
+*/
 
 // Randomly selects a star sprite from data.src.sprites.stars
 function getRandomStarSprite() {
@@ -1820,6 +1924,7 @@ function getRandomStarSprite() {
 	return data.src.sprites.stars.images[n]	
 }
 
+/* Deprecated
 function getRandomAsteroidType() {
 	let r = getRandom(0, 100)
 	let asts = data.consts.asteroidTypes
@@ -1835,10 +1940,10 @@ function getRandomAsteroidType() {
 			return asts[i]
 		}
 	}
-	
-	let a = getAstChance(0, r)
-	return a
+	 
+	return getAstChance(0, r)
 }
+*/
 
 
 
@@ -1847,6 +1952,16 @@ function hyperdrive() {
 	if (data.consts.turbo < 1000) {
 		data.consts.turbo += 60
 	}
+
+	// Update the thread on the changed values
+	GameWorker.postMessage({ 
+		update : {
+			speedConstants : {
+				update : true,
+				turbo : data.consts.turbo
+			}
+		}
+	})
 }
 
 
@@ -1980,6 +2095,8 @@ function addGameEvents() {
     	let asts = data.canvas.asteroids
 
     	if (!game.isPaused) {
+    		// TODO add if to check if you are able to mine.
+
     		// Reverse for-loop so it can always select the topmost asteroid
     		for (let i = asts.length - 1; i >= 0; i--) {
 				let a = asts[i]
@@ -2035,6 +2152,7 @@ function addGameEvents() {
 // Calculates the stars and end point of the laser and adds it to data.canvas.lasers
 // Then it keeps mining every 4 ticks
 function startMining(targetID) {
+	/*
 	if (data.canvas.lasers.length >= data.consts.maxConcurrentLasers) {
 		// Remove existing lasers
 		// This minght need to be changed when we implement auto-lasers.
@@ -2063,6 +2181,12 @@ function startMining(targetID) {
 		lineObj.uniqueID = astC.uniqueID
 		data.canvas.lasers.push(lineObj)
 	}
+	*/
+	let laserData = {
+
+	}
+
+	GameWorker.postMessage(laserData)
 }
 
 // Loops the active lasers and calls asteroidObj.mine()
@@ -2200,8 +2324,8 @@ function pauseGameLoop() {
 	if (!game.isPaused) {
 		game.isPaused = true
 
-		// Warn renderHandler
-		RenderHandler.postMessage({ stop : true })
+		window.cancelAnimationFrame(renderLoop)
+		renderLoop = null
 
 		// Warn gameWorker
 		GameWorker.postMessage({ stop : true })
@@ -2212,11 +2336,11 @@ function resumeGameLoop() {
 	if (game.isPaused) {
 		game.isPaused = false
 
-		// Warn renderHandler
-		RenderHandler.postMessage({ resume : true })
+		renderLoop = requestAnimationFrame(render)
 
 		// Warn gameWorker
 		GameWorker.postMessage({ resume : true })
+
 	}
 }
 
@@ -2243,18 +2367,38 @@ function setupFocus() {
     window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange
 
   function onchange(evt) {
-    let v = "visible", h = "hidden", evtMap = {
-        	focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
-        }
+  	focus = !focus
+
+    let v = "visible", h = "hidden"
+    let evtMap = {
+    	focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h
+    }
 
     evt = evt || window.event
     if (evt.type in evtMap)
-      document.body.className = evtMap[evt.type]
+    	document.body.className = evtMap[evt.type]
     else
-      document.body.className = this[hidden] ? "hidden" : "visible"
-  }
+    	document.body.className = this[hidden] ? "hidden" : "visible"
+  	}
 
-  // set the initial state (but only if browser supports the Page Visibility API)
-  if(document[hidden] !== undefined)
-    onchange({type: document[hidden] ? "blur" : "focus"})
+  	// set the initial state (but only if browser supports the Page Visibility API)
+	if(document[hidden] !== undefined) {
+		onchange({type: document[hidden] ? "blur" : "focus"})
+	}
+
+
 }
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+*/
