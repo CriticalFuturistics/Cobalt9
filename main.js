@@ -16,6 +16,8 @@ const FPS = 40
 const FRAMERATE = Math.round(1000 / FPS)
 const TICKRATE = Math.round(1000 / 60) // 17ms
 
+let isEvenFrame = true
+
 let focus = false
 
 let data = null
@@ -116,35 +118,43 @@ function initAfterLoad() {
 				updateMining()
 			}
 		}
-	
+
 		RenderHandler.onmessage = function(e) {
-    	if (e.data.hasOwnProperty('newFrame')) {
-    		if (e.data.newFrame) {
-    			let newData = e.data
-    			// Clear canvas
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
+	    	if (e.data.hasOwnProperty('newFrame')) {
+	    		if (e.data.newFrame) {
+	    			let newData = e.data
+	    			// Clear canvas
+					ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-				renderStars(newData)
-				renderAsteroids(newData.newAst)
+					renderStars(newData)
+					renderAsteroids(newData.newAst)
 
-				renderLasers()
-				renderSpaceship()
-				renderConsole()
-				
-				// Calling requestAnimationFrame garantees that the next render() call
-				// will be ran on the next frame, at a rate of 60fps.
-				if (!game.isPaused) {
-					renderLoop = window.requestAnimationFrame(render)
-				}
+					renderLasers()
+					renderSpaceship()
+					
+					renderConsole()
+					
+					
+					// Calling requestAnimationFrame guarantees that the next render() call
+					// will be ran on the next frame, at a rate of 60fps (scaled to 30).
+					if (!game.isPaused) {
+						renderLoop = window.requestAnimationFrame(render)
+					}
 
-				// TODO check https://stackoverflow.com/questions/35028470/make-requestanimationframe-animation-persist-when-on-different-tab
-    			// also check the if focus in renderStars()
-    		}
-    	}
-    }
+					// TODO check https://stackoverflow.com/questions/35028470/make-requestanimationframe-animation-persist-when-on-different-tab
+    				// also check the (if focus) in renderStars()
+	    		} else {
+	    			
+	    			if (!game.isPaused) {
+						renderLoop = window.requestAnimationFrame(render)
+					}
+					
+	    		}
+	    	}
+	    }
 	} else {
 		// TODO Find a better solution
-		alert("This browser does not support Web Workers, so the game is not able to run :(")
+		alert("This browser is not currently able to load the Cobalt9 API. Please, switch to a newer browser.")
 	}	
 
 	loadSettings()
@@ -1143,33 +1153,31 @@ function start() {
 		data.consts.isRendererInit = true
 		
 		RenderHandler.postMessage({
-				init : true,
-				framerate : FRAMERATE,
-				data : {
-					consts : data.consts,
-					astsrc : data.src.sprites.asteroids.srcs,
-					canvas : {
-						width : data.canvas.width,
-						height : data.canvas.height,
-						spaceship : { // TODO find a more elegant solution
-							x : 0,
-							width : 0
-						},
-						stars : removeImgReferences(data.canvas.stars),
-						asteroids : removeImgReferences(data.canvas.asteroids),
-						//lasers : canvas.lasers,
-						//planets : canvas.planets,
-						//currentPlanet : canvas.currentPlanet,
-						//enemyShips : canvas.enemyShips,
-						//otherProps : canvas.otherProps,
-
-						//controlPannel : canvas.controlPannel,
-						//console : canvas.console
-					}
+			init : true,
+			framerate : FRAMERATE,
+			data : {
+				consts : data.consts,
+				astsrc : data.src.sprites.asteroids.srcs,
+				canvas : {
+					width : data.canvas.width,
+					height : data.canvas.height,
+					spaceship : { // TODO find a more elegant solution
+						x : 0,
+						width : 0
+					},
+					stars : removeImgReferences(data.canvas.stars),
+					asteroids : removeImgReferences(data.canvas.asteroids),
 				}
+			}
 		})
 
-		render()
+		// Calling requestAnimationFrame guarantees that the next render() call
+		// will be ran on the next frame, at a rate of 60fps (scaled to 30).
+		if (!game.isPaused) {
+			renderLoop = window.requestAnimationFrame(render)
+		}
+
+		//renderLoop = window.requestAnimationFrame(render)
 	}
 
 }
@@ -1489,9 +1497,14 @@ function renderConsole() {
 
     	data.canvas.console.sliderSelector.x = c.sliderSelector.x
 
-    	
 
 		consoleCanvas.objects = c
+
+		// HTML Render for Console Digits
+		$("#emptyDistance").html('888888888')
+		$("#emptyTime").html('888888888')
+		$("#emptyDistanceUnit").html('88')
+		$("#emptyTimeUnit").html('88')
 	}
 	
 	// ----------------------------
@@ -1524,17 +1537,15 @@ function renderConsole() {
 	}
 
 
-	// ------- HTML render --------
-	// Console Digits
-
-	$("#emptyDistance").html('888888888')
-	$("#emptyTime").html('888888888')
-	$("#emptyDistanceUnit").html('88')
-	$("#emptyTimeUnit").html('88')
+	// ------- HTML Render --------
+	
+	let cons_top = $("#console").position().top
+	let dist_top = $("#distance").position().top
+	let dist_left = $("#distance").position().left
 
 	$("#emptyDistance").css({
 		position : 'absolute',
-		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
+		top: parseInt(cons_top + consoleCanvas.objects.display.y - 3) + "px",
 		left: 27 + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
@@ -1542,15 +1553,15 @@ function renderConsole() {
 	})
 	$("#emptyDistanceUnit").css({
 		position : 'absolute',
-		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
-		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		top: parseInt(cons_top + consoleCanvas.objects.display.y - 3) + "px",
+		left: dist_left + parseInt($("#distance").css("width")) + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
 		"text-align" : "right"
 	})
 	$("#emptyTime").css({
 		position : 'absolute',
-		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
+		top: parseInt(dist_top + $("#distance").height() + 3) + "px",
 		left: 27 + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
@@ -1558,8 +1569,8 @@ function renderConsole() {
 	})
 	$("#emptyTimeUnit").css({
 		position : 'absolute',
-		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
-		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		top: parseInt(dist_top + $("#distance").height() + 3) + "px",
+		left: dist_left + parseInt($("#distance").css("width")) + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
 		"text-align" : "right"
@@ -1572,7 +1583,7 @@ function renderConsole() {
 	$("#distance").html(Math.round(temp))
 	$("#distance").css({
 		position : 'absolute',
-		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
+		top: parseInt(cons_top + consoleCanvas.objects.display.y - 3) + "px",
 		left: 27 + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
@@ -1582,8 +1593,8 @@ function renderConsole() {
 	$("#distanceUnit").html(data.consts.distanceUnits[data.consts.distance.u])
 	$("#distanceUnit").css({
 		position : 'absolute',
-		top: parseInt($("#console").position().top + consoleCanvas.objects.display.y - 3) + "px",
-		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		top: parseInt(cons_top + consoleCanvas.objects.display.y - 3) + "px",
+		left: dist_left + parseInt($("#distance").css("width")) + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
 		"text-align" : "right"
@@ -1592,7 +1603,7 @@ function renderConsole() {
 	$("#time").html(Math.round(data.consts.time.n))
 	$("#time").css({
 		position : 'absolute',
-		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
+		top: parseInt(dist_top + $("#distance").height() + 3) + "px",
 		left: 27 + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 3/4,
@@ -1602,8 +1613,8 @@ function renderConsole() {
 	$("#timeUnit").html(data.consts.timeUnits[data.consts.time.u])
 	$("#timeUnit").css({
 		position : 'absolute',
-		top: parseInt($("#distance").position().top + $("#distance").height() + 3) + "px",
-		left: $("#distance").position().left + parseInt($("#distance").css("width")) + "px",
+		top: parseInt(dist_top + $("#distance").height() + 3) + "px",
+		left: dist_left + parseInt($("#distance").css("width")) + "px",
 		height : (consoleCanvas.objects.display.image.height - 4)/2 - 2,
 		width : (consoleCanvas.objects.display.image.width - 4) * 1/4,
 		"text-align" : "right"
@@ -1626,24 +1637,32 @@ function renderConsole() {
 
 // Renders the game interface every frame.
 function render() {
-	// Ask for the next frame
-	RenderHandler.postMessage({
-		render : true,
-		data : {
-			consts : data.consts,
-			astsrc : data.src.sprites.asteroids.srcs,
-			canvas : {
-				width : data.canvas.width,
-				height : data.canvas.height,
-				spaceship : {
-					x : data.canvas.spaceship.getX(),
-					width : data.canvas.spaceship.getWidth()
-				},
-				stars : removeImgReferences(data.canvas.stars),
-				asteroids : removeImgReferences(data.canvas.asteroids)
+	if (isEvenFrame) {
+		isEvenFrame = false
+		// Ask for the next frame
+		RenderHandler.postMessage({
+			render : true,
+			data : {
+				consts : data.consts,
+				astsrc : data.src.sprites.asteroids.srcs,
+				canvas : {
+					width : data.canvas.width,
+					height : data.canvas.height,
+					spaceship : {
+						x : data.canvas.spaceship.getX(),
+						width : data.canvas.spaceship.getWidth()
+					},
+					stars : removeImgReferences(data.canvas.stars),
+					asteroids : removeImgReferences(data.canvas.asteroids)
+				}
 			}
-		}
-	})
+		})
+	} else {
+		isEvenFrame = true
+		RenderHandler.postMessage({
+			skip : true
+		})
+	}
 }
 
 

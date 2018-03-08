@@ -217,11 +217,11 @@
 		"isConsoleEventEnabled" : false,
 		"isGameEventEnabled" : false,
 
-		"baseStarSpeed" : 0.4,
-		"starSpeed" : 0.4,
+		"baseStarSpeed" : 0.6,
+		"starSpeed" : 0.6,
 
-		"baseAsteroidSpeed" : 0.5,
-		"asteroidSpeed" : 0.5,
+		"baseAsteroidSpeed" : 0.7,
+		"asteroidSpeed" : 0.7,
 		
 		"baseStarSpawnRate" : 34,
 		"starSpawnRate" : 34,

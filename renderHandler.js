@@ -30,7 +30,7 @@ self.onmessage = function(e) {
 	if (e.data.hasOwnProperty('init')) {
 		data = e.data.data
 		FRAMERATE = e.data.framerate
-		queueRender()
+		//queueRender()
 	}
 
 	if (e.data.hasOwnProperty('render')) {
@@ -39,6 +39,13 @@ self.onmessage = function(e) {
 			queueRender()
 		}
 	}
+
+	if (e.data.hasOwnProperty('skip')) {
+		self.postMessage({
+			newFrame : false
+		})
+	}
+
 }
 
 function queueRender() {
