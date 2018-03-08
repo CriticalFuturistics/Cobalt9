@@ -86,6 +86,62 @@ function initAfterLoad() {
 
 		// RenderHandler handles the renderer and its fps
 		RenderHandler = new Worker("renderHandler.js")
+
+		GameWorker.onmessage = function(e) {
+			// Decode the data from e.data and update data.const values.
+			// TODO move these to game.values.
+
+			let c = e.data.speedConstants
+
+			data.consts.turbo = c.turbo
+			data.consts.starSpeed = c.starSpeed
+			data.consts.starSpawnRate = c.starSpawnRate
+			data.consts.asteroidSpeed = c.asteroidSpeed
+			data.consts.maxAsteroids = c.maxAsteroids
+
+			// Update the new speeds on the currently displayed items
+			for (let i = 0; i < data.canvas.stars.length; i++) {
+				data.canvas.stars[i].speed = data.consts.starSpeed
+			}
+			for (let i = 0; i < data.canvas.asteroids.length; i++) {
+				data.canvas.asteroids[i].speed = data.consts.asteroidSpeed
+			}
+
+
+			if (e.data.updateUI) {
+				updateUI()
+			}
+
+			if (e.data.updateMining) {
+				updateMining()
+			}
+		}
+	
+		RenderHandler.onmessage = function(e) {
+    	if (e.data.hasOwnProperty('newFrame')) {
+    		if (e.data.newFrame) {
+    			let newData = e.data
+    			// Clear canvas
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+				renderStars(newData)
+				renderAsteroids(newData.newAst)
+
+				renderLasers()
+				renderSpaceship()
+				renderConsole()
+				
+				// Calling requestAnimationFrame garantees that the next render() call
+				// will be ran on the next frame, at a rate of 60fps.
+				if (!game.isPaused) {
+					renderLoop = window.requestAnimationFrame(render)
+				}
+
+				// TODO check https://stackoverflow.com/questions/35028470/make-requestanimationframe-animation-persist-when-on-different-tab
+    			// also check the if focus in renderStars()
+    		}
+    	}
+    }
 	} else {
 		// TODO Find a better solution
 		alert("This browser does not support Web Workers, so the game is not able to run :(")
@@ -1230,40 +1286,7 @@ function decrementTurbo() {
 // Updates the current data values and visual information when it
 // recieves a message from the GameWorker thread.
 function update() {
-	GameWorker.onmessage = function(e) {
-		// Decode the data from e.data and update data.const values.
-		// TODO move these to game.values.
-
-		let c = e.data.speedConstants
-
-		data.consts.turbo = c.turbo
-		data.consts.starSpeed = c.starSpeed
-		data.consts.starSpawnRate = c.starSpawnRate
-		data.consts.asteroidSpeed = c.asteroidSpeed
-		data.consts.maxAsteroids = c.maxAsteroids
-
-		// Update the new speeds on the currently displayed items
-		for (let i = 0; i < data.canvas.stars.length; i++) {
-			data.canvas.stars[i].speed = data.consts.starSpeed
-		}
-		for (let i = 0; i < data.canvas.asteroids.length; i++) {
-			data.canvas.asteroids[i].speed = data.consts.asteroidSpeed
-		}
-
-
-		if (e.data.updateUI) {
-			updateUI()
-		}
-
-		if (e.data.updateMining) {
-			updateMining()
-		}
-
-
-
-
-		
-	}
+	
 }
 
 
@@ -1605,55 +1628,25 @@ function renderConsole() {
 function render() {
 	// Ask for the next frame
 	RenderHandler.postMessage({
-			render : true,
-			data : {
-				consts : data.consts,
-				astsrc : data.src.sprites.asteroids.srcs,
-				canvas : {
-					width : data.canvas.width,
-					height : data.canvas.height,
-					spaceship : {
-						x : data.canvas.spaceship.getX(),
-						width : data.canvas.spaceship.getWidth()
-					},
-					stars : removeImgReferences(data.canvas.stars),
-					asteroids : removeImgReferences(data.canvas.asteroids),
-					//lasers : canvas.lasers,
-					//planets : canvas.planets,
-					//currentPlanet : canvas.currentPlanet,
-					//enemyShips : canvas.enemyShips,
-					//otherProps : canvas.otherProps,
-
-					//controlPannel : canvas.controlPannel,
-					//console : canvas.console
-				}
+		render : true,
+		data : {
+			consts : data.consts,
+			astsrc : data.src.sprites.asteroids.srcs,
+			canvas : {
+				width : data.canvas.width,
+				height : data.canvas.height,
+				spaceship : {
+					x : data.canvas.spaceship.getX(),
+					width : data.canvas.spaceship.getWidth()
+				},
+				stars : removeImgReferences(data.canvas.stars),
+				asteroids : removeImgReferences(data.canvas.asteroids)
 			}
+		}
 	})
-
-	RenderHandler.onmessage = function(e) {
-    	if (e.data.hasOwnProperty('newFrame')) {
-    		if (e.data.newFrame) {
-    			let newData = e.data
-    			// Clear canvas
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-				renderStars(newData)
-				renderAsteroids(newData.newAst)
-
-				renderLasers()
-				renderSpaceship()
-				renderConsole()
-				
-				// Calling requestAnimationFrame garantees that the next render() call
-				// will be ran on the next frame, at a rate of 60fps.
-				renderLoop = window.requestAnimationFrame(render)
-
-				// TODO check https://stackoverflow.com/questions/35028470/make-requestanimationframe-animation-persist-when-on-different-tab
-    			// also check the if focus in renderStars()
-    		}
-    	}
-    }
 }
+
+
 
 // TODO move this to the rendering thread.
 function renderSpaceship() {
