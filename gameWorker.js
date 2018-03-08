@@ -124,9 +124,9 @@ function decrementTurbo() {
 		data.consts.starSpeed = sspeed
 
 		// Stars spawnrate increment
-		let srate = data.consts.baseStarSpawnRate - Math.pow(data.consts.turbo/10, (3/4.2))
+		let srate = data.consts.baseStarSpawnRate - Math.pow(data.consts.turbo/10, 0.9)
 		if (isNaN(srate)) srate = data.consts.baseStarSpawnRate
-		if (srate < 4) srate = 4
+		if (srate < 6) srate = 6
 		data.consts.starSpawnRate = srate
 
 		// Asteroids speed increment

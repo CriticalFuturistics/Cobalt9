@@ -1539,6 +1539,7 @@ function renderConsole() {
 
 	// ------- HTML Render --------
 	
+	// TODO microptimize
 	let cons_top = $("#console").position().top
 	let dist_top = $("#distance").position().top
 	let dist_left = $("#distance").position().left

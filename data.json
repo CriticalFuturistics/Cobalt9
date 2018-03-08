@@ -223,11 +223,11 @@
 		"baseAsteroidSpeed" : 0.7,
 		"asteroidSpeed" : 0.7,
 		
-		"baseStarSpawnRate" : 34,
-		"starSpawnRate" : 34,
+		"baseStarSpawnRate" : 35,
+		"starSpawnRate" : 35,
 		
-		"baseAsteroidSpawnRate" : 500,
-		"asteroidSpawnRate" : 500,
+		"baseAsteroidSpawnRate" : 700,
+		"asteroidSpawnRate" : 700,
 
 		"_comment" : "lastAsteroidUniqueID max 99",
 		"lastAsteroidUniqueID" : 0,

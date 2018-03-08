@@ -109,8 +109,6 @@ function send(starsCoords) {
 				starsCoords : starsCoords,
 			}
 		}
-		//asteroidsData : data.asteroidsData,
-		//lasersData : data.lasersData
 	})	
 }
 
