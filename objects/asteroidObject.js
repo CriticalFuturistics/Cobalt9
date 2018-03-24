@@ -100,7 +100,7 @@ class AsteroidObj {
 				}
 			}
 			if (isEmpty) {
-				this.destroy(this.getAstID())
+				this.destroy(this.getAstID(ast.uniqueID, data.canvas.asteroids))
 				return null
 
 			} else { // Mine something else based on priority rarest first
@@ -126,7 +126,7 @@ class AsteroidObj {
 	// astID is NOT this.typeID, it is the index of the asteroid in asteroidsData.
 	destroy(astID) {
 		// Remove the asteroid from data.asteroidsData and the canvas
-		if (astID > -1 && data.asteroidsData.length > 0 && data.canvas.asteroids.length > 0) {
+		if (astID >= 0 && data.asteroidsData.length > 0 && data.canvas.asteroids.length > 0) {
 			data.asteroidsData.splice(astID, 1)
 			data.canvas.asteroids.splice(astID, 1)
 
@@ -166,4 +166,131 @@ class AsteroidObj {
 		}
 		return null
 	}
+
+
+	// Static Getters and Setters
+	
+	static getTypeID(ast) { return ast.typeID }
+	static getSrc(ast) { return ast.src }
+	static getChance(ast) { return ast.chance }
+	static getCurrentResources(ast) { return ast.currentResources }
+	static getRotationAmount(ast) { return ast.rotationAmount }
+	static getAxis(ast) { return ast.axis }
+
+	static getAstID(uniqueID, astArray) {
+		console.log("getID: ", uniqueID, astArray.length) 
+		for (let i = 0; i < astArray.length; i++) {
+			if (astArray[i].uniqueID == uniqueID) {
+				console.log("found " + i)
+				return i
+			}
+		}
+		console.log("not found")
+		return null
+	}
+
+
+	static mine(ast, strength, priority, _s) {
+		// You can't mine food from asteroids you fool
+		if (priority == _s.r.food) return null
+
+		let cr = this.getCurrentResources(ast)
+		let k = priority
+		let nextP = _s.rPrio.indexOf(priority)
+
+		if (cr[k] > 0) {
+			let amountMined = 0
+			if (cr[k] >= strength) {
+				cr[k] -= strength
+				amountMined = strength
+			} else if (cr[k] < strength) {	
+				amountMined = Math.abs(cr[k] - strength)
+				cr[k] = 0
+				nextP = getNextPrio(cr, k, _s.r)
+			}
+
+			return { resource : k, n : amountMined, nextP : nextP}
+
+		} else { // Mine something else, unless it's empty
+
+
+			if (this.isEmpty(k, cr, _s)) {
+				//this.destroy(ast, this.getAstID(ast.uniqueID, astArray), astArray)
+				return null
+
+			} else { // Mine something else based on priority rarest first
+				if (k != _s.r.uranium && cr[_s.r.uranium] > 0) {
+					return this.mine(ast, strength, _s.r.uranium, _s)
+				} else if (k != _s.r.gold && cr[_s.r.gold] > 0) {
+					return this.mine(ast, strength, _s.r.gold, _s)
+				} else if (k != _s.r.silicon && cr[_s.r.silicon] > 0) {
+					return this.mine(ast, strength, _s.r.silicon, _s)
+				} else if (k != _s.r.copper && cr[_s.r.copper] > 0) {
+					return this.mine(ast, strength, _s.r.copper, _s)
+				} else if (k != _s.r.titanium && cr[_s.r.titanium] > 0) {
+					return this.mine(ast, strength, _s.r.titanium, _s)
+				} else {
+					//this.destroy(ast, this.getAstID(ast.uniqueID, astArray), astArray)
+					return null
+				}
+			}
+		}
+	}
+
+
+	static destroy(ast, astID) {
+		// Remove the asteroid from game.asteroidsData and the canvas
+		if (astID >= 0) {
+			if (game.asteroidsData.length > 0 && data.canvas.asteroids.length > 0) {
+				//Also remove the relative laser, if it was mining
+				for (let i = 0; i < data.canvas.lasers.length; i++) {
+					if (data.canvas.lasers[i].uniqueID == ast.uniqueID) {
+						data.canvas.lasers = [] // TODO splice when we have more lasers
+						break
+					}
+				}
+
+				game.asteroidsData.splice(astID, 1)
+				data.canvas.asteroids.splice(astID, 1)
+			}
+		} else {
+			throw "Error: null asteroid ID."
+		}
+
+
+		// Animate explosion TODO
+		// ...
+
+		// Remove all relative pointers for the CG
+	}
+
+
+	static isEmpty(key, cr, _s) {	
+		for (let key in cr) {
+			if (key != _s.r['food']) {
+				if (cr[key] != 0) {
+					return false
+				}
+			}
+		}
+		return true
+	}
+
+	static getNextPrio(cr, k, _r) {
+		return 0
+
+	}
+
 }
+
+/*
+let isEmpty = true			
+		for (let key in cr) {
+			if (key != _s.r['food'] && cr[key] == 0) {
+				isEmpty = true
+			} else {
+				return false
+			}
+		}
+		return isEmpty
+*/

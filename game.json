@@ -2,6 +2,7 @@
 	"isPaused" : false,
 	"readyToRender" : true,
 
+
 	"qbits" : 0,
 	"energy" : 400,
 	"maxEnergy" : 500,
@@ -24,13 +25,23 @@
 		"food" : 0
 	}, 
 
+
+
+	"asteroidsData" : [],
+	"lasersData" : [],
+	"activeLasers" : 0,
+
+
+
+	
+
 	"tileSelectionMode" : 1,
 	"hasTileStart" : false,
 	"invStartID" : null,
 	"invSlots" : 30,
 	"slotCapacity" : 25,
 	"inv" : [
-		"titanium", "titanium", null, null, null, null,
+		"titanium", "titanium", "copper", "copper", null, null,
 		null, null, null, null, null, null,
 		null, null, null, null, null, null,
 		null, null, null, null, null, null,

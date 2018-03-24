@@ -142,7 +142,6 @@ function removeImgReferences(objs) {
 
 
 
-
 function getResource(r) {
 	if (game.resources.hasOwnProperty(r)) {
 		return game.resources[r]

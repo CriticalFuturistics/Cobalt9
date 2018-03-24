@@ -106,8 +106,7 @@
 		}
 	},
 
-	"asteroidsData" : [],
-	"lasersData" : [],
+	
 
 	"src" : {
 		"sprites" : {
@@ -226,8 +225,8 @@
 		"baseStarSpawnRate" : 35,
 		"starSpawnRate" : 35,
 		
-		"baseAsteroidSpawnRate" : 700,
-		"asteroidSpawnRate" : 700,
+		"baseAsteroidSpawnRate" : 100,
+		"asteroidSpawnRate" : 100,
 
 		"_comment" : "lastAsteroidUniqueID max 99",
 		"lastAsteroidUniqueID" : 0,

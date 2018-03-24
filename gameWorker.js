@@ -21,18 +21,28 @@ self.onmessage = function(e) {
 		initGame()
 	}
 
-	if (e.data.hasOwnProperty('stop')) {
-		stopGame()
-	}
+	if (e.data.hasOwnProperty('stop')) { stopGame() }
 
-	if (e.data.hasOwnProperty('resume')) {
-		resumeGame()
-	}
+	if (e.data.hasOwnProperty('resume')) { resumeGame() }
 
 	if (e.data.hasOwnProperty('update')) {
-		if (e.data.update.speedConstants.update) {
-			data.consts.turbo = e.data.update.speedConstants.turbo
+		if (e.data.update.hasOwnProperty('speedConstants')) {
+			if (e.data.update.speedConstants.update) {
+				data.consts.turbo = e.data.update.speedConstants.turbo
+			}
 		}
+		if (e.data.update.hasOwnProperty('miningPriority')) {
+		 	if (e.data.update.miningPriority.update) {
+				data.consts.miningPriority = e.data.update.miningPriority.new
+			}
+		}
+	}
+
+	if (e.data.hasOwnProperty('newLaser')) {
+		let g = e.data.game
+		game.asteroidsData = g.asteroidsData
+		game.activeLasers = g.activeLasers
+		data.canvas.lasers = e.data.canvasLasers
 	}
 }
 
@@ -41,7 +51,11 @@ function initGame() {
 }
 
 function gameloop() {
-	let updateUI = false
+	let update = false
+	let removeAst = {
+		remove : false,
+		removeIDs : null
+	}
 
 	// Handle single and 4-t ticks
 	if (data.consts.updateTime >= data.consts.blankTicks) {
@@ -57,19 +71,34 @@ function gameloop() {
 
 
 	if (data.consts.timeToUpdate) {
-		//updateMining()
+		if (game.activeLasers > 0) {
+			// Mine the linked asteroids.
+			// If one of them needs to be destroyed, update removeAst.
+			let removeIDs = updateMining()
+			if (removeIDs != null) {
+				removeAst.remove = true
+				removeAst.removeIDs = removeIDs
+				game.activeLasers--
+				data.canvas.lasers = removeLasers(data.canvas.lasers, removeIDs)
+			}
+		}
+
 		//updateTravelInfo()
-		updateUI = true
+		update = true
 	}
 
 	
-
 	// Send a message to the main thread with the new data.
 	if (!game.isPaused) {
 		self.postMessage({
 			speedConstants : speedConstants,
-			updateUI : updateUI,
-			updateMining : true
+			update : update,
+			newData : {
+				game : {
+					resources : game.resources
+				}
+			},
+			removeAst : removeAst
 		})
 	}
 }
@@ -155,59 +184,40 @@ function decrementTurbo() {
 
 }
 
-// Calculates the stars and end point of the laser and adds it to data.canvas.lasers
-// Then it keeps mining every 4 ticks
-function startMining(targetID) {
-	if (data.canvas.lasers.length >= data.consts.maxConcurrentLasers) {
-		// Remove existing lasers
-		// This will need to be changed when we implement auto-lasers.
-		data.canvas.lasers = []
-	}
 
-	if (data.canvas.lasers.length > 0) {
-		if (data.canvas.lasers[0].uniqueID != uniqueID) {
-			makeLaser()
-		}
-	} else {
-		makeLaser()
-	}
-
-	// Private function
-	function makeLaser() {
-		// Rendering
-		let astC = data.canvas.asteroids[targetID]
-		let shipX = data.canvas.spaceship.x + data.canvas.spaceship.width/2
-		let shipY = data.canvas.spaceship.y + data.canvas.spaceship.height/2
-		
-		let astCenterX = astC.getX() + astC.getWidth()/2
-		let astCenterY = astC.getY() + astC.getHeight()/2
-		
-		let lineObj = new LineObject(shipX, shipY, astCenterX, astCenterY, 2, data.consts.laserColor)
-		lineObj.uniqueID = astC.uniqueID
-		data.canvas.lasers.push(lineObj)
-	}
-}
-
-// Loops the active lasers and calls asteroidObj.mine()
+// Loops the active lasers and calls asteroidObj.mine().
+// Returns an array of uIDs if some asteroids need to be destroyed.
 function updateMining() {
 	let inv = game.resources
 	let ls = data.canvas.lasers
-	let as = data.asteroidsData
+	let as = game.asteroidsData
+
+	let removeIDs = null
+	data._s.rPrio.reverse()
+	let prio = data._s.rPrio[data.consts.miningPriority]
+	data._s.rPrio.reverse()
 
 	for (let i = 0; i < ls.length; i++) {
 		for (let j = 0; j < as.length; j++) {
 			if (as[j].uniqueID == ls[i].uniqueID) {
-				data._s.rPrio.reverse()
-				let prio = data._s.rPrio[data.consts.miningPriority]
-				data._s.rPrio.reverse()
-				let mined = as[j].mine(data.consts.miningStrength, prio)	
-				if (mined != null) {
-					addResource(mined.resource, mined.n)
-				}		
+				let mined = AsteroidObj.mine(as[j], data.consts.miningStrength, prio, data._s, data.canvas.asteroids)	
+				// TODO pass only the relevant data, not the entire Data JSON + canvas.astrds
 				
+				// If null, destroy the asteroid and tell the main thread to update the canvas.
+				if (mined == null) {
+					if (removeIDs == null) {
+						removeIDs = []
+					}
+					removeIDs.push(as[j].uniqueID)
+
+				} else {
+					addResource(mined.resource, mined.n)
+					data.consts.miningPriority = mined.nextP
+				}		
 			} 
 		}
 	}
+	return removeIDs
 }
 
 function addResource(r, n) {
@@ -217,6 +227,26 @@ function addResource(r, n) {
 	}
 }
 
+
+
+// Removes the lasers with a uniqueID = those in ids
+function removeLasers(ls, ids) {
+	let toRemove = []
+
+	if (typeof ls[0] == 'undefined') {
+		return []
+	}
+
+	for (let i = 0; i < ls.length; i++) {
+		for (let j = ids.length - 1; j >= 0; j--) {
+			if (ids[j] == ls[i].uniqueID) {
+				ls.splice(i, 1)
+			}
+		}
+	}
+
+	return ls
+}
 
 
 
